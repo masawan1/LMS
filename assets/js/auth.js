@@ -24,7 +24,7 @@ const Auth = {
   wajibLogin(roleYangDiizinkan) {
     const user = this.ambilSesi();
     if (!user) {
-      window.location.href = '/index.html';
+      window.location.href = '../index.html';
       return null;
     }
     if (roleYangDiizinkan && user.role !== roleYangDiizinkan) {
