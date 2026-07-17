@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard siswa - LMS SMK Muhammadiyah Bojong</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      MP01&middot;MP02&middot;MP03
+      <strong>LMS Siswa</strong>
+    </div>
+    <div class="nav-item active">Beranda</div>
+    <div class="nav-item" onclick="segeraHadir()">Materi</div>
+    <div class="nav-item" onclick="segeraHadir()">Games</div>
+    <div class="nav-item" onclick="segeraHadir()">Riwayat poin</div>
+    <div style="flex:1"></div>
+    <div class="nav-item" id="btn-logout">Keluar</div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h1 id="sapaan">Halo</h1>
+        <div class="subtitle" id="subtitle-kelas">&nbsp;</div>
+      </div>
+      <div class="point-readout">
+        <span class="dot"></span>
+        <div>
+          <div class="value" id="total-poin">0000</div>
+          <div class="label">total poin</div>
+        </div>
+      </div>
+    </div>
+
+    <h2 style="font-size:16px; margin-bottom:14px;">Mata pelajaran</h2>
+    <div class="grid" id="grid-mapel">
+      <div class="empty-state">Memuat data mapel...</div>
+    </div>
+  </main>
+</div>
+
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script>
+  const user = Auth.wajibLogin('siswa');
+
+  document.getElementById('btn-logout').addEventListener('click', () => Auth.logout());
+
+  function segeraHadir() {
+    alert('Halaman ini masih dalam pengembangan.');
+  }
+
+  async function muatDashboard() {
+    if (!user) return;
+
+    document.getElementById('sapaan').textContent = 'Halo, ' + user.nama;
+    document.getElementById('subtitle-kelas').textContent = 'Kelas ' + (user.kelas || '-') + ' &middot; NIS ' + user.nis;
+
+    const [mapelRes, nilaiRes] = await Promise.all([
+      Api.getMapel(),
+      Api.getRekapNilai()
+    ]);
+
+    const daftarMapel = mapelRes.success ? mapelRes.data : [];
+    const semuaNilai = nilaiRes.success ? nilaiRes.data : [];
+    const nilaiSaya = semuaNilai.filter(n => String(n.nis) === String(user.nis));
+
+    const totalPoin = nilaiSaya.reduce((sum, n) => sum + Number(n.total_poin || 0), 0);
+    document.getElementById('total-poin').textContent = String(totalPoin).padStart(4, '0');
+
+    const grid = document.getElementById('grid-mapel');
+    if (daftarMapel.length === 0) {
+      grid.innerHTML = '<div class="empty-state">Belum ada mapel terdaftar.</div>';
+      return;
+    }
+
+    grid.innerHTML = daftarMapel.map(mapel => {
+      const nilaiMapel = nilaiSaya.find(n => String(n.id_mapel) === String(mapel.id_mapel));
+      const poin = nilaiMapel ? nilaiMapel.total_poin : 0;
+      const status = nilaiMapel && nilaiMapel.status === 'terverifikasi' ? 'nilai terverifikasi' : 'poin berjalan';
+      return `
+        <div class="card clickable" onclick="segeraHadir()">
+          <div class="eyebrow">${mapel.id_mapel}</div>
+          <h3>${mapel.nama}</h3>
+          <p>Baca materi dan mainkan games untuk mengumpulkan poin.</p>
+          <div class="card-footer">
+            <span class="badge badge-gold">${poin} poin</span>
+            <span>${status}</span>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  muatDashboard();
+</script>
+</body>
+</html>
