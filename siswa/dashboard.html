@@ -14,12 +14,12 @@
       MP01&middot;MP02&middot;MP03
       <strong>LMS Siswa</strong>
     </div>
-    <div class="nav-item active">Beranda</div>
-    <div class="nav-item" onclick="segeraHadir()">Materi</div>
-    <div class="nav-item" onclick="segeraHadir()">Games</div>
-    <div class="nav-item" onclick="segeraHadir()">Riwayat poin</div>
-    <div style="flex:1"></div>
-    <div class="nav-item" id="btn-logout">Keluar</div>
+    <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Beranda</div>
+    <div class="nav-item" onclick="segeraHadir()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5a2 2 0 0 1 2-2h11v18H6a2 2 0 0 1-2-2V5z"/><path d="M17 3v18"/></svg>Materi</div>
+    <div class="nav-item" onclick="segeraHadir()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="8" width="20" height="9" rx="4"/><path d="M7 12h2M8 11v2M15 12h.01M18 12h.01"/></svg>Games</div>
+    <div class="nav-item" onclick="segeraHadir()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>Riwayat poin</div>
+    <div class="nav-spacer"></div>
+    <div class="nav-item" id="btn-logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>Keluar</div>
   </aside>
 
   <main class="main">
@@ -39,7 +39,9 @@
 
     <h2 style="font-size:16px; margin-bottom:14px;">Mata pelajaran</h2>
     <div class="grid" id="grid-mapel">
-      <div class="empty-state">Memuat data mapel...</div>
+      <div class="skeleton-card"></div>
+      <div class="skeleton-card"></div>
+      <div class="skeleton-card"></div>
     </div>
   </main>
 </div>
@@ -59,12 +61,17 @@
     if (!user) return;
 
     document.getElementById('sapaan').textContent = 'Halo, ' + user.nama;
-    document.getElementById('subtitle-kelas').textContent = 'Kelas ' + (user.kelas || '-') + ' &middot; NIS ' + user.nis;
+    document.getElementById('subtitle-kelas').innerHTML = 'Kelas ' + (user.kelas || '-') + ' &middot; NIS ' + user.nis;
 
-    const [mapelRes, nilaiRes] = await Promise.all([
-      Api.getMapel(),
-      Api.getRekapNilai()
-    ]);
+    const grid = document.getElementById('grid-mapel');
+    let mapelRes, nilaiRes;
+
+    try {
+      [mapelRes, nilaiRes] = await Promise.all([Api.getMapel(), Api.getRekapNilai()]);
+    } catch (err) {
+      grid.innerHTML = '<div class="empty-state">Tidak bisa memuat data. Periksa koneksi internet lalu muat ulang halaman.</div>';
+      return;
+    }
 
     const daftarMapel = mapelRes.success ? mapelRes.data : [];
     const semuaNilai = nilaiRes.success ? nilaiRes.data : [];
@@ -73,7 +80,6 @@
     const totalPoin = nilaiSaya.reduce((sum, n) => sum + Number(n.total_poin || 0), 0);
     document.getElementById('total-poin').textContent = String(totalPoin).padStart(4, '0');
 
-    const grid = document.getElementById('grid-mapel');
     if (daftarMapel.length === 0) {
       grid.innerHTML = '<div class="empty-state">Belum ada mapel terdaftar.</div>';
       return;
