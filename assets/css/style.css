@@ -1,0 +1,352 @@
+/* ============================================
+   LMS SMK - Design system
+   Tema: gelap, terinspirasi terminal/circuit board,
+   cocok untuk mapel Informatika, Koding & AI, PSPT.
+   Elemen tanda tangan: penghitung poin bergaya
+   readout LED/terminal (font mono, tabular nums).
+   ============================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap');
+
+:root {
+  --bg: #0b1220;
+  --bg-panel: #101a2e;
+  --bg-card: #16213a;
+  --bg-card-hover: #1c2a47;
+  --border: #253352;
+  --border-strong: #34456e;
+
+  --text-primary: #eaf0fa;
+  --text-secondary: #8fa0bf;
+  --text-muted: #5c6c8c;
+
+  --accent-gold: #f5b942;
+  --accent-gold-dim: #4a3a1c;
+  --accent-teal: #3fd6c0;
+  --accent-teal-dim: #123832;
+  --accent-coral: #ff6b5e;
+  --accent-coral-dim: #3d1e1a;
+
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --radius: 10px;
+  --radius-lg: 16px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+/* tekstur grid halus, kasih nuansa "circuit board" ke tema gelap */
+body {
+  background-image:
+    linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+  background-size: 42px 42px;
+  background-attachment: fixed;
+}
+
+h1, h2, h3, .display {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+a { color: inherit; text-decoration: none; }
+
+/* ---------- layout shells ---------- */
+
+.app-shell {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  min-height: 100vh;
+}
+
+.sidebar {
+  background: var(--bg-panel);
+  border-right: 1px solid var(--border);
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sidebar-brand {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent-teal);
+  padding: 0 12px 20px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 16px;
+}
+
+.sidebar-brand strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 17px;
+  color: var(--text-primary);
+  margin-top: 4px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+
+.nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+.nav-item:hover { background: var(--bg-card); color: var(--text-primary); }
+.nav-item.active { background: var(--accent-teal-dim); color: var(--accent-teal); }
+
+.main {
+  padding: 28px 32px 60px;
+}
+
+/* ---------- mobile: sidebar jadi nav bar bawah ---------- */
+@media (max-width: 780px) {
+  .app-shell { grid-template-columns: 1fr; }
+
+  .sidebar {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    padding: 8px 4px;
+    border-right: none;
+    border-top: 1px solid var(--border);
+    z-index: 40;
+    gap: 0;
+  }
+
+  .sidebar-brand, .sidebar .nav-spacer { display: none; }
+
+  .nav-item {
+    flex-direction: column;
+    gap: 3px;
+    font-size: 10.5px;
+    padding: 6px 4px;
+    flex: 1;
+    text-align: center;
+    border-radius: 8px;
+  }
+
+  .main { padding: 20px 16px 96px; }
+  .topbar h1 { font-size: 19px; }
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.topbar h1 { font-size: 22px; }
+.topbar .subtitle { color: var(--text-secondary); font-size: 14px; margin-top: 4px; }
+
+/* ---------- signature: point readout ---------- */
+
+.point-readout {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-panel);
+  border: 1px solid var(--accent-gold-dim);
+  border-radius: 999px;
+  padding: 8px 16px 8px 8px;
+}
+
+.point-readout .dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--accent-gold);
+  box-shadow: 0 0 8px var(--accent-gold);
+}
+
+.point-readout .value {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 17px;
+  color: var(--accent-gold);
+  font-variant-numeric: tabular-nums;
+}
+
+.point-readout .label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
+/* ---------- cards & grid ---------- */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  transition: border-color .15s, transform .15s;
+}
+
+.card.clickable { cursor: pointer; }
+.card.clickable:hover { border-color: var(--border-strong); transform: translateY(-2px); }
+
+.card .eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent-teal);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  margin-bottom: 8px;
+}
+
+.card h3 { font-size: 16px; margin-bottom: 6px; }
+.card p { color: var(--text-secondary); font-size: 13.5px; margin: 0; }
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+/* ---------- buttons & forms ---------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 20px;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: opacity .15s, background .15s;
+}
+
+.btn-primary { background: var(--accent-teal); color: #06231e; }
+.btn-primary:hover { opacity: .9; }
+.btn-ghost { background: transparent; border-color: var(--border-strong); color: var(--text-primary); }
+.btn-ghost:hover { background: var(--bg-card); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn-block { width: 100%; }
+
+.field { margin-bottom: 16px; }
+.field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.field input, .field select {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 14px;
+}
+
+.field input:focus, .field select:focus, .btn:focus-visible, .nav-item:focus-visible {
+  outline: 2px solid var(--accent-teal);
+  outline-offset: 2px;
+}
+
+.badge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+
+.badge-teal { background: var(--accent-teal-dim); color: var(--accent-teal); }
+.badge-gold { background: var(--accent-gold-dim); color: var(--accent-gold); }
+.badge-coral { background: var(--accent-coral-dim); color: var(--accent-coral); }
+
+.error-text { color: var(--accent-coral); font-size: 13px; margin-top: 10px; min-height: 18px; }
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.nav-spacer { flex: 1; }
+
+/* ---------- skeleton loading ---------- */
+.skeleton-card {
+  height: 128px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(100deg, var(--bg-card) 30%, var(--bg-card-hover) 50%, var(--bg-card) 70%);
+  background-size: 200% 100%;
+  animation: skeleton-sweep 1.4s ease-in-out infinite;
+  border: 1px solid var(--border);
+}
+
+.skeleton-row td {
+  color: transparent !important;
+}
+.skeleton-row .skel-bar {
+  display: inline-block;
+  height: 12px;
+  width: 70%;
+  border-radius: 4px;
+  background: linear-gradient(100deg, var(--bg-card-hover) 30%, var(--border) 50%, var(--bg-card-hover) 70%);
+  background-size: 200% 100%;
+  animation: skeleton-sweep 1.4s ease-in-out infinite;
+}
+
+@keyframes skeleton-sweep {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-card, .skel-bar { animation: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
