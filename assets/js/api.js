@@ -4,7 +4,7 @@
  * GANTI API_URL di bawah setiap kali deploy ulang backend.
  */
 
-const API_URL = 'https://script.google.com/macros/s/AKfycbxodCPF1YSf23a7an-9Bv61OJtETOuhXTlwmkrUg9xcw-Jv7ms9Y1Q0DKnPXOssUfCeuQ/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbwKInVcl4If21_oQkxX8ilMzhtp5Ni0Z9y9AdwWTy0d0jL-Nyeqg9HobPs2QW1HKRFnDA/exec';
 
 const Api = {
   /** Request GET - untuk semua aksi baca data */
