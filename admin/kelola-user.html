@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kelola user - LMS SMK Muhammadiyah Bojong</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+<style>
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--border); }
+  th { color: var(--text-secondary); font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+  td { color: var(--text-primary); }
+  .table-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; margin-top: 24px; }
+  .table-card-head { padding: 16px 18px 0; }
+  .form-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 22px; max-width: 480px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
+  .success-text { color: var(--accent-teal); font-size: 13px; margin-top: 10px; min-height: 18px; }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      panel admin
+      <strong>LMS Kontrol</strong>
+    </div>
+    <div class="nav-item" onclick="location.href='dashboard.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Beranda</div>
+    <div class="nav-item" onclick="segeraHadir()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5a2 2 0 0 1 2-2h11v18H6a2 2 0 0 1-2-2V5z"/><path d="M17 3v18"/></svg>Kelola materi</div>
+    <div class="nav-item" onclick="segeraHadir()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="8" width="20" height="9" rx="4"/><path d="M7 12h2M8 11v2M15 12h.01M18 12h.01"/></svg>Kelola games</div>
+    <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17.5" cy="8.5" r="2.4"/><path d="M15.5 14.2c2.6.4 4.5 2.7 4.5 5.8"/></svg>Kelola user</div>
+    <div class="nav-item" onclick="segeraHadir()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 6L9 17l-5-5"/></svg>Verifikasi nilai</div>
+    <div class="nav-spacer"></div>
+    <div class="nav-item" id="btn-logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>Keluar</div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h1>Kelola user</h1>
+        <div class="subtitle">Tambah akun siswa atau admin baru</div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <h3 style="margin-bottom:4px;">Tambah user baru</h3>
+      <p style="color:var(--text-secondary); font-size:13px; margin:0 0 18px;">
+        Password otomatis diamankan (hash), tidak disimpan sebagai teks polos.
+      </p>
+
+      <form id="form-user">
+        <div class="form-row">
+          <div class="field">
+            <label for="nis">NIS / Username</label>
+            <input type="text" id="nis" required>
+          </div>
+          <div class="field">
+            <label for="password">Password</label>
+            <input type="text" id="password" required minlength="4">
+          </div>
+        </div>
+        <div class="field">
+          <label for="nama">Nama lengkap</label>
+          <input type="text" id="nama" required>
+        </div>
+        <div class="form-row">
+          <div class="field">
+            <label for="role">Role</label>
+            <select id="role">
+              <option value="siswa">Siswa</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <div class="field" id="field-kelas">
+            <label for="kelas">Kelas</label>
+            <input type="text" id="kelas" placeholder="misal X TKJ 1">
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary" id="btn-submit">Tambah user</button>
+        <p class="error-text" id="error-text"></p>
+        <p class="success-text" id="success-text"></p>
+      </form>
+    </div>
+
+    <div class="table-card">
+      <div class="table-card-head">
+        <h2 style="font-size:16px;">Daftar user</h2>
+        <p class="subtitle" style="margin:4px 0 0;">Semua akun yang terdaftar di sistem.</p>
+      </div>
+      <table>
+        <thead>
+          <tr><th>NIS / username</th><th>Nama</th><th>Role</th><th>Kelas</th></tr>
+        </thead>
+        <tbody id="tbody-user">
+          <tr class="skeleton-row"><td><span class="skel-bar"></span></td><td><span class="skel-bar"></span></td><td><span class="skel-bar"></span></td><td><span class="skel-bar"></span></td></tr>
+          <tr class="skeleton-row"><td><span class="skel-bar"></span></td><td><span class="skel-bar"></span></td><td><span class="skel-bar"></span></td><td><span class="skel-bar"></span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script>
+  const user = Auth.wajibLogin('admin');
+  document.getElementById('btn-logout').addEventListener('click', () => Auth.logout());
+  function segeraHadir() { alert('Halaman ini masih dalam pengembangan.'); }
+
+  // Kelas cuma relevan buat siswa, sembunyikan kalau role admin
+  const roleSelect = document.getElementById('role');
+  const fieldKelas = document.getElementById('field-kelas');
+  roleSelect.addEventListener('change', function () {
+    fieldKelas.style.display = this.value === 'admin' ? 'none' : 'block';
+  });
+
+  async function muatDaftarUser() {
+    const tbody = document.getElementById('tbody-user');
+    let res;
+    try {
+      res = await Api.getUsers();
+    } catch (err) {
+      tbody.innerHTML = '<tr><td colspan="4">Gagal memuat data. Periksa koneksi.</td></tr>';
+      return;
+    }
+
+    const daftar = res.success ? res.data : [];
+    if (daftar.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4">Belum ada user terdaftar.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = daftar.map(u => `
+      <tr>
+        <td>${u.nis}</td>
+        <td>${u.nama}</td>
+        <td><span class="badge ${u.role === 'admin' ? 'badge-gold' : 'badge-teal'}">${u.role}</span></td>
+        <td>${u.kelas || '-'}</td>
+      </tr>`).join('');
+  }
+
+  document.getElementById('form-user').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const errorText = document.getElementById('error-text');
+    const successText = document.getElementById('success-text');
+    const btnSubmit = document.getElementById('btn-submit');
+    errorText.textContent = '';
+    successText.textContent = '';
+    btnSubmit.disabled = true;
+    btnSubmit.textContent = 'Menyimpan...';
+
+    const payload = {
+      nis: document.getElementById('nis').value.trim(),
+      password: document.getElementById('password').value,
+      nama: document.getElementById('nama').value.trim(),
+      role: roleSelect.value,
+      kelas: roleSelect.value === 'admin' ? '-' : document.getElementById('kelas').value.trim()
+    };
+
+    try {
+      const res = await Api.buatUser(payload);
+      if (res.success) {
+        successText.textContent = 'User berhasil ditambahkan.';
+        document.getElementById('form-user').reset();
+        muatDaftarUser();
+      } else {
+        errorText.textContent = res.message || 'Gagal menambah user.';
+      }
+    } catch (err) {
+      errorText.textContent = 'Tidak bisa terhubung ke server.';
+    } finally {
+      btnSubmit.disabled = false;
+      btnSubmit.textContent = 'Tambah user';
+    }
+  });
+
+  muatDaftarUser();
+</script>
+</body>
+</html>
