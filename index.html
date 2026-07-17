@@ -13,7 +13,9 @@
   }
   @media (max-width: 780px) {
     body { grid-template-columns: 1fr; }
-    .brand-panel { display: none; }
+    .brand-panel { border-right: none; border-bottom: 1px solid var(--border); padding: 32px 24px; }
+    .brand-panel h1 { font-size: 26px; }
+    .login-panel { padding: 32px 24px; }
   }
   .brand-panel {
     background: var(--bg-panel);
@@ -22,6 +24,15 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    animation: fade-in-up .5s ease both;
+  }
+  .login-panel { animation: fade-in-up .5s ease .1s both; }
+  @keyframes fade-in-up {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .brand-panel, .login-panel { animation: none; }
   }
   .brand-panel .eyebrow {
     font-family: var(--font-mono);
@@ -71,6 +82,7 @@
 
   <section class="brand-panel">
     <div>
+      <div style="width:38px;height:38px;border-radius:9px;background:var(--accent-teal-dim);color:var(--accent-teal);display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:16px;margin-bottom:18px;">&gt;_</div>
       <div class="eyebrow">Sistem &mdash; media pembelajaran</div>
       <h1>LMS SMK Muhammadiyah Bojong</h1>
       <div class="subject-list">
