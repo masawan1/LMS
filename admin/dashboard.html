@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard admin - LMS SMK Muhammadiyah Bojong</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+<style>
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--border); }
+  th { color: var(--text-secondary); font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+  td { color: var(--text-primary); }
+  .table-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; margin-top: 16px; }
+  .table-card-head { padding: 16px 18px 0; }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      panel admin
+      <strong>LMS Kontrol</strong>
+    </div>
+    <div class="nav-item active">Beranda</div>
+    <div class="nav-item" onclick="segeraHadir()">Kelola materi</div>
+    <div class="nav-item" onclick="segeraHadir()">Kelola games</div>
+    <div class="nav-item" onclick="segeraHadir()">Kelola user</div>
+    <div class="nav-item" onclick="segeraHadir()">Verifikasi nilai</div>
+    <div style="flex:1"></div>
+    <div class="nav-item" id="btn-logout">Keluar</div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h1 id="sapaan">Halo</h1>
+        <div class="subtitle">Ringkasan sistem pembelajaran</div>
+      </div>
+    </div>
+
+    <h2 style="font-size:16px; margin-bottom:14px;">Mata pelajaran</h2>
+    <div class="grid" id="grid-mapel">
+      <div class="empty-state">Memuat data mapel...</div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-card-head">
+        <h2 style="font-size:16px;">Rekap poin &amp; nilai siswa</h2>
+        <p class="subtitle" style="margin:4px 0 0;">Poin terhitung otomatis, nilai final menunggu verifikasi admin.</p>
+      </div>
+      <table>
+        <thead>
+          <tr><th>NIS</th><th>Mapel</th><th>Total poin</th><th>Status</th></tr>
+        </thead>
+        <tbody id="tbody-nilai">
+          <tr><td colspan="4">Memuat data...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script>
+  const user = Auth.wajibLogin('admin');
+
+  document.getElementById('btn-logout').addEventListener('click', () => Auth.logout());
+
+  function segeraHadir() {
+    alert('Halaman ini masih dalam pengembangan.');
+  }
+
+  async function muatDashboard() {
+    if (!user) return;
+    document.getElementById('sapaan').textContent = 'Halo, ' + user.nama;
+
+    const [mapelRes, nilaiRes] = await Promise.all([
+      Api.getMapel(),
+      Api.getRekapNilai()
+    ]);
+
+    const daftarMapel = mapelRes.success ? mapelRes.data : [];
+    const namaMapel = Object.fromEntries(daftarMapel.map(m => [m.id_mapel, m.nama]));
+
+    const grid = document.getElementById('grid-mapel');
+    grid.innerHTML = daftarMapel.length
+      ? daftarMapel.map(mapel => `
+        <div class="card clickable" onclick="segeraHadir()">
+          <div class="eyebrow">${mapel.id_mapel}</div>
+          <h3>${mapel.nama}</h3>
+          <p>Kelola materi dan games untuk mapel ini.</p>
+        </div>`).join('')
+      : '<div class="empty-state">Belum ada mapel terdaftar.</div>';
+
+    const semuaNilai = nilaiRes.success ? nilaiRes.data : [];
+    const tbody = document.getElementById('tbody-nilai');
+
+    if (semuaNilai.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4">Belum ada data poin siswa.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = semuaNilai.map(n => {
+      const badgeClass = n.status === 'terverifikasi' ? 'badge-teal' : 'badge-gold';
+      const label = n.status === 'terverifikasi' ? 'terverifikasi' : 'draft';
+      return `
+        <tr>
+          <td>${n.nis}</td>
+          <td>${namaMapel[n.id_mapel] || n.id_mapel}</td>
+          <td><span class="badge ${badgeClass}">${n.total_poin} poin</span></td>
+          <td>${label}</td>
+        </tr>`;
+    }).join('');
+  }
+
+  muatDashboard();
+</script>
+</body>
+</html>
