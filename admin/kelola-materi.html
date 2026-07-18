@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kelola materi - LMS SMK Muhammadiyah Bojong</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+<style>
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--border); }
+  th { color: var(--text-secondary); font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+  td { color: var(--text-primary); }
+  .table-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; margin-top: 24px; }
+  .table-card-head { padding: 16px 18px 0; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .form-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 22px; max-width: 520px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
+  .success-text { color: var(--accent-teal); font-size: 13px; margin-top: 10px; min-height: 18px; }
+  .hint { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+  select#filter-mapel { width: 220px; }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      panel admin
+      <strong>LMS Kontrol</strong>
+    </div>
+    <div class="nav-item" onclick="location.href='dashboard.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Beranda</div>
+    <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5a2 2 0 0 1 2-2h11v18H6a2 2 0 0 1-2-2V5z"/><path d="M17 3v18"/></svg>Kelola materi</div>
+    <div class="nav-item" onclick="segeraHadir()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="8" width="20" height="9" rx="4"/><path d="M7 12h2M8 11v2M15 12h.01M18 12h.01"/></svg>Kelola games</div>
+    <div class="nav-item" onclick="location.href='kelola-user.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17.5" cy="8.5" r="2.4"/><path d="M15.5 14.2c2.6.4 4.5 2.7 4.5 5.8"/></svg>Kelola user</div>
+    <div class="nav-item" onclick="segeraHadir()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 6L9 17l-5-5"/></svg>Verifikasi nilai</div>
+    <div class="nav-spacer"></div>
+    <div class="nav-item" id="btn-logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>Keluar</div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h1>Kelola materi</h1>
+        <div class="subtitle">Tambah bab materi per mata pelajaran</div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <h3 style="margin-bottom:4px;">Tambah materi baru</h3>
+      <p style="color:var(--text-secondary); font-size:13px; margin:0 0 18px;">
+        File HTML materinya taruh dulu di folder <code>konten/</code> di repo, baru isi path-nya di sini.
+      </p>
+
+      <form id="form-materi">
+        <div class="field">
+          <label for="id_mapel">Mata pelajaran</label>
+          <select id="id_mapel" required></select>
+        </div>
+        <div class="field">
+          <label for="judul">Judul bab</label>
+          <input type="text" id="judul" placeholder="misal: Bab 1 - Pengenalan Algoritma" required>
+        </div>
+        <div class="field">
+          <label for="path_html">Path file HTML</label>
+          <input type="text" id="path_html" placeholder="konten/informatika/bab-1.html" required>
+          <div class="hint">Relatif dari root repo, contoh: konten/informatika/bab-1.html</div>
+        </div>
+        <div class="form-row">
+          <div class="field">
+            <label for="urutan_bab">Urutan bab</label>
+            <input type="number" id="urutan_bab" min="1" value="1" required>
+          </div>
+          <div class="field">
+            <label for="poin_baca">Poin kalau selesai dibaca</label>
+            <input type="number" id="poin_baca" min="0" value="10" required>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary" id="btn-submit">Tambah materi</button>
+        <p class="error-text" id="error-text"></p>
+        <p class="success-text" id="success-text"></p>
+      </form>
+    </div>
+
+    <div class="table-card">
+      <div class="table-card-head">
+        <div>
+          <h2 style="font-size:16px;">Daftar materi</h2>
+          <p class="subtitle" style="margin:4px 0 0;">Difilter per mapel.</p>
+        </div>
+        <select id="filter-mapel"></select>
+      </div>
+      <table>
+        <thead>
+          <tr><th>Bab</th><th>Judul</th><th>Path file</th><th>Poin</th></tr>
+        </thead>
+        <tbody id="tbody-materi">
+          <tr class="skeleton-row"><td><span class="skel-bar"></span></td><td><span class="skel-bar"></span></td><td><span class="skel-bar"></span></td><td><span class="skel-bar"></span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script>
+  const user = Auth.wajibLogin('admin');
+  document.getElementById('btn-logout').addEventListener('click', () => Auth.logout());
+  function segeraHadir() { alert('Halaman ini masih dalam pengembangan.'); }
+
+  let daftarMapel = [];
+
+  async function muatMapel() {
+    const res = await Api.getMapel();
+    daftarMapel = res.success ? res.data : [];
+
+    const opsi = daftarMapel.map(m => `<option value="${m.id_mapel}">${m.nama}</option>`).join('');
+    document.getElementById('id_mapel').innerHTML = opsi;
+    document.getElementById('filter-mapel').innerHTML =
+      '<option value="">Semua mapel</option>' + opsi;
+  }
+
+  async function muatDaftarMateri() {
+    const tbody = document.getElementById('tbody-materi');
+    const idMapel = document.getElementById('filter-mapel').value;
+
+    let res;
+    try {
+      res = await Api.getMateri(idMapel);
+    } catch (err) {
+      tbody.innerHTML = '<tr><td colspan="4">Gagal memuat data.</td></tr>';
+      return;
+    }
+
+    const data = res.success ? res.data : [];
+    if (data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4">Belum ada materi.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = data.map(m => `
+      <tr>
+        <td>${m.urutan_bab}</td>
+        <td>${m.judul}</td>
+        <td style="font-family:var(--font-mono); font-size:12px;">${m.path_html}</td>
+        <td><span class="badge badge-gold">${m.poin_baca} poin</span></td>
+      </tr>`).join('');
+  }
+
+  document.getElementById('filter-mapel').addEventListener('change', muatDaftarMateri);
+
+  document.getElementById('form-materi').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const errorText = document.getElementById('error-text');
+    const successText = document.getElementById('success-text');
+    const btnSubmit = document.getElementById('btn-submit');
+    errorText.textContent = '';
+    successText.textContent = '';
+    btnSubmit.disabled = true;
+    btnSubmit.textContent = 'Menyimpan...';
+
+    const payload = {
+      id_mapel: document.getElementById('id_mapel').value,
+      judul: document.getElementById('judul').value.trim(),
+      path_html: document.getElementById('path_html').value.trim(),
+      urutan_bab: Number(document.getElementById('urutan_bab').value),
+      poin_baca: Number(document.getElementById('poin_baca').value)
+    };
+
+    try {
+      const res = await Api.tambahMateri(payload);
+      if (res.success) {
+        successText.textContent = 'Materi berhasil ditambahkan.';
+        document.getElementById('form-materi').reset();
+        document.getElementById('urutan_bab').value = 1;
+        document.getElementById('poin_baca').value = 10;
+        muatDaftarMateri();
+      } else {
+        errorText.textContent = res.message || 'Gagal menambah materi.';
+      }
+    } catch (err) {
+      errorText.textContent = 'Tidak bisa terhubung ke server.';
+    } finally {
+      btnSubmit.disabled = false;
+      btnSubmit.textContent = 'Tambah materi';
+    }
+  });
+
+  (async function init() {
+    await muatMapel();
+    await muatDaftarMateri();
+  })();
+</script>
+</body>
+</html>
