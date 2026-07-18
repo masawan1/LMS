@@ -28,7 +28,7 @@ const Auth = {
       return null;
     }
     if (roleYangDiizinkan && user.role !== roleYangDiizinkan) {
-      window.location.href = '/index.html';
+      window.location.href = '../index.html';
       return null;
     }
     return user;
@@ -36,6 +36,6 @@ const Auth = {
 
   logout() {
     this.hapusSesi();
-    window.location.href = '/index.html';
+    window.location.href = '../index.html';
   }
 };
