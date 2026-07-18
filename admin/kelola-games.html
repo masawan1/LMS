@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kelola games - LMS SMK Muhammadiyah Bojong</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+<style>
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--border); }
+  th { color: var(--text-secondary); font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+  td { color: var(--text-primary); }
+  .table-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; margin-top: 24px; }
+  .table-card-head { padding: 16px 18px 0; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .form-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 22px; max-width: 620px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
+  .success-text { color: var(--accent-teal); font-size: 13px; margin-top: 10px; min-height: 18px; }
+  .hint { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+  textarea#config_json {
+    width: 100%; min-height: 160px; background: var(--bg); border: 1px solid var(--border-strong);
+    border-radius: var(--radius); padding: 12px 14px; color: var(--text-primary);
+    font-family: var(--font-mono); font-size: 12.5px; line-height: 1.6; resize: vertical;
+  }
+  select#filter-mapel-games { width: 200px; }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="sidebar-brand">panel admin<strong>LMS Kontrol</strong></div>
+    <div class="nav-item" onclick="location.href='dashboard.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Beranda</div>
+    <div class="nav-item" onclick="location.href='kelola-materi.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5a2 2 0 0 1 2-2h11v18H6a2 2 0 0 1-2-2V5z"/><path d="M17 3v18"/></svg>Kelola materi</div>
+    <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="8" width="20" height="9" rx="4"/><path d="M7 12h2M8 11v2M15 12h.01M18 12h.01"/></svg>Kelola games</div>
+    <div class="nav-item" onclick="location.href='kelola-user.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17.5" cy="8.5" r="2.4"/><path d="M15.5 14.2c2.6.4 4.5 2.7 4.5 5.8"/></svg>Kelola user</div>
+    <div class="nav-item" onclick="location.href='verifikasi-nilai.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 6L9 17l-5-5"/></svg>Verifikasi nilai</div>
+    <div class="nav-spacer"></div>
+    <div class="nav-item" id="btn-logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>Keluar</div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h1>Kelola games</h1>
+        <div class="subtitle">Tambah game interaktif per mata pelajaran</div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <h3 style="margin-bottom:4px;">Tambah game baru</h3>
+      <p style="color:var(--text-secondary); font-size:13px; margin:0 0 18px;">
+        Pilih tipe dulu, klik "Muat contoh" buat isi format config-nya, baru edit isinya.
+      </p>
+
+      <form id="form-game">
+        <div class="form-row">
+          <div class="field">
+            <label for="id_mapel">Mata pelajaran</label>
+            <select id="id_mapel" required></select>
+          </div>
+          <div class="field">
+            <label for="tipe">Tipe game</label>
+            <select id="tipe" required>
+              <option value="drag_drop">Cocokkan pasangan (drag &amp; drop)</option>
+              <option value="kode_simulasi">Simulasi kode</option>
+              <option value="puzzle">Puzzle</option>
+              <option value="kuis_timer">Kuis timer</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="judul">Judul game</label>
+          <input type="text" id="judul" placeholder="misal: Cocokkan Istilah Algoritma" required>
+        </div>
+        <div class="field">
+          <label for="poin_max">Poin kalau menang</label>
+          <input type="number" id="poin_max" min="0" value="20" required>
+        </div>
+        <div class="field">
+          <label for="config_json">Config (JSON)</label>
+          <textarea id="config_json" required></textarea>
+          <div class="hint" id="hint-config">Pilih tipe "Cocokkan pasangan" dulu, klik tombol di bawah buat isi contoh.</div>
+        </div>
+        <button type="button" class="btn btn-ghost" id="btn-contoh" style="margin-bottom:14px;">Muat contoh sesuai tipe</button>
+        <br>
+        <button type="submit" class="btn btn-primary" id="btn-submit">Tambah game</button>
+        <p class="error-text" id="error-text"></p>
+        <p class="success-text" id="success-text"></p>
+      </form>
+    </div>
+
+    <div class="table-card">
+      <div class="table-card-head">
+        <div>
+          <h2 style="font-size:16px;">Daftar games</h2>
+          <p class="subtitle" style="margin:4px 0 0;">Cuma tipe "Cocokkan pasangan" yang sudah bisa dimainkan siswa saat ini.</p>
+        </div>
+        <select id="filter-mapel-games"></select>
+      </div>
+      <table>
+        <thead>
+          <tr><th>Judul</th><th>Tipe</th><th>Poin</th></tr>
+        </thead>
+        <tbody id="tbody-games">
+          <tr class="skeleton-row"><td><span class="skel-bar"></span></td><td><span class="skel-bar"></span></td><td><span class="skel-bar"></span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script>
+  const user = Auth.wajibLogin('admin');
+  document.getElementById('btn-logout').addEventListener('click', () => Auth.logout());
+
+  const CONTOH_CONFIG = {
+    drag_drop: {
+      pasangan: [
+        { kiri: 'Variabel', kanan: 'Wadah untuk menyimpan nilai' },
+        { kiri: 'Algoritma', kanan: 'Urutan langkah menyelesaikan masalah' },
+        { kiri: 'Looping', kanan: 'Pengulangan instruksi' }
+      ]
+    },
+    kode_simulasi: {
+      starter_code: "print('hello')",
+      expected_output: 'hello',
+      instruksi: 'Ganti isi print supaya outputnya "halo dunia"'
+    },
+    puzzle: {
+      kata: ['VARIABEL', 'ALGORITMA'],
+      petunjuk: ['Wadah nilai', 'Urutan langkah']
+    },
+    kuis_timer: {
+      durasi_detik: 30,
+      soal: [
+        { pertanyaan: 'Apa itu variabel?', pilihan: ['Wadah nilai', 'Jenis loop', 'Nama fungsi'], jawaban: 0 }
+      ]
+    }
+  };
+
+  document.getElementById('btn-contoh').addEventListener('click', function () {
+    const tipe = document.getElementById('tipe').value;
+    document.getElementById('config_json').value = JSON.stringify(CONTOH_CONFIG[tipe], null, 2);
+  });
+
+  let daftarMapel = [];
+
+  async function muatMapel() {
+    const res = await Api.getMapel();
+    daftarMapel = res.success ? res.data : [];
+    const opsi = daftarMapel.map(m => `<option value="${m.id_mapel}">${m.nama}</option>`).join('');
+    document.getElementById('id_mapel').innerHTML = opsi;
+    document.getElementById('filter-mapel-games').innerHTML = '<option value="">Semua mapel</option>' + opsi;
+  }
+
+  async function muatDaftarGames() {
+    const tbody = document.getElementById('tbody-games');
+    const idMapel = document.getElementById('filter-mapel-games').value;
+    let res;
+    try {
+      res = await Api.getGames(idMapel);
+    } catch (err) {
+      tbody.innerHTML = '<tr><td colspan="3">Gagal memuat data.</td></tr>';
+      return;
+    }
+    const data = res.success ? res.data : [];
+    if (data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="3">Belum ada game.</td></tr>';
+      return;
+    }
+    const labelTipe = { drag_drop: 'Cocokkan pasangan', kode_simulasi: 'Simulasi kode', puzzle: 'Puzzle', kuis_timer: 'Kuis timer' };
+    tbody.innerHTML = data.map(g => `
+      <tr>
+        <td>${g.judul}</td>
+        <td><span class="badge badge-teal">${labelTipe[g.tipe] || g.tipe}</span></td>
+        <td><span class="badge badge-gold">${g.poin_max} poin</span></td>
+      </tr>`).join('');
+  }
+
+  document.getElementById('filter-mapel-games').addEventListener('change', muatDaftarGames);
+
+  document.getElementById('form-game').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const errorText = document.getElementById('error-text');
+    const successText = document.getElementById('success-text');
+    const btnSubmit = document.getElementById('btn-submit');
+    errorText.textContent = '';
+    successText.textContent = '';
+
+    let config;
+    try {
+      config = JSON.parse(document.getElementById('config_json').value);
+    } catch (err) {
+      errorText.textContent = 'Format JSON config tidak valid. Cek lagi tanda kurung/koma-nya.';
+      return;
+    }
+
+    btnSubmit.disabled = true;
+    btnSubmit.textContent = 'Menyimpan...';
+
+    const payload = {
+      id_mapel: document.getElementById('id_mapel').value,
+      judul: document.getElementById('judul').value.trim(),
+      tipe: document.getElementById('tipe').value,
+      poin_max: Number(document.getElementById('poin_max').value),
+      config: config
+    };
+
+    try {
+      const res = await Api.tambahGame(payload);
+      if (res.success) {
+        successText.textContent = 'Game berhasil ditambahkan.';
+        document.getElementById('form-game').reset();
+        document.getElementById('config_json').value = '';
+        muatDaftarGames();
+      } else {
+        errorText.textContent = res.message || 'Gagal menambah game.';
+      }
+    } catch (err) {
+      errorText.textContent = 'Tidak bisa terhubung ke server.';
+    } finally {
+      btnSubmit.disabled = false;
+      btnSubmit.textContent = 'Tambah game';
+    }
+  });
+
+  (async function init() {
+    await muatMapel();
+    await muatDaftarGames();
+  })();
+</script>
+</body>
+</html>
