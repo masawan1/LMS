@@ -9,7 +9,13 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbzaPXbCT9q0ogEeMDQjN6mN
 const Api = {
   /** Request GET - untuk semua aksi baca data */
   async get(action, params = {}) {
-    const query = new URLSearchParams({ action, ...params }).toString();
+    // buang key yang nilainya undefined/null, supaya tidak ikut
+    // terkirim sebagai literal "undefined" (itu bikin filter di
+    // backend salah cocok dan data jadi kosong)
+    const bersih = Object.fromEntries(
+      Object.entries({ action, ...params }).filter(([, v]) => v !== undefined && v !== null)
+    );
+    const query = new URLSearchParams(bersih).toString();
     const res = await fetch(`${API_URL}?${query}`);
     return res.json();
   },
@@ -27,9 +33,11 @@ const Api = {
   },
 
   getMapel: () => Api.get('getMapel'),
+  getUsers: () => Api.get('getUsers'),
   getMateri: (idMapel) => Api.get('getMateri', { id_mapel: idMapel }),
   getGames: (idMapel) => Api.get('getGames', { id_mapel: idMapel }),
   getRekapNilai: (idMapel) => Api.get('getRekapNilai', { id_mapel: idMapel || '' }),
+  getProgress: (nis) => Api.get('getProgress', { nis }),
 
   login: (nis, password) => Api.post('login', { nis, password }),
   buatUser: (data) => Api.post('buatUser', data),
