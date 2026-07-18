@@ -40,7 +40,7 @@
     <div class="topbar">
       <div>
         <h1 id="judul-mapel">Materi</h1>
-        <div class="subtitle">Baca tiap bab lalu tandai selesai untuk dapat poin.</div>
+        <div class="subtitle">Baca sampai akhir halaman, poin tercatat otomatis. Bisa juga klik "Tandai selesai" manual.</div>
       </div>
       <div class="point-readout">
         <span class="dot"></span>
@@ -118,7 +118,7 @@
           </div>
           <div class="actions">
             <span class="badge badge-gold">${m.poin_baca} poin</span>
-            <a class="btn btn-ghost btn-sm" href="../${m.path_html}" target="_blank" rel="noopener">Baca</a>
+            <a class="btn btn-ghost btn-sm" href="../${m.path_html}?id=${encodeURIComponent(m.id_materi)}&poin=${m.poin_baca}&mapel=${encodeURIComponent(idMapel)}">Baca</a>
             ${sudahSelesai
               ? '<span class="badge badge-teal">selesai</span>'
               : `<button class="btn btn-primary btn-sm" onclick="tandaiSelesai('${m.id_materi}', ${m.poin_baca}, this)">Tandai selesai</button>`}
