@@ -23,7 +23,7 @@
 </head>
 <body>
   <div class="konten-wrap">
-    <a class="back-link" href="javascript:history.back()">&larr; kembali ke daftar materi</a>
+    <a class="back-link" href="#">&larr; kembali ke daftar materi</a>
     <div class="eyebrow">Informatika &middot; Bab 1</div>
     <h1>Pengenalan Algoritma</h1>
 
@@ -48,8 +48,14 @@
     </ul>
 
     <p>Materi lengkap dan latihan soal akan ditambahkan bertahap oleh guru
-    pengampu. Kalau sudah paham bab ini, kembali ke daftar materi dan klik
-    "Tandai selesai" untuk dapat poin.</p>
+    pengampu. Poin otomatis tercatat begitu kamu sampai di bagian paling
+    bawah halaman ini.</p>
+
+    <div id="akhir-materi"></div>
   </div>
+
+  <script src="../../assets/js/api.js"></script>
+  <script src="../../assets/js/auth.js"></script>
+  <script src="../../assets/js/materi-tracker.js"></script>
 </body>
 </html>
