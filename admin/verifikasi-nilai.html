@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verifikasi nilai - LMS SMK Muhammadiyah Bojong</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+<style>
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  th { color: var(--text-secondary); font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+  td { color: var(--text-primary); }
+  .table-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; margin-top: 20px; }
+  .table-card-head { padding: 16px 18px 0; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+  select#filter-mapel { width: 240px; }
+  .nilai-input {
+    width: 70px; background: var(--bg); border: 1px solid var(--border-strong); border-radius: 6px;
+    padding: 7px 9px; color: var(--text-primary); font-family: var(--font-mono); font-size: 13px;
+  }
+  .btn-xs { padding: 7px 12px; font-size: 12.5px; }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="sidebar-brand">panel admin<strong>LMS Kontrol</strong></div>
+    <div class="nav-item" onclick="location.href='dashboard.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Beranda</div>
+    <div class="nav-item" onclick="location.href='kelola-materi.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5a2 2 0 0 1 2-2h11v18H6a2 2 0 0 1-2-2V5z"/><path d="M17 3v18"/></svg>Kelola materi</div>
+    <div class="nav-item" onclick="segeraHadir()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="8" width="20" height="9" rx="4"/><path d="M7 12h2M8 11v2M15 12h.01M18 12h.01"/></svg>Kelola games</div>
+    <div class="nav-item" onclick="location.href='kelola-user.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17.5" cy="8.5" r="2.4"/><path d="M15.5 14.2c2.6.4 4.5 2.7 4.5 5.8"/></svg>Kelola user</div>
+    <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 6L9 17l-5-5"/></svg>Verifikasi nilai</div>
+    <div class="nav-spacer"></div>
+    <div class="nav-item" id="btn-logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>Keluar</div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h1>Verifikasi nilai</h1>
+        <div class="subtitle">Tetapkan nilai final dari poin yang terkumpul siswa.</div>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-card-head">
+        <div>
+          <h2 style="font-size:16px;">Rekap poin siswa</h2>
+          <p class="subtitle" style="margin:4px 0 0;">Isi nilai final lalu klik verifikasi. Bisa diubah lagi kapan saja.</p>
+        </div>
+        <select id="filter-mapel"><option value="">Memuat mapel...</option></select>
+      </div>
+      <table>
+        <thead>
+          <tr><th>NIS</th><th>Nama</th><th>Total poin</th><th>Nilai final</th><th>Status</th><th></th></tr>
+        </thead>
+        <tbody id="tbody-nilai">
+          <tr class="skeleton-row">
+            <td><span class="skel-bar"></span></td><td><span class="skel-bar"></span></td>
+            <td><span class="skel-bar"></span></td><td><span class="skel-bar"></span></td>
+            <td><span class="skel-bar"></span></td><td></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script>
+  const user = Auth.wajibLogin('admin');
+  document.getElementById('btn-logout').addEventListener('click', () => Auth.logout());
+  function segeraHadir() { alert('Halaman ini masih dalam pengembangan.'); }
+
+  let petaNama = {};
+
+  async function muatMapel() {
+    const res = await Api.getMapel();
+    const daftar = res.success ? res.data : [];
+    document.getElementById('filter-mapel').innerHTML =
+      '<option value="">Semua mapel</option>' +
+      daftar.map(m => `<option value="${m.id_mapel}">${m.nama}</option>`).join('');
+  }
+
+  async function muatPetaNama() {
+    const res = await Api.getUsers();
+    const daftar = res.success ? res.data : [];
+    petaNama = Object.fromEntries(daftar.map(u => [String(u.nis), u.nama]));
+  }
+
+  async function muatRekap() {
+    const tbody = document.getElementById('tbody-nilai');
+    const idMapel = document.getElementById('filter-mapel').value;
+
+    let res;
+    try {
+      res = await Api.getRekapNilai(idMapel);
+    } catch (err) {
+      tbody.innerHTML = '<tr><td colspan="6">Gagal memuat data. Periksa koneksi.</td></tr>';
+      return;
+    }
+
+    const data = res.success ? res.data : [];
+    if (data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6">Belum ada data poin siswa.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = data.map((n, i) => {
+      const nama = petaNama[String(n.nis)] || '-';
+      const sudahVerif = n.status === 'terverifikasi';
+      const nilaiTampil = sudahVerif ? n.nilai_final : n.total_poin;
+      return `
+        <tr>
+          <td>${n.nis}</td>
+          <td>${nama}</td>
+          <td><span class="badge badge-gold">${n.total_poin}</span></td>
+          <td><input type="number" class="nilai-input" id="nilai-${i}" value="${nilaiTampil}" min="0" max="100"></td>
+          <td><span class="badge ${sudahVerif ? 'badge-teal' : 'badge-coral'}">${sudahVerif ? 'terverifikasi' : 'draft'}</span></td>
+          <td><button class="btn btn-primary btn-xs" onclick="verifikasi('${n.nis}', '${n.id_mapel}', ${i}, this)">${sudahVerif ? 'Update' : 'Verifikasi'}</button></td>
+        </tr>`;
+    }).join('');
+  }
+
+  async function verifikasi(nis, idMapel, i, btn) {
+    const nilai = Number(document.getElementById('nilai-' + i).value);
+    btn.disabled = true;
+    const teksAsli = btn.textContent;
+    btn.textContent = '...';
+    try {
+      const res = await Api.verifikasiNilai(nis, idMapel, nilai);
+      if (res.success) {
+        muatRekap();
+      } else {
+        alert(res.message || 'Gagal verifikasi.');
+        btn.disabled = false;
+        btn.textContent = teksAsli;
+      }
+    } catch (err) {
+      alert('Tidak bisa terhubung ke server.');
+      btn.disabled = false;
+      btn.textContent = teksAsli;
+    }
+  }
+
+  document.getElementById('filter-mapel').addEventListener('change', muatRekap);
+
+  (async function init() {
+    await Promise.all([muatMapel(), muatPetaNama()]);
+    await muatRekap();
+  })();
+</script>
+</body>
+</html>
