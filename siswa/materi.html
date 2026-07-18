@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Materi - LMS SMK Muhammadiyah Bojong</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+<style>
+  .materi-list { display: flex; flex-direction: column; gap: 12px; max-width: 640px; }
+  .materi-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    padding: 16px 18px;
+  }
+  .materi-row .info { display: flex; align-items: center; gap: 14px; }
+  .materi-row .num {
+    font-family: var(--font-mono); font-size: 13px; color: var(--text-muted);
+    width: 28px; text-align: center;
+  }
+  .materi-row.selesai .num { color: var(--accent-teal); }
+  .materi-row h3 { font-size: 14.5px; margin: 0; }
+  .materi-row .actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+  .btn-sm { padding: 8px 14px; font-size: 13px; }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="sidebar-brand">MP01&middot;MP02&middot;MP03<strong>LMS Siswa</strong></div>
+    <div class="nav-item" onclick="location.href='dashboard.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Beranda</div>
+    <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5a2 2 0 0 1 2-2h11v18H6a2 2 0 0 1-2-2V5z"/><path d="M17 3v18"/></svg>Materi</div>
+    <div class="nav-item" onclick="segeraHadir()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="8" width="20" height="9" rx="4"/><path d="M7 12h2M8 11v2M15 12h.01M18 12h.01"/></svg>Games</div>
+    <div class="nav-item" onclick="segeraHadir()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>Riwayat poin</div>
+    <div class="nav-spacer"></div>
+    <div class="nav-item" id="btn-logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>Keluar</div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h1 id="judul-mapel">Materi</h1>
+        <div class="subtitle">Baca tiap bab lalu tandai selesai untuk dapat poin.</div>
+      </div>
+      <div class="point-readout">
+        <span class="dot"></span>
+        <div>
+          <div class="value" id="poin-mapel">0</div>
+          <div class="label">poin mapel ini</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="materi-list" id="list-materi">
+      <div class="skeleton-card"></div>
+      <div class="skeleton-card"></div>
+    </div>
+  </main>
+</div>
+
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script>
+  const user = Auth.wajibLogin('siswa');
+  document.getElementById('btn-logout').addEventListener('click', () => Auth.logout());
+  function segeraHadir() { alert('Halaman ini masih dalam pengembangan.'); }
+
+  const params = new URLSearchParams(window.location.search);
+  const idMapel = params.get('mapel');
+
+  async function muat() {
+    if (!user) return;
+    const list = document.getElementById('list-materi');
+
+    if (!idMapel) {
+      list.innerHTML = '<div class="empty-state">Mapel tidak ditemukan. Kembali ke beranda dan pilih mapel dulu.</div>';
+      return;
+    }
+
+    let mapelRes, materiRes, progressRes;
+    try {
+      [mapelRes, materiRes, progressRes] = await Promise.all([
+        Api.getMapel(),
+        Api.getMateri(idMapel),
+        Api.getProgress(user.nis)
+      ]);
+    } catch (err) {
+      list.innerHTML = '<div class="empty-state">Tidak bisa memuat data. Periksa koneksi lalu muat ulang.</div>';
+      return;
+    }
+
+    const mapel = (mapelRes.data || []).find(m => m.id_mapel === idMapel);
+    document.getElementById('judul-mapel').textContent = mapel ? mapel.nama : 'Materi';
+
+    const materi = materiRes.success ? materiRes.data : [];
+    const progress = progressRes.success ? progressRes.data : [];
+    const idSelesai = new Set(progress.map(p => String(p.id_ref)));
+
+    const poinTerkumpul = materi
+      .filter(m => idSelesai.has(String(m.id_materi)))
+      .reduce((sum, m) => sum + Number(m.poin_baca || 0), 0);
+    document.getElementById('poin-mapel').textContent = poinTerkumpul;
+
+    if (materi.length === 0) {
+      list.innerHTML = '<div class="empty-state">Belum ada materi untuk mapel ini.</div>';
+      return;
+    }
+
+    list.innerHTML = materi.map(m => {
+      const sudahSelesai = idSelesai.has(String(m.id_materi));
+      return `
+        <div class="materi-row ${sudahSelesai ? 'selesai' : ''}">
+          <div class="info">
+            <span class="num">${sudahSelesai ? '✓' : m.urutan_bab}</span>
+            <div>
+              <h3>${m.judul}</h3>
+            </div>
+          </div>
+          <div class="actions">
+            <span class="badge badge-gold">${m.poin_baca} poin</span>
+            <a class="btn btn-ghost btn-sm" href="../${m.path_html}" target="_blank" rel="noopener">Baca</a>
+            ${sudahSelesai
+              ? '<span class="badge badge-teal">selesai</span>'
+              : `<button class="btn btn-primary btn-sm" onclick="tandaiSelesai('${m.id_materi}', ${m.poin_baca}, this)">Tandai selesai</button>`}
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  async function tandaiSelesai(idMateri, poin, btn) {
+    btn.disabled = true;
+    btn.textContent = 'Menyimpan...';
+    try {
+      const res = await Api.submitProgress(user.nis, idMateri, 'materi', poin);
+      if (res.success) {
+        muat();
+      } else {
+        btn.disabled = false;
+        btn.textContent = 'Tandai selesai';
+        alert(res.message || 'Gagal menyimpan progress.');
+      }
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = 'Tandai selesai';
+      alert('Tidak bisa terhubung ke server.');
+    }
+  }
+
+  muat();
+</script>
+</body>
+</html>
