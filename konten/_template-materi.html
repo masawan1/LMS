@@ -1,0 +1,65 @@
+<!--
+  TEMPLATE MATERI
+  ================
+  Cara pakai:
+  1. Copy file ini, taruh di folder konten/<mapel>/, ganti nama sesuai bab
+     (misal: konten/informatika/bab-2.html)
+  2. Ganti judul, eyebrow, dan isi konten di bagian <div class="konten-wrap">
+  3. JANGAN hapus atau ubah: <a class="back-link">, <div id="akhir-materi">,
+     dan 3 baris <script> di paling bawah -- itu yang bikin tombol "kembali"
+     dan poin otomatis berfungsi.
+  4. Setelah file ini diupload ke GitHub, daftarkan di
+     admin > Kelola materi (isi path file-nya sesuai lokasi file ini).
+-->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Judul Bab - Ganti Ini</title>
+<link rel="stylesheet" href="../../assets/css/style.css">
+<style>
+  .konten-wrap { max-width: 720px; margin: 0 auto; padding: 40px 24px 80px; }
+  .konten-wrap h1 { font-size: 26px; margin-bottom: 8px; }
+  .konten-wrap .eyebrow { font-family: var(--font-mono); font-size: 12px; color: var(--accent-teal); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 10px; }
+  .konten-wrap p { color: var(--text-primary); font-size: 15px; margin: 16px 0; }
+  .konten-wrap h2 { font-size: 18px; margin: 32px 0 12px; }
+  .konten-wrap ul { color: var(--text-primary); padding-left: 20px; }
+  .konten-wrap li { margin-bottom: 8px; }
+  .konten-wrap code {
+    font-family: var(--font-mono); background: var(--bg-card); border: 1px solid var(--border);
+    padding: 2px 6px; border-radius: 4px; font-size: 13px;
+  }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; color: var(--text-secondary); font-size: 13px; margin-bottom: 24px; }
+  .back-link:hover { color: var(--text-primary); }
+</style>
+</head>
+<body>
+  <div class="konten-wrap">
+    <!-- JANGAN ubah baris ini, href-nya diisi otomatis oleh materi-tracker.js -->
+    <a class="back-link" href="#">&larr; kembali ke daftar materi</a>
+
+    <div class="eyebrow">Nama Mapel &middot; Bab X</div>
+    <h1>Judul Bab - Ganti Ini</h1>
+
+    <p>Tulis isi materi di sini. Bisa pakai paragraf, daftar (list), kode,
+    dan sebagainya seperti contoh di bawah.</p>
+
+    <h2>Contoh sub-judul</h2>
+    <ul>
+      <li>Poin pertama</li>
+      <li>Poin kedua</li>
+    </ul>
+
+    <p>Kalimat terakhir dari materi ini.</p>
+
+    <!-- JANGAN hapus div ini -- ini penanda "akhir bacaan" -->
+    <div id="akhir-materi"></div>
+  </div>
+
+  <!-- JANGAN hapus / ubah urutan 3 baris script ini -->
+  <script src="../../assets/js/api.js"></script>
+  <script src="../../assets/js/auth.js"></script>
+  <script src="../../assets/js/materi-tracker.js"></script>
+</body>
+</html>
