@@ -30,7 +30,7 @@
     </div>
     <div class="nav-item" onclick="location.href='dashboard.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Beranda</div>
     <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5a2 2 0 0 1 2-2h11v18H6a2 2 0 0 1-2-2V5z"/><path d="M17 3v18"/></svg>Kelola materi</div>
-    <div class="nav-item" onclick="segeraHadir()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="8" width="20" height="9" rx="4"/><path d="M7 12h2M8 11v2M15 12h.01M18 12h.01"/></svg>Kelola games</div>
+    <div class="nav-item" onclick="location.href='kelola-games.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="8" width="20" height="9" rx="4"/><path d="M7 12h2M8 11v2M15 12h.01M18 12h.01"/></svg>Kelola games</div>
     <div class="nav-item" onclick="location.href='kelola-user.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17.5" cy="8.5" r="2.4"/><path d="M15.5 14.2c2.6.4 4.5 2.7 4.5 5.8"/></svg>Kelola user</div>
     <div class="nav-item" onclick="location.href='verifikasi-nilai.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 6L9 17l-5-5"/></svg>Verifikasi nilai</div>
     <div class="nav-spacer"></div>
@@ -76,6 +76,7 @@
           </div>
         </div>
         <button type="submit" class="btn btn-primary" id="btn-submit">Tambah materi</button>
+        <button type="button" class="btn btn-ghost" id="btn-batal" style="display:none;">Batal edit</button>
         <p class="error-text" id="error-text"></p>
         <p class="success-text" id="success-text"></p>
       </form>
@@ -91,10 +92,10 @@
       </div>
       <table>
         <thead>
-          <tr><th>Bab</th><th>Judul</th><th>Path file</th><th>Poin</th></tr>
+          <tr><th>Bab</th><th>Judul</th><th>Path file</th><th>Poin</th><th></th></tr>
         </thead>
         <tbody id="tbody-materi">
-          <tr class="skeleton-row"><td><span class="skel-bar"></span></td><td><span class="skel-bar"></span></td><td><span class="skel-bar"></span></td><td><span class="skel-bar"></span></td></tr>
+          <tr class="skeleton-row"><td><span class="skel-bar"></span></td><td><span class="skel-bar"></span></td><td><span class="skel-bar"></span></td><td><span class="skel-bar"></span></td><td></td></tr>
         </tbody>
       </table>
     </div>
@@ -109,6 +110,7 @@
   function segeraHadir() { alert('Halaman ini masih dalam pengembangan.'); }
 
   let daftarMapel = [];
+  let idEdit = null;
 
   async function muatMapel() {
     const res = await Api.getMapel();
@@ -120,6 +122,8 @@
       '<option value="">Semua mapel</option>' + opsi;
   }
 
+  let materiTerakhir = [];
+
   async function muatDaftarMateri() {
     const tbody = document.getElementById('tbody-materi');
     const idMapel = document.getElementById('filter-mapel').value;
@@ -128,13 +132,14 @@
     try {
       res = await Api.getMateri(idMapel);
     } catch (err) {
-      tbody.innerHTML = '<tr><td colspan="4">Gagal memuat data.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="5">Gagal memuat data.</td></tr>';
       return;
     }
 
     const data = res.success ? res.data : [];
+    materiTerakhir = data;
     if (data.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="4">Belum ada materi.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="5">Belum ada materi.</td></tr>';
       return;
     }
 
@@ -144,7 +149,51 @@
         <td>${m.judul}</td>
         <td style="font-family:var(--font-mono); font-size:12px;">${m.path_html}</td>
         <td><span class="badge badge-gold">${m.poin_baca} poin</span></td>
+        <td style="white-space:nowrap;">
+          <button class="btn btn-ghost btn-xs" onclick="editMateri('${m.id_materi}')">Edit</button>
+          <button class="btn btn-ghost btn-xs" onclick="hapusMateriBaris('${m.id_materi}', '${m.judul.replace(/'/g, "\\'")}')">Hapus</button>
+        </td>
       </tr>`).join('');
+  }
+
+  function editMateri(idMateri) {
+    const m = materiTerakhir.find(x => String(x.id_materi) === String(idMateri));
+    if (!m) return;
+    idEdit = idMateri;
+    document.getElementById('id_mapel').value = m.id_mapel;
+    document.getElementById('judul').value = m.judul;
+    document.getElementById('path_html').value = m.path_html;
+    document.getElementById('urutan_bab').value = m.urutan_bab;
+    document.getElementById('poin_baca').value = m.poin_baca;
+    document.getElementById('btn-submit').textContent = 'Simpan perubahan';
+    document.getElementById('btn-batal').style.display = 'inline-flex';
+    document.querySelector('.form-card h3').textContent = 'Edit materi';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function batalEdit() {
+    idEdit = null;
+    document.getElementById('form-materi').reset();
+    document.getElementById('urutan_bab').value = 1;
+    document.getElementById('poin_baca').value = 10;
+    document.getElementById('btn-submit').textContent = 'Tambah materi';
+    document.getElementById('btn-batal').style.display = 'none';
+    document.querySelector('.form-card h3').textContent = 'Tambah materi baru';
+  }
+  document.getElementById('btn-batal').addEventListener('click', batalEdit);
+
+  async function hapusMateriBaris(idMateri, judul) {
+    if (!confirm(`Yakin mau hapus materi "${judul}"? Tidak bisa dibatalkan.`)) return;
+    try {
+      const res = await Api.hapusMateri(idMateri);
+      if (res.success) {
+        muatDaftarMateri();
+      } else {
+        alert(res.message || 'Gagal menghapus.');
+      }
+    } catch (err) {
+      alert('Tidak bisa terhubung ke server.');
+    }
   }
 
   document.getElementById('filter-mapel').addEventListener('change', muatDaftarMateri);
@@ -157,7 +206,7 @@
     errorText.textContent = '';
     successText.textContent = '';
     btnSubmit.disabled = true;
-    btnSubmit.textContent = 'Menyimpan...';
+    btnSubmit.textContent = idEdit ? 'Menyimpan...' : 'Menyimpan...';
 
     const payload = {
       id_mapel: document.getElementById('id_mapel').value,
@@ -168,21 +217,20 @@
     };
 
     try {
-      const res = await Api.tambahMateri(payload);
+      const res = idEdit ? await Api.updateMateri(idEdit, payload) : await Api.tambahMateri(payload);
       if (res.success) {
-        successText.textContent = 'Materi berhasil ditambahkan.';
-        document.getElementById('form-materi').reset();
-        document.getElementById('urutan_bab').value = 1;
-        document.getElementById('poin_baca').value = 10;
+        successText.textContent = idEdit ? 'Perubahan disimpan.' : 'Materi berhasil ditambahkan.';
+        const sedangEdit = !!idEdit;
+        batalEdit();
         muatDaftarMateri();
       } else {
-        errorText.textContent = res.message || 'Gagal menambah materi.';
+        errorText.textContent = res.message || 'Gagal menyimpan.';
       }
     } catch (err) {
       errorText.textContent = 'Tidak bisa terhubung ke server.';
     } finally {
       btnSubmit.disabled = false;
-      btnSubmit.textContent = 'Tambah materi';
+      btnSubmit.textContent = idEdit ? 'Simpan perubahan' : 'Tambah materi';
     }
   });
 
