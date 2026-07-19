@@ -48,6 +48,7 @@
 
 <script src="../assets/js/api.js"></script>
 <script src="../assets/js/auth.js"></script>
+<script src="../assets/js/mapel-config.js"></script>
 <script>
   const user = Auth.wajibLogin('siswa');
 
@@ -73,7 +74,8 @@
       return;
     }
 
-    const daftarMapel = mapelRes.success ? mapelRes.data : [];
+    const daftarMapelSemua = mapelRes.success ? mapelRes.data : [];
+    const daftarMapel = MapelConfig.filterMapel(daftarMapelSemua, user.kelas);
     const semuaNilai = nilaiRes.success ? nilaiRes.data : [];
     const nilaiSaya = semuaNilai.filter(n => String(n.nis) === String(user.nis));
 
