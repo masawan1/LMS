@@ -28,7 +28,7 @@
     </div>
     <div class="nav-item" onclick="location.href='dashboard.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Beranda</div>
     <div class="nav-item" onclick="segeraHadir()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5a2 2 0 0 1 2-2h11v18H6a2 2 0 0 1-2-2V5z"/><path d="M17 3v18"/></svg>Kelola materi</div>
-    <div class="nav-item" onclick="segeraHadir()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="8" width="20" height="9" rx="4"/><path d="M7 12h2M8 11v2M15 12h.01M18 12h.01"/></svg>Kelola games</div>
+    <div class="nav-item" onclick="location.href='kelola-games.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="8" width="20" height="9" rx="4"/><path d="M7 12h2M8 11v2M15 12h.01M18 12h.01"/></svg>Kelola games</div>
     <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17.5" cy="8.5" r="2.4"/><path d="M15.5 14.2c2.6.4 4.5 2.7 4.5 5.8"/></svg>Kelola user</div>
     <div class="nav-item" onclick="location.href='verifikasi-nilai.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 6L9 17l-5-5"/></svg>Verifikasi nilai</div>
     <div class="nav-spacer"></div>
@@ -56,7 +56,7 @@
             <input type="text" id="nis" required>
           </div>
           <div class="field">
-            <label for="password">Password</label>
+            <label for="password" id="label-password">Password</label>
             <input type="text" id="password" required minlength="4">
           </div>
         </div>
@@ -78,6 +78,7 @@
           </div>
         </div>
         <button type="submit" class="btn btn-primary" id="btn-submit">Tambah user</button>
+        <button type="button" class="btn btn-ghost" id="btn-batal" style="display:none;">Batal edit</button>
         <p class="error-text" id="error-text"></p>
         <p class="success-text" id="success-text"></p>
       </form>
@@ -90,11 +91,11 @@
       </div>
       <table>
         <thead>
-          <tr><th>NIS / username</th><th>Nama</th><th>Role</th><th>Kelas</th></tr>
+          <tr><th>NIS / username</th><th>Nama</th><th>Role</th><th>Kelas</th><th></th></tr>
         </thead>
         <tbody id="tbody-user">
-          <tr class="skeleton-row"><td><span class="skel-bar"></span></td><td><span class="skel-bar"></span></td><td><span class="skel-bar"></span></td><td><span class="skel-bar"></span></td></tr>
-          <tr class="skeleton-row"><td><span class="skel-bar"></span></td><td><span class="skel-bar"></span></td><td><span class="skel-bar"></span></td><td><span class="skel-bar"></span></td></tr>
+          <tr class="skeleton-row"><td><span class="skel-bar"></span></td><td><span class="skel-bar"></span></td><td><span class="skel-bar"></span></td><td><span class="skel-bar"></span></td><td></td></tr>
+          <tr class="skeleton-row"><td><span class="skel-bar"></span></td><td><span class="skel-bar"></span></td><td><span class="skel-bar"></span></td><td><span class="skel-bar"></span></td><td></td></tr>
         </tbody>
       </table>
     </div>
@@ -115,19 +116,23 @@
     fieldKelas.style.display = this.value === 'admin' ? 'none' : 'block';
   });
 
+  let idEdit = null;
+  let userTerakhir = [];
+
   async function muatDaftarUser() {
     const tbody = document.getElementById('tbody-user');
     let res;
     try {
       res = await Api.getUsers();
     } catch (err) {
-      tbody.innerHTML = '<tr><td colspan="4">Gagal memuat data. Periksa koneksi.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="5">Gagal memuat data. Periksa koneksi.</td></tr>';
       return;
     }
 
     const daftar = res.success ? res.data : [];
+    userTerakhir = daftar;
     if (daftar.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="4">Belum ada user terdaftar.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="5">Belum ada user terdaftar.</td></tr>';
       return;
     }
 
@@ -137,7 +142,54 @@
         <td>${u.nama}</td>
         <td><span class="badge ${u.role === 'admin' ? 'badge-gold' : 'badge-teal'}">${u.role}</span></td>
         <td>${u.kelas || '-'}</td>
+        <td style="white-space:nowrap;">
+          <button class="btn btn-ghost btn-xs" onclick="editUser('${u.nis}')">Edit</button>
+          <button class="btn btn-ghost btn-xs" onclick="hapusUserBaris('${u.nis}', '${u.nama.replace(/'/g, "\\'")}')">Hapus</button>
+        </td>
       </tr>`).join('');
+  }
+
+  function editUser(nis) {
+    const u = userTerakhir.find(x => String(x.nis) === String(nis));
+    if (!u) return;
+    idEdit = nis;
+    document.getElementById('nis').value = u.nis;
+    document.getElementById('nis').disabled = true;
+    document.getElementById('password').value = '';
+    document.getElementById('password').required = false;
+    document.getElementById('label-password').textContent = 'Password baru (kosongkan kalau tidak ganti)';
+    document.getElementById('nama').value = u.nama;
+    document.getElementById('role').value = u.role;
+    document.getElementById('kelas').value = u.kelas || '';
+    fieldKelas.style.display = u.role === 'admin' ? 'none' : 'block';
+    document.getElementById('btn-submit').textContent = 'Simpan perubahan';
+    document.getElementById('btn-batal').style.display = 'inline-flex';
+    document.querySelector('.form-card h3').textContent = 'Edit user';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function batalEdit() {
+    idEdit = null;
+    document.getElementById('form-user').reset();
+    document.getElementById('nis').disabled = false;
+    document.getElementById('password').required = true;
+    document.getElementById('label-password').textContent = 'Password';
+    document.getElementById('btn-submit').textContent = 'Tambah user';
+    document.getElementById('btn-batal').style.display = 'none';
+    document.querySelector('.form-card h3').textContent = 'Tambah user baru';
+    fieldKelas.style.display = 'block';
+  }
+  document.getElementById('btn-batal').addEventListener('click', batalEdit);
+
+  async function hapusUserBaris(nis, nama) {
+    if (!confirm(`Yakin mau hapus user "${nama}" (${nis})? Tidak bisa dibatalkan.`)) return;
+    try {
+      const res = await Api.hapusUser(nis);
+      if (res.success) muatDaftarUser();
+      else alert(res.message || 'Gagal menghapus.');
+    } catch (err) {
+      alert('Tidak bisa terhubung ke server.');
+    }
   }
 
   document.getElementById('form-user').addEventListener('submit', async function (e) {
@@ -150,28 +202,38 @@
     btnSubmit.disabled = true;
     btnSubmit.textContent = 'Menyimpan...';
 
-    const payload = {
-      nis: document.getElementById('nis').value.trim(),
-      password: document.getElementById('password').value,
-      nama: document.getElementById('nama').value.trim(),
-      role: roleSelect.value,
-      kelas: roleSelect.value === 'admin' ? '-' : document.getElementById('kelas').value.trim()
-    };
+    const kelasVal = roleSelect.value === 'admin' ? '-' : document.getElementById('kelas').value.trim();
 
     try {
-      const res = await Api.buatUser(payload);
+      let res;
+      if (idEdit) {
+        const payload = { nama: document.getElementById('nama').value.trim(), role: roleSelect.value, kelas: kelasVal };
+        const passBaru = document.getElementById('password').value;
+        if (passBaru) payload.password = passBaru;
+        res = await Api.updateUser(idEdit, payload);
+      } else {
+        const payload = {
+          nis: document.getElementById('nis').value.trim(),
+          password: document.getElementById('password').value,
+          nama: document.getElementById('nama').value.trim(),
+          role: roleSelect.value,
+          kelas: kelasVal
+        };
+        res = await Api.buatUser(payload);
+      }
+
       if (res.success) {
-        successText.textContent = 'User berhasil ditambahkan.';
-        document.getElementById('form-user').reset();
+        successText.textContent = idEdit ? 'Perubahan disimpan.' : 'User berhasil ditambahkan.';
+        batalEdit();
         muatDaftarUser();
       } else {
-        errorText.textContent = res.message || 'Gagal menambah user.';
+        errorText.textContent = res.message || 'Gagal menyimpan.';
       }
     } catch (err) {
       errorText.textContent = 'Tidak bisa terhubung ke server.';
     } finally {
       btnSubmit.disabled = false;
-      btnSubmit.textContent = 'Tambah user';
+      btnSubmit.textContent = idEdit ? 'Simpan perubahan' : 'Tambah user';
     }
   });
 
