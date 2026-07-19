@@ -30,7 +30,7 @@
     <div class="sidebar-brand">MP01&middot;MP02&middot;MP03<strong>LMS Siswa</strong></div>
     <div class="nav-item" onclick="location.href='dashboard.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Beranda</div>
     <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5a2 2 0 0 1 2-2h11v18H6a2 2 0 0 1-2-2V5z"/><path d="M17 3v18"/></svg>Materi</div>
-    <div class="nav-item" onclick="segeraHadir()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="8" width="20" height="9" rx="4"/><path d="M7 12h2M8 11v2M15 12h.01M18 12h.01"/></svg>Games</div>
+    <div class="nav-item" onclick="if(idMapel) location.href='games.html?mapel='+idMapel; else segeraHadir()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="8" width="20" height="9" rx="4"/><path d="M7 12h2M8 11v2M15 12h.01M18 12h.01"/></svg>Games</div>
     <div class="nav-item" onclick="segeraHadir()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>Riwayat poin</div>
     <div class="nav-spacer"></div>
     <div class="nav-item" id="btn-logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>Keluar</div>
@@ -42,7 +42,7 @@
         <h1 id="judul-mapel">Materi</h1>
         <div class="subtitle">Baca sampai akhir halaman, poin tercatat otomatis. Bisa juga klik "Tandai selesai" manual.</div>
       </div>
-      <div class="point-readout">
+      <div class="point-readout" id="poin-wrap" style="display:none;">
         <span class="dot"></span>
         <div>
           <div class="value" id="poin-mapel">0</div>
@@ -51,7 +51,13 @@
       </div>
     </div>
 
-    <div class="materi-list" id="list-materi">
+    <div id="area-mapel" class="grid" style="display:none;">
+      <div class="skeleton-card"></div>
+      <div class="skeleton-card"></div>
+      <div class="skeleton-card"></div>
+    </div>
+
+    <div class="materi-list" id="list-materi" style="display:none;">
       <div class="skeleton-card"></div>
       <div class="skeleton-card"></div>
     </div>
@@ -68,14 +74,35 @@
   const params = new URLSearchParams(window.location.search);
   const idMapel = params.get('mapel');
 
+  async function tampilkanPilihanMapel(list) {
+    document.getElementById('area-mapel').style.display = 'grid';
+    let res;
+    try {
+      res = await Api.getMapel();
+    } catch (err) {
+      document.getElementById('area-mapel').innerHTML = '<div class="empty-state">Tidak bisa memuat data. Periksa koneksi.</div>';
+      return;
+    }
+    const daftar = res.success ? res.data : [];
+    document.getElementById('area-mapel').innerHTML = daftar.map(m => `
+      <div class="card clickable" onclick="location.href='materi.html?mapel=${m.id_mapel}'">
+        <div class="eyebrow">${m.id_mapel}</div>
+        <h3>${m.nama}</h3>
+        <p>Lihat daftar materi untuk mapel ini.</p>
+      </div>`).join('');
+  }
+
   async function muat() {
     if (!user) return;
     const list = document.getElementById('list-materi');
 
     if (!idMapel) {
-      list.innerHTML = '<div class="empty-state">Mapel tidak ditemukan. Kembali ke beranda dan pilih mapel dulu.</div>';
+      await tampilkanPilihanMapel(list);
       return;
     }
+
+    list.style.display = 'flex';
+    document.getElementById('poin-wrap').style.display = 'flex';
 
     let mapelRes, materiRes, progressRes;
     try {
