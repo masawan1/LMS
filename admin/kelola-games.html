@@ -85,6 +85,7 @@
         <button type="button" class="btn btn-ghost" id="btn-contoh" style="margin-bottom:14px;">Muat contoh sesuai tipe</button>
         <br>
         <button type="submit" class="btn btn-primary" id="btn-submit">Tambah game</button>
+        <button type="button" class="btn btn-ghost" id="btn-batal" style="display:none;">Batal edit</button>
         <p class="error-text" id="error-text"></p>
         <p class="success-text" id="success-text"></p>
       </form>
@@ -94,16 +95,16 @@
       <div class="table-card-head">
         <div>
           <h2 style="font-size:16px;">Daftar games</h2>
-          <p class="subtitle" style="margin:4px 0 0;">Cuma tipe "Cocokkan pasangan" yang sudah bisa dimainkan siswa saat ini.</p>
+          <p class="subtitle" style="margin:4px 0 0;">Cuma tipe "Cocokkan pasangan" dan "Kuis timer" yang sudah bisa dimainkan siswa saat ini.</p>
         </div>
         <select id="filter-mapel-games"></select>
       </div>
       <table>
         <thead>
-          <tr><th>Judul</th><th>Tipe</th><th>Poin</th></tr>
+          <tr><th>Judul</th><th>Tipe</th><th>Poin</th><th></th></tr>
         </thead>
         <tbody id="tbody-games">
-          <tr class="skeleton-row"><td><span class="skel-bar"></span></td><td><span class="skel-bar"></span></td><td><span class="skel-bar"></span></td></tr>
+          <tr class="skeleton-row"><td><span class="skel-bar"></span></td><td><span class="skel-bar"></span></td><td><span class="skel-bar"></span></td><td></td></tr>
         </tbody>
       </table>
     </div>
@@ -147,6 +148,8 @@
   });
 
   let daftarMapel = [];
+  let idEdit = null;
+  let gamesTerakhir = [];
 
   async function muatMapel() {
     const res = await Api.getMapel();
@@ -163,12 +166,13 @@
     try {
       res = await Api.getGames(idMapel);
     } catch (err) {
-      tbody.innerHTML = '<tr><td colspan="3">Gagal memuat data.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="4">Gagal memuat data.</td></tr>';
       return;
     }
     const data = res.success ? res.data : [];
+    gamesTerakhir = data;
     if (data.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="3">Belum ada game.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="4">Belum ada game.</td></tr>';
       return;
     }
     const labelTipe = { drag_drop: 'Cocokkan pasangan', kode_simulasi: 'Simulasi kode', puzzle: 'Puzzle', kuis_timer: 'Kuis timer' };
@@ -177,7 +181,47 @@
         <td>${g.judul}</td>
         <td><span class="badge badge-teal">${labelTipe[g.tipe] || g.tipe}</span></td>
         <td><span class="badge badge-gold">${g.poin_max} poin</span></td>
+        <td style="white-space:nowrap;">
+          <button class="btn btn-ghost btn-xs" onclick="editGame('${g.id_game}')">Edit</button>
+          <button class="btn btn-ghost btn-xs" onclick="hapusGameBaris('${g.id_game}', '${g.judul.replace(/'/g, "\\'")}')">Hapus</button>
+        </td>
       </tr>`).join('');
+  }
+
+  function editGame(idGame) {
+    const g = gamesTerakhir.find(x => String(x.id_game) === String(idGame));
+    if (!g) return;
+    idEdit = idGame;
+    document.getElementById('id_mapel').value = g.id_mapel;
+    document.getElementById('tipe').value = g.tipe;
+    document.getElementById('judul').value = g.judul;
+    document.getElementById('poin_max').value = g.poin_max;
+    document.getElementById('config_json').value = JSON.stringify(g.config || {}, null, 2);
+    document.getElementById('btn-submit').textContent = 'Simpan perubahan';
+    document.getElementById('btn-batal').style.display = 'inline-flex';
+    document.querySelector('.form-card h3').textContent = 'Edit game';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function batalEdit() {
+    idEdit = null;
+    document.getElementById('form-game').reset();
+    document.getElementById('config_json').value = '';
+    document.getElementById('btn-submit').textContent = 'Tambah game';
+    document.getElementById('btn-batal').style.display = 'none';
+    document.querySelector('.form-card h3').textContent = 'Tambah game baru';
+  }
+  document.getElementById('btn-batal').addEventListener('click', batalEdit);
+
+  async function hapusGameBaris(idGame, judul) {
+    if (!confirm(`Yakin mau hapus game "${judul}"? Tidak bisa dibatalkan.`)) return;
+    try {
+      const res = await Api.hapusGame(idGame);
+      if (res.success) muatDaftarGames();
+      else alert(res.message || 'Gagal menghapus.');
+    } catch (err) {
+      alert('Tidak bisa terhubung ke server.');
+    }
   }
 
   document.getElementById('filter-mapel-games').addEventListener('change', muatDaftarGames);
@@ -210,20 +254,19 @@
     };
 
     try {
-      const res = await Api.tambahGame(payload);
+      const res = idEdit ? await Api.updateGame(idEdit, payload) : await Api.tambahGame(payload);
       if (res.success) {
-        successText.textContent = 'Game berhasil ditambahkan.';
-        document.getElementById('form-game').reset();
-        document.getElementById('config_json').value = '';
+        successText.textContent = idEdit ? 'Perubahan disimpan.' : 'Game berhasil ditambahkan.';
+        batalEdit();
         muatDaftarGames();
       } else {
-        errorText.textContent = res.message || 'Gagal menambah game.';
+        errorText.textContent = res.message || 'Gagal menyimpan.';
       }
     } catch (err) {
       errorText.textContent = 'Tidak bisa terhubung ke server.';
     } finally {
       btnSubmit.disabled = false;
-      btnSubmit.textContent = 'Tambah game';
+      btnSubmit.textContent = idEdit ? 'Simpan perubahan' : 'Tambah game';
     }
   });
 
