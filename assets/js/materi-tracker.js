@@ -48,6 +48,7 @@
 
     const user = Auth.ambilSesi();
     if (!user) return; // belum login, jangan kirim apa-apa
+    if (user.role !== 'siswa') return; // admin cuma pratinjau, jangan catat progress
 
     sudahDikirim = true;
     try {
@@ -90,9 +91,13 @@
   }
 
   function pasangLinkKembali() {
-    const tujuan = idMapel
-      ? '../../siswa/materi.html?mapel=' + encodeURIComponent(idMapel)
-      : '../../siswa/dashboard.html';
+    const user = (typeof Auth !== 'undefined') ? Auth.ambilSesi() : null;
+    const isAdmin = user && user.role === 'admin';
+    const tujuan = isAdmin
+      ? ('../../admin/kelola-materi.html' + (idMapel ? '?mapel=' + encodeURIComponent(idMapel) : ''))
+      : (idMapel
+        ? '../../siswa/materi.html?mapel=' + encodeURIComponent(idMapel)
+        : '../../siswa/dashboard.html');
     document.querySelectorAll('.back-link').forEach(function (el) {
       el.setAttribute('href', tujuan);
       el.removeAttribute('onclick');
