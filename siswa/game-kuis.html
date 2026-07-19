@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kuis timer - LMS SMK Muhammadiyah Bojong</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+<style>
+  .game-wrap { max-width: 620px; }
+  .progress-bar-outer { height: 6px; background: var(--bg-card); border-radius: 999px; overflow: hidden; margin-bottom: 22px; }
+  .progress-bar-inner { height: 100%; background: var(--accent-teal); transition: width .25s; }
+  .timer-ring {
+    width: 54px; height: 54px; border-radius: 50%;
+    border: 3px solid var(--border); display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono); font-weight: 700; font-size: 17px; color: var(--accent-gold);
+    flex-shrink: 0; transition: border-color .2s, color .2s;
+  }
+  .timer-ring.kritis { border-color: var(--accent-coral); color: var(--accent-coral); }
+  .soal-nomor { font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+  .soal-teks { font-size: 18px; font-weight: 600; margin-bottom: 22px; line-height: 1.4; }
+  .pilihan-btn {
+    display: block; width: 100%; text-align: left;
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 14px 16px; margin-bottom: 10px; color: var(--text-primary); font-size: 14.5px;
+    cursor: pointer; font-family: var(--font-body);
+  }
+  .pilihan-btn:hover:not(:disabled) { border-color: var(--border-strong); }
+  .pilihan-btn.benar { border-color: var(--accent-teal); background: var(--accent-teal-dim); color: var(--accent-teal); }
+  .pilihan-btn.salah { border-color: var(--accent-coral); background: var(--accent-coral-dim); color: var(--accent-coral); }
+  .pilihan-btn:disabled { cursor: default; opacity: .85; }
+  .selesai-box {
+    text-align: center; padding: 48px 24px; background: var(--bg-card); border: 1px solid var(--accent-teal-dim);
+    border-radius: var(--radius-lg); max-width: 480px; margin-top: 20px;
+  }
+  .selesai-box .value { font-family: var(--font-mono); font-size: 40px; color: var(--accent-gold); font-weight: 700; }
+  .selesai-box .skor { color: var(--text-secondary); font-size: 14px; margin-top: 8px; }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="sidebar-brand">MP01&middot;MP02&middot;MP03<strong>LMS Siswa</strong></div>
+    <div class="nav-item" onclick="location.href='dashboard.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Beranda</div>
+    <div class="nav-item" onclick="segeraHadir()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5a2 2 0 0 1 2-2h11v18H6a2 2 0 0 1-2-2V5z"/><path d="M17 3v18"/></svg>Materi</div>
+    <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="8" width="20" height="9" rx="4"/><path d="M7 12h2M8 11v2M15 12h.01M18 12h.01"/></svg>Games</div>
+    <div class="nav-item" onclick="segeraHadir()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>Riwayat poin</div>
+    <div class="nav-spacer"></div>
+    <div class="nav-item" id="btn-logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>Keluar</div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h1 id="judul-game">Kuis timer</h1>
+        <div class="subtitle">Jawab sebelum waktu habis.</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:14px;">
+        <div class="timer-ring" id="timer-ring">--</div>
+        <a class="btn btn-ghost" id="link-kembali" href="games.html">&larr; kembali</a>
+      </div>
+    </div>
+
+    <div class="game-wrap" id="area-game">
+      <div class="skeleton-card"></div>
+    </div>
+    <div id="area-selesai"></div>
+  </main>
+</div>
+
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script>
+  const user = Auth.wajibLogin('siswa');
+  document.getElementById('btn-logout').addEventListener('click', () => Auth.logout());
+  function segeraHadir() { alert('Halaman ini masih dalam pengembangan.'); }
+
+  const params = new URLSearchParams(window.location.search);
+  const idGame = params.get('id');
+  const idMapel = params.get('mapel');
+  document.getElementById('link-kembali').href = idMapel ? `games.html?mapel=${idMapel}` : 'games.html';
+
+  let soalList = [];
+  let indexSoal = 0;
+  let jumlahBenar = 0;
+  let poinMax = 0;
+  let sisaWaktu = 0;
+  let timerInterval = null;
+  let kuisSelesaiDijawab = false;
+  let terkirim = false;
+
+  async function muat() {
+    if (!idGame) {
+      document.getElementById('area-game').innerHTML = '<div class="empty-state">Game tidak ditemukan.</div>';
+      return;
+    }
+
+    let res;
+    try {
+      res = await Api.getGames(idMapel);
+    } catch (err) {
+      document.getElementById('area-game').innerHTML = '<div class="empty-state">Tidak bisa memuat data. Periksa koneksi.</div>';
+      return;
+    }
+
+    const game = (res.data || []).find(g => String(g.id_game) === String(idGame));
+    if (!game || !game.config || !Array.isArray(game.config.soal) || game.config.soal.length === 0) {
+      document.getElementById('area-game').innerHTML = '<div class="empty-state">Data kuis tidak valid.</div>';
+      return;
+    }
+
+    document.getElementById('judul-game').textContent = game.judul;
+    poinMax = Number(game.poin_max || 0);
+    soalList = game.config.soal;
+    sisaWaktu = Number(game.config.durasi_detik || 60);
+
+    mulaiTimer();
+    tampilkanSoal();
+  }
+
+  function mulaiTimer() {
+    updateTimerTampilan();
+    timerInterval = setInterval(function () {
+      sisaWaktu--;
+      updateTimerTampilan();
+      if (sisaWaktu <= 0) {
+        clearInterval(timerInterval);
+        selesaiKuis();
+      }
+    }, 1000);
+  }
+
+  function updateTimerTampilan() {
+    const ring = document.getElementById('timer-ring');
+    ring.textContent = Math.max(sisaWaktu, 0);
+    ring.classList.toggle('kritis', sisaWaktu <= 10);
+  }
+
+  function tampilkanSoal() {
+    if (indexSoal >= soalList.length) {
+      selesaiKuis();
+      return;
+    }
+    const soal = soalList[indexSoal];
+
+    document.getElementById('area-game').innerHTML = `
+      <div class="progress-bar-outer"><div class="progress-bar-inner" style="width:${(indexSoal / soalList.length) * 100}%"></div></div>
+      <div class="soal-nomor">Soal ${indexSoal + 1} dari ${soalList.length}</div>
+      <div class="soal-teks">${soal.pertanyaan}</div>
+      <div id="daftar-pilihan"></div>`;
+
+    const daftarPilihan = document.getElementById('daftar-pilihan');
+    soal.pilihan.forEach((teks, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'pilihan-btn';
+      btn.textContent = teks;
+      btn.addEventListener('click', () => jawabSoal(i, soal, btn));
+      daftarPilihan.appendChild(btn);
+    });
+  }
+
+  function jawabSoal(indexPilihan, soal, btnDiklik) {
+    document.querySelectorAll('.pilihan-btn').forEach(b => b.disabled = true);
+
+    const benar = indexPilihan === soal.jawaban;
+    if (benar) {
+      jumlahBenar++;
+      btnDiklik.classList.add('benar');
+    } else {
+      btnDiklik.classList.add('salah');
+      const tombolBenar = document.querySelectorAll('.pilihan-btn')[soal.jawaban];
+      if (tombolBenar) tombolBenar.classList.add('benar');
+    }
+
+    setTimeout(() => {
+      indexSoal++;
+      tampilkanSoal();
+    }, 800);
+  }
+
+  async function selesaiKuis() {
+    if (kuisSelesaiDijawab) return;
+    kuisSelesaiDijawab = true;
+    clearInterval(timerInterval);
+
+    const totalDijawab = Math.min(indexSoal, soalList.length);
+    const persentase = soalList.length > 0 ? jumlahBenar / soalList.length : 0;
+    const poinDidapat = Math.round(persentase * poinMax);
+
+    document.getElementById('area-game').innerHTML = '';
+    document.getElementById('area-selesai').innerHTML = `
+      <div class="selesai-box">
+        <div class="value">+${poinDidapat}</div>
+        <p class="skor">Benar ${jumlahBenar} dari ${soalList.length} soal</p>
+        <p style="color:var(--text-secondary); margin-top:10px;" id="teks-status">Menyimpan poin...</p>
+      </div>`;
+
+    try {
+      const res = await Api.submitProgress(user.nis, idGame, 'game', poinDidapat);
+      const pesan = res.success
+        ? (res.duplikat ? 'Poin untuk kuis ini sudah pernah tercatat sebelumnya.' : 'Poin berhasil disimpan!')
+        : 'Gagal menyimpan poin, coba muat ulang halaman.';
+      document.getElementById('teks-status').textContent = pesan;
+    } catch (err) {
+      document.getElementById('teks-status').textContent = 'Gagal menyimpan poin (koneksi bermasalah).';
+    }
+  }
+
+  muat();
+</script>
+</body>
+</html>
