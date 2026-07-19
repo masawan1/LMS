@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Portfolio — Dwi Frediawan</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0D0D1A;
+      --surface:   #17172A;
+      --glass:     rgba(30, 28, 60, 0.55);
+      --violet:    #7C3AED;
+      --violet-lt: #A855F7;
+      --cyan:      #22D3EE;
+      --cyan-lt:   #67E8F9;
+      --white:     #F0EEFF;
+      --muted:     #8B8AAE;
+      --border:    rgba(124, 58, 237, 0.25);
+    }
+
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+    body {
+      background: var(--bg);
+      color: var(--white);
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    img, svg { max-width: 100%; }
+
+    /* ─── NOISE OVERLAY ─── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 0; opacity: .4;
+    }
+
+    /* ─── NAV ─── */
+    nav {
+      position: fixed; top: 0; width: 100%; z-index: 100;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1.2rem 4rem;
+      background: rgba(13,13,26,.75);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700; font-size: 1.2rem;
+      background: linear-gradient(135deg, var(--violet-lt), var(--cyan));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      letter-spacing: -.02em;
+      white-space: nowrap;
+    }
+    .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+    .nav-links a {
+      color: var(--muted); text-decoration: none; font-size: .9rem; font-weight: 500;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--white); }
+
+    /* Hamburger button (hidden on desktop) */
+    .nav-toggle {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      gap: 5px;
+      width: 44px; height: 44px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      padding: 0;
+      align-items: center;
+    }
+    .nav-toggle span {
+      width: 20px; height: 2px;
+      background: var(--white);
+      border-radius: 2px;
+      transition: transform .3s ease, opacity .3s ease;
+    }
+    .nav-toggle.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .nav-toggle.active span:nth-child(2) { opacity: 0; }
+    .nav-toggle.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    /* Mobile dropdown menu */
+    .nav-mobile-menu {
+      display: none;
+      position: fixed;
+      top: 0; right: 0;
+      height: 100dvh;
+      width: min(78vw, 320px);
+      background: rgba(13,13,26,.97);
+      backdrop-filter: blur(20px);
+      border-left: 1px solid var(--border);
+      z-index: 99;
+      flex-direction: column;
+      gap: .25rem;
+      padding: 6.5rem 1.5rem 2rem;
+      transform: translateX(100%);
+      transition: transform .35s cubic-bezier(.4,0,.2,1);
+    }
+    .nav-mobile-menu.open { transform: translateX(0); }
+    .nav-mobile-menu a {
+      color: var(--white);
+      text-decoration: none;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 600;
+      padding: 1rem .5rem;
+      border-bottom: 1px solid var(--border);
+      transition: color .2s, padding-left .2s;
+    }
+    .nav-mobile-menu a:active { color: var(--cyan); padding-left: .9rem; }
+
+    .nav-scrim {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.5);
+      z-index: 98;
+      opacity: 0;
+      transition: opacity .35s ease;
+      pointer-events: none;
+    }
+    .nav-scrim.open { opacity: 1; pointer-events: auto; }
+
+    /* ─── HERO ─── */
+    #hero {
+      min-height: 100svh;
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      text-align: center;
+      padding: 8rem 2rem 4rem;
+      position: relative;
+    }
+    .hero-glow {
+      position: absolute; top: 20%; left: 50%; transform: translateX(-50%);
+      width: 600px; height: 600px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(124,58,237,.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-tag {
+      font-family: 'DM Mono', monospace; font-size: .8rem;
+      color: var(--cyan); letter-spacing: .15em; text-transform: uppercase;
+      margin-bottom: 1.2rem;
+    }
+    .hero-tag span { display: inline-block; animation: blink 1s step-end infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(2.4rem, 9vw, 6rem);
+      font-weight: 700; line-height: 1.08;
+      letter-spacing: -.03em;
+    }
+    .gradient-text {
+      background: linear-gradient(135deg, var(--violet-lt) 0%, var(--cyan) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero-sub {
+      max-width: 520px; margin: 1.5rem auto 0;
+      color: var(--muted); font-size: clamp(.95rem, 2.6vw, 1.1rem); line-height: 1.7;
+    }
+    .hero-ctas { display: flex; gap: 1rem; justify-content: center; margin-top: 2.5rem; flex-wrap: wrap; width: 100%; }
+    .btn-primary {
+      padding: 1rem 2rem; border-radius: 100px;
+      background: linear-gradient(135deg, var(--violet), var(--violet-lt));
+      color: #fff; font-weight: 600; font-size: .95rem;
+      text-decoration: none; border: none; cursor: pointer;
+      transition: transform .2s, box-shadow .2s;
+      box-shadow: 0 0 24px rgba(124,58,237,.4);
+      min-height: 48px; display: inline-flex; align-items: center; justify-content: center;
+    }
+    .btn-primary:active { transform: scale(.97); }
+    .btn-outline {
+      padding: 1rem 2rem; border-radius: 100px;
+      border: 1px solid var(--border); color: var(--white);
+      background: var(--glass); backdrop-filter: blur(10px);
+      font-weight: 500; font-size: .95rem;
+      text-decoration: none; cursor: pointer;
+      transition: border-color .2s, transform .2s;
+      min-height: 48px; display: inline-flex; align-items: center; justify-content: center;
+    }
+    .btn-outline:active { transform: scale(.97); }
+
+    .hero-stats {
+      display: flex; gap: 3rem; justify-content: center;
+      margin-top: 4rem; flex-wrap: wrap;
+    }
+    .stat-item { text-align: center; }
+    .stat-num {
+      font-family: 'DM Mono', monospace; font-size: 1.8rem; font-weight: 500;
+      color: var(--white); display: block;
+    }
+    .stat-label { font-size: .78rem; color: var(--muted); letter-spacing: .05em; }
+
+    /* ─── SECTION BASE ─── */
+    section { padding: 6rem 4rem; max-width: 1200px; margin: 0 auto; }
+    .section-eyebrow {
+      font-family: 'DM Mono', monospace; font-size: .78rem;
+      color: var(--cyan); letter-spacing: .2em; text-transform: uppercase;
+      margin-bottom: .75rem;
+    }
+    h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(1.7rem, 6vw, 2.8rem);
+      font-weight: 700; letter-spacing: -.025em; line-height: 1.15;
+      margin-bottom: .75rem;
+    }
+    .section-lead { color: var(--muted); font-size: 1.02rem; max-width: 500px; margin-bottom: 3rem; }
+
+    /* ─── DIVIDER ─── */
+    .divider {
+      width: 100%; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      margin: 0 auto;
+    }
+
+    /* ─── TIKTOK CARDS ─── */
+    .tiktok-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .card-platform {
+      display: flex; align-items: center; gap: .6rem; margin-bottom: 1.5rem;
+    }
+    .tt-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: linear-gradient(135deg, #010101, #1a1a2e);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; border: 1px solid rgba(255,255,255,.1);
+      flex-shrink: 0;
+    }
+    .platform-name { font-family: 'DM Mono', monospace; font-size: .8rem; color: var(--muted); }
+
+    /* ─── TIKTOK EMBED CARDS ─── */
+    .tiktok-embed-card {
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: var(--glass);
+      backdrop-filter: blur(16px);
+      padding: 1.5rem 1.5rem .5rem;
+      overflow: hidden;
+      display: flex; flex-direction: column;
+      transition: transform .3s, border-color .3s, box-shadow .3s;
+    }
+    .tiktok-embed-card:hover {
+      transform: translateY(-6px);
+      border-color: var(--violet-lt);
+      box-shadow: 0 20px 50px rgba(124,58,237,.2);
+    }
+    .card-niche-inline {
+      margin-left: auto;
+      font-size: .8rem; color: var(--muted);
+      white-space: nowrap;
+    }
+    .tiktok-embed-card .tiktok-embed {
+      margin: 0 auto; border-radius: 14px; overflow: hidden;
+      width: 100%;
+    }
+    @media (max-width: 480px) {
+      .card-platform { flex-wrap: wrap; row-gap: .4rem; }
+      .card-niche-inline { margin-left: 0; white-space: normal; }
+    }
+
+    /* ─── WEB PROJECT ─── */
+    .project-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 1.5rem;
+    }
+    .project-card {
+      border: 1px solid var(--border); border-radius: 20px;
+      background: var(--glass); backdrop-filter: blur(16px);
+      overflow: hidden;
+      transition: transform .3s, box-shadow .3s, border-color .3s;
+    }
+    .project-card:hover { transform: translateY(-6px); box-shadow: 0 20px 50px rgba(34,211,238,.15); border-color: var(--cyan); }
+
+    .project-thumb {
+      height: 160px; position: relative; overflow: hidden;
+      background: linear-gradient(135deg, var(--surface), #1e1c3e);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .thumb-icon { font-size: 3rem; opacity: .5; }
+    .thumb-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(124,58,237,.15), rgba(34,211,238,.1));
+    }
+    .project-body { padding: 1.5rem; }
+    .project-type {
+      font-size: .75rem; font-family: 'DM Mono', monospace;
+      color: var(--violet-lt); letter-spacing: .1em; text-transform: uppercase;
+      margin-bottom: .5rem;
+    }
+    .project-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.2rem; font-weight: 700; margin-bottom: .5rem;
+    }
+    .project-desc { font-size: .88rem; color: var(--muted); line-height: 1.6; margin-bottom: 1.2rem; }
+    .project-tags { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1.2rem; }
+    .tag {
+      font-size: .72rem; padding: .3rem .75rem; border-radius: 100px;
+      background: rgba(124,58,237,.12); color: var(--violet-lt);
+      border: 1px solid rgba(124,58,237,.2);
+    }
+    .project-links-row { display: flex; gap: .75rem; flex-wrap: wrap; }
+    .project-link {
+      display: inline-flex; align-items: center; gap: .4rem;
+      font-size: .85rem; color: var(--cyan); text-decoration: none; font-weight: 500;
+      transition: gap .2s;
+      min-height: 36px;
+    }
+    .project-link:hover { gap: .7rem; }
+
+    /* ─── SKILLS ─── */
+    .skills-wrap {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+    .skill-pill {
+      display: flex; align-items: center; gap: 1rem;
+      padding: 1rem 1.25rem; border-radius: 14px;
+      border: 1px solid var(--border); background: var(--glass);
+      transition: border-color .2s, transform .2s;
+      min-height: 48px;
+    }
+    .skill-pill:hover { border-color: var(--violet-lt); transform: translateX(4px); }
+    .skill-icon { font-size: 1.5rem; width: 36px; text-align: center; flex-shrink: 0; }
+    .skill-name { font-size: .9rem; font-weight: 500; }
+    .skill-level {
+      margin-left: auto; font-family: 'DM Mono', monospace;
+      font-size: .75rem; color: var(--violet-lt);
+      white-space: nowrap;
+    }
+
+    /* ─── INVESTASI ─── */
+    .invest-highlight {
+      display: flex; gap: 2.5rem; flex-wrap: wrap;
+      padding: 1.5rem 1.75rem; margin-bottom: 2.5rem;
+      border: 1px solid var(--border); border-radius: 18px;
+      background: var(--glass); backdrop-filter: blur(16px);
+    }
+    .invest-highlight .stat-item { text-align: left; }
+    .invest-stat-num {
+      font-family: 'DM Mono', monospace; font-size: 1.5rem; font-weight: 500;
+      color: var(--white); display: block;
+    }
+    .invest-highlight .stat-sub { display: block; font-size: .72rem; color: var(--muted); margin-top: .15rem; }
+
+    .invest-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+    .invest-card {
+      border: 1px solid var(--border); border-radius: 20px;
+      background: var(--glass); backdrop-filter: blur(16px);
+      padding: 1.5rem; display: flex; flex-direction: column;
+      transition: transform .3s, box-shadow .3s, border-color .3s;
+    }
+    .invest-card:hover { transform: translateY(-6px); box-shadow: 0 20px 50px rgba(124,58,237,.15); border-color: var(--violet-lt); }
+    .invest-head { display: flex; align-items: center; gap: .75rem; margin-bottom: .9rem; }
+    .invest-icon {
+      width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0;
+      background: linear-gradient(135deg, rgba(124,58,237,.18), rgba(34,211,238,.12));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; border: 1px solid var(--border);
+    }
+    .invest-title { font-family: 'Space Grotesk', sans-serif; font-size: 1.05rem; font-weight: 700; }
+    .invest-sub { font-size: .75rem; color: var(--cyan); font-family: 'DM Mono', monospace; }
+    .invest-desc { font-size: .87rem; color: var(--muted); line-height: 1.6; margin-bottom: 1rem; }
+    .invest-tags { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: auto; }
+
+    .stock-list { display: flex; flex-direction: column; gap: .85rem; margin-top: .25rem; }
+    .stock-item { display: flex; gap: .75rem; align-items: flex-start; }
+    .stock-ticker {
+      flex-shrink: 0; width: 52px; text-align: center;
+      font-family: 'DM Mono', monospace; font-size: .72rem; font-weight: 500;
+      color: var(--violet-lt); background: rgba(124,58,237,.12);
+      border: 1px solid rgba(124,58,237,.2); border-radius: 8px;
+      padding: .3rem .2rem;
+    }
+    .stock-info { flex: 1; }
+    .stock-name-row { display: flex; justify-content: space-between; align-items: baseline; gap: .5rem; }
+    .stock-name { font-size: .85rem; font-weight: 600; color: var(--white); }
+    .stock-lot { font-family: 'DM Mono', monospace; font-size: .72rem; color: var(--cyan); white-space: nowrap; }
+    .stock-desc { font-size: .78rem; color: var(--muted); line-height: 1.5; margin-top: .1rem; }
+
+    @media (max-width: 600px) {
+      .invest-highlight { gap: 1.25rem 2rem; padding: 1.25rem 1.5rem; }
+    }
+
+    /* ─── CONTACT ─── */
+    #contact { text-align: center; padding: 6rem 1.5rem 8rem; }
+    .contact-card {
+      max-width: 600px; margin: 0 auto;
+      padding: 3rem 2rem; border-radius: 24px;
+      border: 1px solid var(--border); background: var(--glass);
+      backdrop-filter: blur(20px);
+      position: relative; overflow: hidden;
+    }
+    .contact-card::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(124,58,237,.12), transparent 65%);
+      pointer-events: none;
+    }
+    .contact-card h2 { margin-bottom: .5rem; }
+    .contact-card p { color: var(--muted); margin-bottom: 2rem; }
+    .social-links { display: flex; gap: .75rem; justify-content: center; flex-wrap: wrap; }
+    .social-btn {
+      display: flex; align-items: center; gap: .5rem;
+      padding: .85rem 1.4rem; border-radius: 100px;
+      border: 1px solid var(--border); background: rgba(255,255,255,.04);
+      color: var(--white); text-decoration: none; font-size: .88rem; font-weight: 500;
+      transition: border-color .2s, transform .2s, background .2s;
+      min-height: 44px;
+    }
+    .social-btn:active { transform: scale(.96); background: rgba(124,58,237,.12); }
+
+    /* ─── FOOTER ─── */
+    footer {
+      text-align: center; padding: 2rem;
+      border-top: 1px solid var(--border);
+      color: var(--muted); font-size: .8rem;
+      font-family: 'DM Mono', monospace;
+    }
+
+    /* ─── SCROLL REVEAL ─── */
+    .reveal { opacity: 0; transform: translateY(28px); transition: opacity .6s ease, transform .6s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ─── SCROLLBAR ─── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--violet); border-radius: 10px; }
+
+    /* ─── KEYBOARD FOCUS ─── */
+    a:focus-visible, button:focus-visible {
+      outline: 2px solid var(--cyan);
+      outline-offset: 3px;
+      border-radius: 4px;
+    }
+
+    /* ─── TABLET ─── */
+    @media (max-width: 900px) {
+      nav { padding: 1rem 1.5rem; }
+      .nav-links { display: none; }
+      .nav-toggle { display: flex; }
+      .nav-mobile-menu, .nav-scrim { display: flex; }
+      section { padding: 4.5rem 1.5rem; }
+    }
+
+    /* ─── MOBILE ─── */
+    @media (max-width: 600px) {
+      #hero { padding: 6.5rem 1.25rem 3rem; }
+      .hero-stats { gap: 1.5rem 2rem; margin-top: 3rem; }
+      .stat-num { font-size: 1.5rem; }
+      .hero-ctas { flex-direction: column; align-items: stretch; }
+      .hero-ctas a { width: 100%; }
+      section { padding: 3.5rem 1.25rem; }
+      .section-lead { max-width: 100%; }
+      .tiktok-grid, .project-grid { grid-template-columns: 1fr; }
+      .social-links { flex-direction: column; }
+      .social-btn { width: 100%; justify-content: center; }
+      .contact-card { padding: 2.25rem 1.5rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .reveal { opacity: 1; transform: none; }
+      * { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+<a class="back-link" href="#" style="position:fixed; top:14px; left:14px; z-index:200; background:rgba(13,13,26,.85); backdrop-filter:blur(10px); border:1px solid var(--border); color:var(--white); padding:8px 14px; border-radius:100px; font-family:'DM Mono',monospace; font-size:.78rem; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">&larr; kembali ke daftar materi</a>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">Dwi Frediawan</div>
+  <ul class="nav-links">
+    <li><a href="#tiktok">TikTok</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#investasi">Investasi</a></li>
+    <li><a href="#contact">Kontak</a></li>
+  </ul>
+  <button class="nav-toggle" id="navToggle" aria-label="Buka menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+<div class="nav-scrim" id="navScrim"></div>
+<div class="nav-mobile-menu" id="navMobileMenu">
+  <a href="#tiktok">TikTok</a>
+  <a href="#projects">Projects</a>
+  <a href="#skills">Skills</a>
+  <a href="#investasi">Investasi</a>
+  <a href="#contact">Kontak</a>
+</div>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-glow"></div>
+  <p class="hero-tag">✦ TikTok Affiliate Creator &amp; Web Developer &amp; Investor <span>|</span></p>
+  <h1>
+    Jualan Lewat Konten.<br>
+    <span class="gradient-text">Bangun Digital & Aset.</span>
+  </h1>
+  <p class="hero-sub">
+    Kreator affiliate TikTok dengan 3 niche produk berbeda — minuman, perabotan rumah tangga, dan alat tulis. Merangkap sebagai web developer untuk media pembelajaran dan proyek digital. Di luar itu, aktif membangun aset lewat investasi saham dividen, reksadana pasar uang, emas, dan tabungan rutin.
+  </p>
+  <div class="hero-ctas">
+    <a href="#tiktok" class="btn-primary">Lihat Portfolio →</a>
+    <a href="#contact" class="btn-outline">Hubungi Saya</a>
+  </div>
+  <div class="hero-stats">
+    <div class="stat-item">
+      <span class="stat-num" data-target="3">0</span>
+      <span class="stat-label">Akun TikTok</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num" data-target="50" data-suffix="K+">0</span>
+      <span class="stat-label">Total Followers</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num" data-target="5">0</span>
+      <span class="stat-label">Web Projects</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num" data-target="2" data-suffix=" Tahun">0</span>
+      <span class="stat-label">Pengalaman</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num" data-target="178" data-suffix="Jt+">0</span>
+      <span class="stat-label">Total GMV Affiliate</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num" data-target="9" data-suffix=",5Jt+">0</span>
+      <span class="stat-label">Total Komisi Affiliate</span>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- TIKTOK SECTION -->
+<section id="tiktok">
+  <p class="section-eyebrow reveal">✦ Social Media</p>
+  <h2 class="reveal">Akun <span class="gradient-text">TikTok</span></h2>
+  <p class="section-lead reveal">Tiga akun affiliate dengan niche produk berbeda — minuman, perabotan rumah tangga, dan alat tulis. Profil dan video terbaru tampil langsung dari TikTok.</p>
+
+  <div class="tiktok-grid">
+
+    <!-- Akun 1 -->
+    <div class="tiktok-embed-card reveal">
+      <div class="card-platform">
+        <div class="tt-icon">🎵</div>
+        <span class="platform-name">TikTok</span>
+        <span class="card-niche-inline">☕ Affiliate Kopi, Teh &amp; Minuman</span>
+      </div>
+      <blockquote class="tiktok-embed" cite="https://www.tiktok.com/@mascloudd" data-unique-id="mascloudd" data-embed-type="creator" style="max-width: 100%; min-width: 288px;">
+        <section> <a target="_blank" href="https://www.tiktok.com/@mascloudd?refer=creator_embed">@mascloudd</a> </section>
+      </blockquote>
+    </div>
+
+    <!-- Akun 2 -->
+    <div class="tiktok-embed-card reveal" style="transition-delay:.1s">
+      <div class="card-platform">
+        <div class="tt-icon">🎵</div>
+        <span class="platform-name">TikTok</span>
+        <span class="card-niche-inline">🏠 Affiliate Perabotan Rumah Tangga</span>
+      </div>
+      <blockquote class="tiktok-embed" cite="https://www.tiktok.com/@mascloud2" data-unique-id="mascloud2" data-embed-type="creator" style="max-width: 100%; min-width: 288px;">
+        <section> <a target="_blank" href="https://www.tiktok.com/@mascloud2?refer=creator_embed">@mascloud2</a> </section>
+      </blockquote>
+    </div>
+
+    <!-- Akun 3 -->
+    <div class="tiktok-embed-card reveal" style="transition-delay:.2s">
+      <div class="card-platform">
+        <div class="tt-icon">🎵</div>
+        <span class="platform-name">TikTok</span>
+        <span class="card-niche-inline">✏️ Affiliate Alat Tulis</span>
+      </div>
+      <blockquote class="tiktok-embed" cite="https://www.tiktok.com/@dwfrediawan" data-unique-id="dwfrediawan" data-embed-type="creator" style="max-width: 100%; min-width: 288px;">
+        <section> <a target="_blank" href="https://www.tiktok.com/@dwfrediawan?refer=creator_embed">@dwfrediawan</a> </section>
+      </blockquote>
+    </div>
+
+  </div>
+</section>
+
+<script async src="https://www.tiktok.com/embed.js"></script>
+
+<div class="divider"></div>
+
+<!-- PROJECTS SECTION -->
+<section id="projects">
+  <p class="section-eyebrow reveal">✦ Web Projects</p>
+  <h2 class="reveal">Website &amp; <span class="gradient-text">Projects</span></h2>
+  <p class="section-lead reveal">Dari platform media pembelajaran interaktif hingga proyek-proyek sederhana yang memecahkan masalah nyata.</p>
+
+  <div class="project-grid">
+
+    <!-- Project 1: Dashboard D2PK -->
+    <div class="project-card reveal">
+      <div class="project-thumb">
+        <div class="thumb-overlay"></div>
+        <div class="thumb-icon">🎓</div>
+      </div>
+      <div class="project-body">
+        <div class="project-type">Media Pembelajaran</div>
+        <div class="project-title">Dashboard D2PK</div>
+        <p class="project-desc">Dashboard data dan monitoring untuk mendukung kegiatan pembelajaran, menyajikan informasi secara terstruktur dan mudah diakses.</p>
+        <div class="project-tags">
+          <span class="tag">HTML/CSS</span>
+          <span class="tag">JavaScript</span>
+          <span class="tag">Dashboard</span>
+        </div>
+        <div class="project-links-row">
+          <a href="https://masawan1.github.io/dashboard_D2PK/" class="project-link" target="_blank">Lihat Project →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Project 2: Dashboard Informatika -->
+    <div class="project-card reveal" style="transition-delay:.1s">
+      <div class="project-thumb" style="background: linear-gradient(135deg, #1e1c3e, #0f1e3a);">
+        <div class="thumb-overlay"></div>
+        <div class="thumb-icon">💻</div>
+      </div>
+      <div class="project-body">
+        <div class="project-type">Media Pembelajaran</div>
+        <div class="project-title">Dashboard Informatika</div>
+        <p class="project-desc">Dashboard pembelajaran mata pelajaran Informatika, dirancang untuk membantu siswa mengakses materi dan progres belajar.</p>
+        <div class="project-tags">
+          <span class="tag">HTML/CSS</span>
+          <span class="tag">JavaScript</span>
+          <span class="tag">Dashboard</span>
+        </div>
+        <div class="project-links-row">
+          <a href="https://masawan1.github.io/dashboardinformatika/" class="project-link" target="_blank">Lihat Project →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Project 3: SISKEU Lazismu -->
+    <div class="project-card reveal" style="transition-delay:.2s">
+      <div class="project-thumb" style="background: linear-gradient(135deg, #0d1a1e, #0a1a1e);">
+        <div class="thumb-overlay" style="background: linear-gradient(135deg, rgba(34,211,238,.15), rgba(124,58,237,.1));"></div>
+        <div class="thumb-icon">💰</div>
+      </div>
+      <div class="project-body">
+        <div class="project-type">Proyek Sederhana</div>
+        <div class="project-title">SISKEU Lazismu Ranting</div>
+        <p class="project-desc">Sistem pencatatan dan pelaporan keuangan untuk organisasi Lazismu Ranting, mempermudah transparansi dan rekap dana.</p>
+        <div class="project-tags">
+          <span class="tag">HTML/CSS</span>
+          <span class="tag">JavaScript</span>
+          <span class="tag">Sistem Keuangan</span>
+        </div>
+        <div class="project-links-row">
+          <a href="https://masawan97.github.io/siskeu-lazismu-ranting/" class="project-link" target="_blank">Lihat Project →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Project 4: ExamApp -->
+    <div class="project-card reveal" style="transition-delay:.3s">
+      <div class="project-thumb" style="background: linear-gradient(135deg, #1a0d2e, #0d1a0d);">
+        <div class="thumb-overlay" style="background: linear-gradient(135deg, rgba(168,85,247,.15), rgba(34,211,238,.1));"></div>
+        <div class="thumb-icon">📝</div>
+      </div>
+      <div class="project-body">
+        <div class="project-type">Proyek Sederhana</div>
+        <div class="project-title">ExamApp</div>
+        <p class="project-desc">Aplikasi ujian online dengan dua panel terpisah: admin untuk mengelola soal, dan siswa untuk mengerjakan ujian.</p>
+        <div class="project-tags">
+          <span class="tag">HTML/CSS</span>
+          <span class="tag">JavaScript</span>
+          <span class="tag">Multi-role</span>
+        </div>
+        <div class="project-links-row">
+          <a href="https://mrcloudddev.github.io/ExamApp/admin/" class="project-link" target="_blank">Panel Admin →</a>
+          <a href="https://mrcloudddev.github.io/ExamApp/siswa/" class="project-link" target="_blank">Panel Siswa →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Project 5: Kasir -->
+    <div class="project-card reveal" style="transition-delay:.4s">
+      <div class="project-thumb" style="background: linear-gradient(135deg, #2e1a0d, #1e1c3e);">
+        <div class="thumb-overlay" style="background: linear-gradient(135deg, rgba(124,58,237,.15), rgba(168,85,247,.1));"></div>
+        <div class="thumb-icon">🧾</div>
+      </div>
+      <div class="project-body">
+        <div class="project-type">Proyek Sederhana</div>
+        <div class="project-title">Aplikasi Kasir</div>
+        <p class="project-desc">Aplikasi kasir dengan dua panel: admin untuk mengelola produk dan laporan, kasir untuk transaksi harian.</p>
+        <div class="project-tags">
+          <span class="tag">HTML/CSS</span>
+          <span class="tag">JavaScript</span>
+          <span class="tag">Multi-role</span>
+        </div>
+        <div class="project-links-row">
+          <a href="https://mrcloudddev.github.io/kasir/admin" class="project-link" target="_blank">Panel Admin →</a>
+          <a href="https://mrcloudddev.github.io/kasir/kasir" class="project-link" target="_blank">Panel Kasir →</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SKILLS SECTION -->
+<section id="skills">
+  <p class="section-eyebrow reveal">✦ Kemampuan</p>
+  <h2 class="reveal">Tools &amp; <span class="gradient-text">Skills</span></h2>
+  <p class="section-lead reveal">Kombinasi kemampuan teknis dan kreativitas konten untuk hasil yang maksimal.</p>
+
+  <div class="skills-wrap">
+    <div class="skill-pill reveal"><span class="skill-icon">🛍️</span><span class="skill-name">Affiliate Marketing</span><span class="skill-level">Expert</span></div>
+    <div class="skill-pill reveal" style="transition-delay:.05s"><span class="skill-icon">🎬</span><span class="skill-name">Video Editing</span><span class="skill-level">Intermediate</span></div>
+    <div class="skill-pill reveal" style="transition-delay:.1s"><span class="skill-icon">📱</span><span class="skill-name">TikTok / CapCut</span><span class="skill-level">Expert</span></div>
+    <div class="skill-pill reveal" style="transition-delay:.1s"><span class="skill-icon">🌐</span><span class="skill-name">HTML / CSS</span><span class="skill-level">Advanced</span></div>
+    <div class="skill-pill reveal" style="transition-delay:.15s"><span class="skill-icon">⚡</span><span class="skill-name">JavaScript</span><span class="skill-level">Intermediate</span></div>
+    <div class="skill-pill reveal" style="transition-delay:.2s"><span class="skill-icon">🎨</span><span class="skill-name">Canva / Figma</span><span class="skill-level">Advanced</span></div>
+    <div class="skill-pill reveal" style="transition-delay:.25s"><span class="skill-icon">📊</span><span class="skill-name">Content Strategy</span><span class="skill-level">Expert</span></div>
+    <div class="skill-pill reveal" style="transition-delay:.35s"><span class="skill-icon">⚛️</span><span class="skill-name">React / Next.js</span><span class="skill-level">Beginner</span></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- INVESTASI SECTION -->
+<section id="investasi">
+  <p class="section-eyebrow reveal">✦ Manajemen Keuangan</p>
+  <h2 class="reveal">Investasi &amp; <span class="gradient-text">Portofolio</span></h2>
+  <p class="section-lead reveal">Selain berkarya di konten dan web, juga konsisten membangun aset lewat saham dividen, reksadana, emas, dan tabungan rutin.</p>
+
+  <div class="invest-highlight reveal">
+    <div class="stat-item">
+      <span class="invest-stat-num">Rp178Jt+</span>
+      <span class="stat-label">Total GMV Affiliate</span>
+      <span class="stat-sub">≈ Rp9,9Jt / bulan</span>
+    </div>
+    <div class="stat-item">
+      <span class="invest-stat-num">Rp9,5Jt+</span>
+      <span class="stat-label">Total Komisi Affiliate</span>
+      <span class="stat-sub">≈ Rp528Rb / bulan</span>
+    </div>
+    <div class="stat-item">
+      <span class="invest-stat-num">+11.60%</span>
+      <span class="stat-label">Return Reksadana</span>
+      <span class="stat-sub">Sucorinvest Money Market Fund</span>
+    </div>
+  </div>
+
+  <div class="invest-grid">
+
+    <!-- Saham Dividen -->
+    <div class="invest-card reveal">
+      <div class="invest-head">
+        <div class="invest-icon">📈</div>
+        <div>
+          <div class="invest-title">Saham Dividen</div>
+          <div class="invest-sub">Buy &amp; Hold</div>
+        </div>
+      </div>
+      <p class="invest-desc">Fokus pada saham-saham dividen dari sektor perbankan, energi, telekomunikasi, manufaktur, multifinance, dan semen — strategi jangka panjang untuk pendapatan pasif.</p>
+      <div class="stock-list">
+        <div class="stock-item">
+          <span class="stock-ticker">BMRI</span>
+          <div class="stock-info">
+            <div class="stock-name-row"><span class="stock-name">Bank Mandiri</span><span class="stock-lot">3 Lot</span></div>
+            <p class="stock-desc">Bank BUMN dengan aset terbesar di Indonesia, melayani segmen korporasi hingga ritel.</p>
+          </div>
+        </div>
+        <div class="stock-item">
+          <span class="stock-ticker">BBRI</span>
+          <div class="stock-info">
+            <div class="stock-name-row"><span class="stock-name">Bank Rakyat Indonesia</span><span class="stock-lot">4 Lot</span></div>
+            <p class="stock-desc">Bank BUMN yang dikenal sebagai raksasa pembiayaan UMKM dan mikro di Indonesia.</p>
+          </div>
+        </div>
+        <div class="stock-item">
+          <span class="stock-ticker">ADRO</span>
+          <div class="stock-info">
+            <div class="stock-name-row"><span class="stock-name">Alamtri Resources Indonesia</span><span class="stock-lot">3 Lot</span></div>
+            <p class="stock-desc">Perusahaan tambang &amp; energi, dengan lini bisnis batu bara dan energi terbarukan.</p>
+          </div>
+        </div>
+        <div class="stock-item">
+          <span class="stock-ticker">BBNI</span>
+          <div class="stock-info">
+            <div class="stock-name-row"><span class="stock-name">Bank Negara Indonesia</span><span class="stock-lot">2 Lot</span></div>
+            <p class="stock-desc">Bank BUMN dengan jaringan layanan korporasi, komersial, dan internasional yang luas.</p>
+          </div>
+        </div>
+        <div class="stock-item">
+          <span class="stock-ticker">BBTN</span>
+          <div class="stock-info">
+            <div class="stock-name-row"><span class="stock-name">Bank Tabungan Negara</span><span class="stock-lot">4 Lot</span></div>
+            <p class="stock-desc">Bank BUMN spesialis pembiayaan perumahan, terutama Kredit Pemilikan Rumah (KPR).</p>
+          </div>
+        </div>
+        <div class="stock-item">
+          <span class="stock-ticker">BNGA</span>
+          <div class="stock-info">
+            <div class="stock-name-row"><span class="stock-name">Bank CIMB Niaga</span><span class="stock-lot">2 Lot</span></div>
+            <p class="stock-desc">Bank swasta nasional, bagian dari grup perbankan regional CIMB.</p>
+          </div>
+        </div>
+        <div class="stock-item">
+          <span class="stock-ticker">TLKM</span>
+          <div class="stock-info">
+            <div class="stock-name-row"><span class="stock-name">Telkom Indonesia</span><span class="stock-lot">1 Lot</span></div>
+            <p class="stock-desc">BUMN telekomunikasi terbesar di Indonesia, menaungi Telkomsel dan infrastruktur digital.</p>
+          </div>
+        </div>
+        <div class="stock-item">
+          <span class="stock-ticker">SMSM</span>
+          <div class="stock-info">
+            <div class="stock-name-row"><span class="stock-name">Selamat Sempurna</span><span class="stock-lot">1 Lot</span></div>
+            <p class="stock-desc">Produsen komponen otomotif, terutama filter dan radiator, untuk pasar lokal &amp; ekspor.</p>
+          </div>
+        </div>
+        <div class="stock-item">
+          <span class="stock-ticker">BFIN</span>
+          <div class="stock-info">
+            <div class="stock-name-row"><span class="stock-name">BFI Finance Indonesia</span><span class="stock-lot">2 Lot</span></div>
+            <p class="stock-desc">Perusahaan multifinance/pembiayaan independen, fokus pembiayaan kendaraan &amp; modal usaha.</p>
+          </div>
+        </div>
+        <div class="stock-item">
+          <span class="stock-ticker">SMGR</span>
+          <div class="stock-info">
+            <div class="stock-name-row"><span class="stock-name">Semen Indonesia</span><span class="stock-lot">1 Lot</span></div>
+            <p class="stock-desc">BUMN produsen semen terbesar di Indonesia, menaungi beberapa merek semen nasional.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reksadana -->
+    <div class="invest-card reveal" style="transition-delay:.1s">
+      <div class="invest-head">
+        <div class="invest-icon">💵</div>
+        <div>
+          <div class="invest-title">Reksadana</div>
+          <div class="invest-sub">Pasar Uang</div>
+        </div>
+      </div>
+      <p class="invest-desc">Menempatkan dana di reksadana pasar uang untuk instrumen yang aman dan likuid sebagai pelengkap portofolio. Sucorinvest Money Market Fund dikelola oleh Sucorinvest Asset Management, berinvestasi pada instrumen pasar uang jangka pendek seperti deposito dan surat utang bertenor di bawah 1 tahun — cocok untuk dana darurat karena risiko rendah dan pencairan cepat.</p>
+      <div class="invest-tags">
+        <span class="tag">Sucorinvest Money Market Fund</span>
+        <span class="tag">Return +11.60%</span>
+      </div>
+    </div>
+
+    <!-- Nabung Emas -->
+    <div class="invest-card reveal" style="transition-delay:.2s">
+      <div class="invest-head">
+        <div class="invest-icon">🥇</div>
+        <div>
+          <div class="invest-title">Nabung Emas</div>
+          <div class="invest-sub">Lindung Nilai</div>
+        </div>
+      </div>
+      <p class="invest-desc">Menabung emas digital secara rutin sebagai instrumen lindung nilai jangka panjang terhadap inflasi.</p>
+      <div class="invest-tags">
+        <span class="tag">Tring by Pegadaian</span>
+      </div>
+    </div>
+
+    <!-- Bank Jago -->
+    <div class="invest-card reveal" style="transition-delay:.3s">
+      <div class="invest-head">
+        <div class="invest-icon">🏦</div>
+        <div>
+          <div class="invest-title">Tabungan Bank Jago</div>
+          <div class="invest-sub">Kantong Nabung</div>
+        </div>
+      </div>
+      <p class="invest-desc">Membiasakan diri menabung rutin lewat fitur Kantong di Bank Jago, membangun konsistensi finansial sejak dini.</p>
+      <div class="invest-tags">
+        <span class="tag">Min. Rp50.000 / bulan</span>
+        <span class="tag">Berjalan 3 Bulan</span>
+      </div>
+    </div>
+
+    <!-- Bisnis Baru -->
+    <div class="invest-card reveal" style="transition-delay:.4s">
+      <div class="invest-head">
+        <div class="invest-icon">📱</div>
+        <div>
+          <div class="invest-title">Bisnis Sampingan</div>
+          <div class="invest-sub">Diversifikasi</div>
+        </div>
+      </div>
+      <p class="invest-desc">Merambah jual beli iPhone sebagai lini bisnis baru untuk mendiversifikasi sumber pendapatan.</p>
+      <div class="invest-tags">
+        <span class="tag">Jual Beli iPhone</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="contact-card reveal">
+    <p class="section-eyebrow" style="text-align:center">✦ Let's Connect</p>
+    <h2>Yuk <span class="gradient-text">Kolaborasi!</span></h2>
+    <p>Terbuka untuk kerja sama brand, freelance web, atau kolaborasi konten. Kirim pesan, kita ngobrol dulu!</p>
+    <div class="social-links">
+      <a href="https://wa.me/6282314822991" class="social-btn" target="_blank">💬  WhatsApp</a>
+      <a href="mailto:dwiawan081@gmail.com" class="social-btn">📧 Email</a>
+      <a href="https://tiktok.com/@mascloudd" class="social-btn" target="_blank">🎵 @mascloudd</a>
+      <a href="https://tiktok.com/@mascloud2" class="social-btn" target="_blank">🎵 @mascloud2</a>
+      <a href="https://tiktok.com/@dwfrediawan" class="social-btn" target="_blank">🎵 @dwfrediawan</a>
+      <a href="https://instagram.com/masfrediawan?igsh=MXRwNTNiZXpheGdkbA==" class="social-btn" target="_blank">📸 Instagram</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>Dibuat dengan ✦ · <span id="year"></span> · Dwi Frediawan</p>
+</footer>
+
+<script>
+  // Year
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  reveals.forEach(r => observer.observe(r));
+
+  // Counter animation
+  function animateCounter(el) {
+    const target = parseInt(el.dataset.target);
+    const suffix = el.dataset.suffix || '';
+    const duration = 1400;
+    const start = performance.now();
+    function update(now) {
+      const progress = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      el.textContent = Math.floor(eased * target) + (progress === 1 ? suffix : '');
+      if (progress < 1) requestAnimationFrame(update);
+    }
+    requestAnimationFrame(update);
+  }
+
+  const counters = document.querySelectorAll('.stat-num');
+  const counterObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { animateCounter(e.target); counterObs.unobserve(e.target); } });
+  }, { threshold: .5 });
+  counters.forEach(c => counterObs.observe(c));
+
+  // Mobile hamburger menu
+  const navToggle = document.getElementById('navToggle');
+  const navMobileMenu = document.getElementById('navMobileMenu');
+  const navScrim = document.getElementById('navScrim');
+
+  function closeMenu() {
+    navToggle.classList.remove('active');
+    navMobileMenu.classList.remove('open');
+    navScrim.classList.remove('open');
+    navToggle.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  }
+  function openMenu() {
+    navToggle.classList.add('active');
+    navMobileMenu.classList.add('open');
+    navScrim.classList.add('open');
+    navToggle.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+  }
+  navToggle.addEventListener('click', () => {
+    navMobileMenu.classList.contains('open') ? closeMenu() : openMenu();
+  });
+  navScrim.addEventListener('click', closeMenu);
+  navMobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMenu));
+</script>
+
+<div id="akhir-materi"></div>
+
+<script src="../../assets/js/api.js"></script>
+<script src="../../assets/js/auth.js"></script>
+<script src="../../assets/js/materi-tracker.js"></script>
+</body>
+</html>
