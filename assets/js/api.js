@@ -4,7 +4,7 @@
  * GANTI API_URL di bawah setiap kali deploy ulang backend.
  */
 
-const API_URL = 'https://script.google.com/macros/s/AKfycbzaPXbCT9q0ogEeMDQjN6mNKeSi5YefYtwEgbKhZfo-qCD4ajlajLeYBtJh-HceOZQhtA/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbyEpamupCso6IAZPEfAmjsszB6MUpX7ylSKr3OfDdMDdk98FEbHvb8R5hXQU0ZIqjaICQ/exec';
 
 const Api = {
   /** Request GET - untuk semua aksi baca data */
@@ -44,7 +44,13 @@ const Api = {
   submitProgress: (nis, idRef, tipeRef, poin) =>
     Api.post('submitProgress', { nis, id_ref: idRef, tipe_ref: tipeRef, poin_didapat: poin }),
   tambahMateri: (data) => Api.post('tambahMateri', data),
+  hapusMateri: (idMateri) => Api.post('hapusMateri', { id_materi: idMateri }),
+  updateMateri: (idMateri, data) => Api.post('updateMateri', { id_materi: idMateri, ...data }),
   tambahGame: (data) => Api.post('tambahGame', data),
+  hapusGame: (idGame) => Api.post('hapusGame', { id_game: idGame }),
+  updateGame: (idGame, data) => Api.post('updateGame', { id_game: idGame, ...data }),
+  hapusUser: (nis) => Api.post('hapusUser', { nis }),
+  updateUser: (nis, data) => Api.post('updateUser', { nis, ...data }),
   verifikasiNilai: (nis, idMapel, nilaiFinal) =>
     Api.post('verifikasiNilai', { nis, id_mapel: idMapel, nilai_final: nilaiFinal })
 };
