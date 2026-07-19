@@ -112,6 +112,9 @@
   let daftarMapel = [];
   let idEdit = null;
 
+  const paramsUrl = new URLSearchParams(window.location.search);
+  const mapelAwal = paramsUrl.get('mapel');
+
   async function muatMapel() {
     const res = await Api.getMapel();
     daftarMapel = res.success ? res.data : [];
@@ -120,6 +123,11 @@
     document.getElementById('id_mapel').innerHTML = opsi;
     document.getElementById('filter-mapel').innerHTML =
       '<option value="">Semua mapel</option>' + opsi;
+
+    if (mapelAwal) {
+      document.getElementById('filter-mapel').value = mapelAwal;
+      document.getElementById('id_mapel').value = mapelAwal;
+    }
   }
 
   let materiTerakhir = [];
