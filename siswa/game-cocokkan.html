@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cocokkan pasangan - LMS SMK Muhammadiyah Bojong</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+<style>
+  .game-wrap { max-width: 720px; }
+  .kolom-pasang { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 8px; }
+  @media (max-width: 560px) { .kolom-pasang { grid-template-columns: 1fr; } }
+  .kolom-pasang h4 { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); margin-bottom: 10px; }
+  .item-pasang {
+    display: block; width: 100%; text-align: left;
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 13px 16px; margin-bottom: 10px; color: var(--text-primary); font-size: 14px;
+    cursor: pointer; font-family: var(--font-body);
+  }
+  .item-pasang:hover:not(:disabled) { border-color: var(--border-strong); }
+  .item-pasang.dipilih { border-color: var(--accent-teal); background: var(--accent-teal-dim); }
+  .item-pasang.benar { border-color: var(--accent-teal); color: var(--accent-teal); opacity: .6; cursor: default; }
+  .item-pasang.salah { border-color: var(--accent-coral); background: var(--accent-coral-dim); }
+  .status-bar { display: flex; align-items: center; justify-content: space-between; margin: 18px 0 4px; max-width: 720px; }
+  .progress-text { font-family: var(--font-mono); font-size: 13px; color: var(--text-secondary); }
+  .selesai-box {
+    text-align: center; padding: 48px 24px; background: var(--bg-card); border: 1px solid var(--accent-teal-dim);
+    border-radius: var(--radius-lg); max-width: 480px; margin-top: 20px;
+  }
+  .selesai-box .value { font-family: var(--font-mono); font-size: 40px; color: var(--accent-gold); font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="sidebar-brand">MP01&middot;MP02&middot;MP03<strong>LMS Siswa</strong></div>
+    <div class="nav-item" onclick="location.href='dashboard.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Beranda</div>
+    <div class="nav-item" onclick="segeraHadir()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5a2 2 0 0 1 2-2h11v18H6a2 2 0 0 1-2-2V5z"/><path d="M17 3v18"/></svg>Materi</div>
+    <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="8" width="20" height="9" rx="4"/><path d="M7 12h2M8 11v2M15 12h.01M18 12h.01"/></svg>Games</div>
+    <div class="nav-item" onclick="segeraHadir()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>Riwayat poin</div>
+    <div class="nav-spacer"></div>
+    <div class="nav-item" id="btn-logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>Keluar</div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h1 id="judul-game">Cocokkan pasangan</h1>
+        <div class="subtitle">Tap istilah di kiri, lalu tap pasangannya di kanan.</div>
+      </div>
+      <a class="btn btn-ghost" id="link-kembali" href="games.html">&larr; kembali</a>
+    </div>
+
+    <div class="status-bar">
+      <span class="progress-text" id="progress-text">Memuat...</span>
+    </div>
+
+    <div class="game-wrap" id="area-game"></div>
+    <div id="area-selesai"></div>
+  </main>
+</div>
+
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script>
+  const user = Auth.wajibLogin('siswa');
+  document.getElementById('btn-logout').addEventListener('click', () => Auth.logout());
+  function segeraHadir() { alert('Halaman ini masih dalam pengembangan.'); }
+
+  const params = new URLSearchParams(window.location.search);
+  const idGame = params.get('id');
+  const idMapel = params.get('mapel');
+  document.getElementById('link-kembali').href = idMapel ? `games.html?mapel=${idMapel}` : 'games.html';
+
+  function acak(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  let dipilihKiri = null;
+  let jumlahBenar = 0;
+  let totalPasangan = 0;
+  let poinMax = 0;
+  let selesaiDikirim = false;
+
+  async function muat() {
+    if (!idGame) {
+      document.getElementById('area-game').innerHTML = '<div class="empty-state">Game tidak ditemukan.</div>';
+      return;
+    }
+
+    let res;
+    try {
+      res = await Api.getGames(idMapel);
+    } catch (err) {
+      document.getElementById('area-game').innerHTML = '<div class="empty-state">Tidak bisa memuat data. Periksa koneksi.</div>';
+      return;
+    }
+
+    const game = (res.data || []).find(g => String(g.id_game) === String(idGame));
+    if (!game || !game.config || !Array.isArray(game.config.pasangan)) {
+      document.getElementById('area-game').innerHTML = '<div class="empty-state">Data game tidak valid.</div>';
+      return;
+    }
+
+    document.getElementById('judul-game').textContent = game.judul;
+    poinMax = Number(game.poin_max || 0);
+    totalPasangan = game.config.pasangan.length;
+
+    renderPapan(game.config.pasangan);
+    updateProgress();
+  }
+
+  function renderPapan(pasangan) {
+    const kiriList = pasangan.map((p, i) => ({ teks: p.kiri, idPasangan: i }));
+    const kananList = pasangan.map((p, i) => ({ teks: p.kanan, idPasangan: i }));
+    const kiriAcak = acak(kiriList);
+    const kananAcak = acak(kananList);
+
+    document.getElementById('area-game').innerHTML = `
+      <div class="kolom-pasang">
+        <div>
+          <h4>Istilah</h4>
+          <div id="kolom-kiri"></div>
+        </div>
+        <div>
+          <h4>Penjelasan</h4>
+          <div id="kolom-kanan"></div>
+        </div>
+      </div>`;
+
+    const kolomKiri = document.getElementById('kolom-kiri');
+    kiriAcak.forEach(item => {
+      const btn = document.createElement('button');
+      btn.className = 'item-pasang';
+      btn.textContent = item.teks;
+      btn.dataset.idPasangan = item.idPasangan;
+      btn.addEventListener('click', () => pilihKiri(btn, item.idPasangan));
+      kolomKiri.appendChild(btn);
+    });
+
+    const kolomKanan = document.getElementById('kolom-kanan');
+    kananAcak.forEach(item => {
+      const btn = document.createElement('button');
+      btn.className = 'item-pasang';
+      btn.textContent = item.teks;
+      btn.dataset.idPasangan = item.idPasangan;
+      btn.addEventListener('click', () => pilihKanan(btn, item.idPasangan));
+      kolomKanan.appendChild(btn);
+    });
+  }
+
+  function pilihKiri(btn, idPasangan) {
+    if (btn.disabled) return;
+    document.querySelectorAll('#kolom-kiri .item-pasang').forEach(b => b.classList.remove('dipilih'));
+    btn.classList.add('dipilih');
+    dipilihKiri = { btn, idPasangan };
+  }
+
+  function pilihKanan(btnKanan, idPasangan) {
+    if (btnKanan.disabled || !dipilihKiri) return;
+
+    if (dipilihKiri.idPasangan === idPasangan) {
+      dipilihKiri.btn.classList.remove('dipilih');
+      dipilihKiri.btn.classList.add('benar');
+      dipilihKiri.btn.disabled = true;
+      btnKanan.classList.add('benar');
+      btnKanan.disabled = true;
+      jumlahBenar++;
+      dipilihKiri = null;
+      updateProgress();
+      if (jumlahBenar === totalPasangan) selesai();
+    } else {
+      btnKanan.classList.add('salah');
+      setTimeout(() => btnKanan.classList.remove('salah'), 400);
+    }
+  }
+
+  function updateProgress() {
+    document.getElementById('progress-text').textContent = `${jumlahBenar} / ${totalPasangan} cocok`;
+  }
+
+  async function selesai() {
+    if (selesaiDikirim) return;
+    selesaiDikirim = true;
+
+    document.getElementById('area-selesai').innerHTML = `
+      <div class="selesai-box">
+        <div class="value">+${poinMax}</div>
+        <p style="color:var(--text-secondary); margin-top:6px;">Semua pasangan cocok! Poin sedang disimpan...</p>
+      </div>`;
+
+    try {
+      const res = await Api.submitProgress(user.nis, idGame, 'game', poinMax);
+      const pesan = res.success
+        ? (res.duplikat ? 'Poin untuk game ini sudah pernah tercatat sebelumnya.' : 'Poin berhasil disimpan!')
+        : 'Gagal menyimpan poin, coba muat ulang halaman.';
+      document.querySelector('.selesai-box p').textContent = pesan;
+    } catch (err) {
+      document.querySelector('.selesai-box p').textContent = 'Gagal menyimpan poin (koneksi bermasalah).';
+      selesaiDikirim = false;
+    }
+  }
+
+  muat();
+</script>
+</body>
+</html>
