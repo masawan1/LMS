@@ -94,7 +94,7 @@
     const grid = document.getElementById('grid-mapel');
     grid.innerHTML = daftarMapel.length
       ? daftarMapel.map(mapel => `
-        <div class="card clickable" onclick="segeraHadir()">
+        <div class="card clickable" onclick="location.href='kelola-materi.html?mapel=${mapel.id_mapel}'">
           <div class="eyebrow">${mapel.id_mapel}</div>
           <h3>${mapel.nama}</h3>
           <p>Kelola materi dan games untuk mapel ini.</p>
