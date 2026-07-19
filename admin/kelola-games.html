@@ -35,6 +35,8 @@
     <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="8" width="20" height="9" rx="4"/><path d="M7 12h2M8 11v2M15 12h.01M18 12h.01"/></svg>Kelola games</div>
     <div class="nav-item" onclick="location.href='kelola-user.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17.5" cy="8.5" r="2.4"/><path d="M15.5 14.2c2.6.4 4.5 2.7 4.5 5.8"/></svg>Kelola user</div>
     <div class="nav-item" onclick="location.href='verifikasi-nilai.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 6L9 17l-5-5"/></svg>Verifikasi nilai</div>
+    <div class="nav-item" onclick="location.href='../siswa/materi.html'" title="Buka tampilan materi siswa sebagai contoh, progress tidak disimpan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5a2 2 0 0 1 2-2h11v18H6a2 2 0 0 1-2-2V5z"/><path d="M17 3v18"/></svg>Lihat materi (siswa)</div>
+    <div class="nav-item" onclick="location.href='../siswa/games.html'" title="Buka tampilan games siswa sebagai contoh, poin tidak disimpan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="8" width="20" height="9" rx="4"/><path d="M7 12h2M8 11v2M15 12h.01M18 12h.01"/></svg>Lihat games (siswa)</div>
     <div class="nav-spacer"></div>
     <div class="nav-item" id="btn-logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>Keluar</div>
   </aside>
@@ -97,7 +99,10 @@
           <h2 style="font-size:16px;">Daftar games</h2>
           <p class="subtitle" style="margin:4px 0 0;">Cuma tipe "Cocokkan pasangan" dan "Kuis timer" yang sudah bisa dimainkan siswa saat ini.</p>
         </div>
-        <select id="filter-mapel-games"></select>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <a class="btn btn-ghost btn-sm" id="link-lihat-siswa" href="../siswa/games.html" target="_blank">Lihat sebagai siswa &rarr;</a>
+          <select id="filter-mapel-games"></select>
+        </div>
       </div>
       <table>
         <thead>
@@ -157,11 +162,22 @@
     const opsi = daftarMapel.map(m => `<option value="${m.id_mapel}">${m.nama}</option>`).join('');
     document.getElementById('id_mapel').innerHTML = opsi;
     document.getElementById('filter-mapel-games').innerHTML = '<option value="">Semua mapel</option>' + opsi;
+    perbaruiLinkLihatSiswa();
   }
+
+  function perbaruiLinkLihatSiswa() {
+    const idMapel = document.getElementById('filter-mapel-games').value;
+    document.getElementById('link-lihat-siswa').href = idMapel
+      ? `../siswa/games.html?mapel=${encodeURIComponent(idMapel)}`
+      : '../siswa/games.html';
+  }
+
+  const URL_GAME_PRATINJAU = { drag_drop: '../siswa/game-cocokkan.html', kuis_timer: '../siswa/game-kuis.html' };
 
   async function muatDaftarGames() {
     const tbody = document.getElementById('tbody-games');
     const idMapel = document.getElementById('filter-mapel-games').value;
+    perbaruiLinkLihatSiswa();
     let res;
     try {
       res = await Api.getGames(idMapel);
@@ -176,16 +192,23 @@
       return;
     }
     const labelTipe = { drag_drop: 'Cocokkan pasangan', kode_simulasi: 'Simulasi kode', puzzle: 'Puzzle', kuis_timer: 'Kuis timer' };
-    tbody.innerHTML = data.map(g => `
+    tbody.innerHTML = data.map(g => {
+      const tujuanPratinjau = URL_GAME_PRATINJAU[g.tipe];
+      const tombolLihat = tujuanPratinjau
+        ? `<a class="btn btn-ghost btn-xs" href="${tujuanPratinjau}?id=${encodeURIComponent(g.id_game)}&mapel=${encodeURIComponent(g.id_mapel)}" target="_blank" title="Lihat game ini seperti tampilan siswa">Lihat</a>`
+        : '';
+      return `
       <tr>
         <td>${g.judul}</td>
         <td><span class="badge badge-teal">${labelTipe[g.tipe] || g.tipe}</span></td>
         <td><span class="badge badge-gold">${g.poin_max} poin</span></td>
         <td style="white-space:nowrap;">
+          ${tombolLihat}
           <button class="btn btn-ghost btn-xs" onclick="editGame('${g.id_game}')">Edit</button>
           <button class="btn btn-ghost btn-xs" onclick="hapusGameBaris('${g.id_game}', '${g.judul.replace(/'/g, "\\'")}')">Hapus</button>
         </td>
-      </tr>`).join('');
+      </tr>`;
+    }).join('');
   }
 
   function editGame(idGame) {
