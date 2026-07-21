@@ -48,7 +48,6 @@
 
 <script src="../assets/js/api.js"></script>
 <script src="../assets/js/auth.js"></script>
-<script src="../assets/js/mapel-config.js"></script>
 <script>
   const user = Auth.wajibLogin('siswa');
 
@@ -68,14 +67,13 @@
     let mapelRes, nilaiRes;
 
     try {
-      [mapelRes, nilaiRes] = await Promise.all([Api.getMapel(), Api.getRekapNilai()]);
+      [mapelRes, nilaiRes] = await Promise.all([Api.getMapelSiswa(user.kelas), Api.getRekapNilai()]);
     } catch (err) {
       grid.innerHTML = '<div class="empty-state">Tidak bisa memuat data. Periksa koneksi internet lalu muat ulang halaman.</div>';
       return;
     }
 
-    const daftarMapelSemua = mapelRes.success ? mapelRes.data : [];
-    const daftarMapel = MapelConfig.filterMapel(daftarMapelSemua, user.kelas);
+    const daftarMapel = mapelRes.success ? mapelRes.data : [];
     const semuaNilai = nilaiRes.success ? nilaiRes.data : [];
     const nilaiSaya = semuaNilai.filter(n => String(n.nis) === String(user.nis));
 
