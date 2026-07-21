@@ -4,7 +4,7 @@
  * GANTI API_URL di bawah setiap kali deploy ulang backend.
  */
 
-const API_URL = 'https://script.google.com/macros/s/AKfycbyEpamupCso6IAZPEfAmjsszB6MUpX7ylSKr3OfDdMDdk98FEbHvb8R5hXQU0ZIqjaICQ/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbzhHWhzR29KO4iz2DWREwOC_e5zN3z-a6TrLiX8JYufIGwqF9OTFVX6HGBVKNOwJ7rrtw/exec';
 
 const Api = {
   /** Request GET - untuk semua aksi baca data */
@@ -33,6 +33,7 @@ const Api = {
   },
 
   getMapel: () => Api.get('getMapel'),
+  getMapelSiswa: (kelas) => Api.get('getMapelSiswa', { kelas: kelas || '' }),
   getUsers: () => Api.get('getUsers'),
   getMateri: (idMapel) => Api.get('getMateri', { id_mapel: idMapel }),
   getGames: (idMapel) => Api.get('getGames', { id_mapel: idMapel }),
@@ -51,6 +52,7 @@ const Api = {
   updateGame: (idGame, data) => Api.post('updateGame', { id_game: idGame, ...data }),
   hapusUser: (nis) => Api.post('hapusUser', { nis }),
   updateUser: (nis, data) => Api.post('updateUser', { nis, ...data }),
+  updateMapelAkses: (idMapel, kelasDiizinkan) => Api.post('updateMapelAkses', { id_mapel: idMapel, kelas_diizinkan: kelasDiizinkan }),
   verifikasiNilai: (nis, idMapel, nilaiFinal) =>
     Api.post('verifikasiNilai', { nis, id_mapel: idMapel, nilai_final: nilaiFinal })
 };
