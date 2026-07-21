@@ -28,7 +28,7 @@
 <div class="app-shell">
   <aside class="sidebar">
     <div class="sidebar-brand">MP01&middot;MP02&middot;MP03<strong>LMS Siswa</strong></div>
-    <div class="nav-item" onclick="location.href=(Auth.ambilSesi() && Auth.ambilSesi().role === 'admin') ? '../admin/dashboard.html' : 'dashboard.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Beranda</div>
+    <div class="nav-item" onclick="location.href='dashboard.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Beranda</div>
     <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5a2 2 0 0 1 2-2h11v18H6a2 2 0 0 1-2-2V5z"/><path d="M17 3v18"/></svg>Materi</div>
     <div class="nav-item" onclick="if(idMapel) location.href='games.html?mapel='+idMapel; else segeraHadir()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="8" width="20" height="9" rx="4"/><path d="M7 12h2M8 11v2M15 12h.01M18 12h.01"/></svg>Games</div>
     <div class="nav-item" onclick="segeraHadir()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>Riwayat poin</div>
@@ -66,41 +66,30 @@
 
 <script src="../assets/js/api.js"></script>
 <script src="../assets/js/auth.js"></script>
-<script src="../assets/js/mapel-config.js"></script>
 <script>
-  const user = Auth.wajibLogin(['siswa', 'admin']);
-  const modePratinjauAdmin = !!(user && user.role === 'admin');
+  const user = Auth.wajibLogin(['siswa','admin']);
   document.getElementById('btn-logout').addEventListener('click', () => Auth.logout());
   function segeraHadir() { alert('Halaman ini masih dalam pengembangan.'); }
 
   const params = new URLSearchParams(window.location.search);
   const idMapel = params.get('mapel');
 
-  if (modePratinjauAdmin) {
-    document.querySelector('.sidebar-brand').innerHTML = 'mode pratinjau<strong>Panel Admin</strong>';
-    document.getElementById('poin-wrap').remove();
-    const subtitle = document.querySelector('.topbar .subtitle');
-    subtitle.textContent = 'Pratinjau tampilan siswa (mode admin, progress tidak disimpan).';
-  }
-
   async function tampilkanPilihanMapel(list) {
     document.getElementById('area-mapel').style.display = 'grid';
     let res;
     try {
-      res = await Api.getMapel();
+      res = await Api.getMapelSiswa(user.kelas);
     } catch (err) {
       document.getElementById('area-mapel').innerHTML = '<div class="empty-state">Tidak bisa memuat data. Periksa koneksi.</div>';
       return;
     }
-    const daftarSemua = res.success ? res.data : [];
-    // siswa cuma lihat mapel sesuai kelasnya; admin lihat semua buat pratinjau
-    const daftar = modePratinjauAdmin ? daftarSemua : MapelConfig.filterMapel(daftarSemua, user.kelas);
-    document.getElementById('area-mapel').innerHTML = daftar.length ? daftar.map(m => `
+    const daftar = res.success ? res.data : [];
+    document.getElementById('area-mapel').innerHTML = daftar.map(m => `
       <div class="card clickable" onclick="location.href='materi.html?mapel=${m.id_mapel}'">
         <div class="eyebrow">${m.id_mapel}</div>
         <h3>${m.nama}</h3>
         <p>Lihat daftar materi untuk mapel ini.</p>
-      </div>`).join('') : '<div class="empty-state">Belum ada mapel untuk kelasmu.</div>';
+      </div>`).join('');
   }
 
   async function muat() {
@@ -112,21 +101,15 @@
       return;
     }
 
-    if (!modePratinjauAdmin && !MapelConfig.bolehAkses(idMapel, user.kelas)) {
-      list.style.display = 'flex';
-      list.innerHTML = '<div class="empty-state">Mapel ini tidak tersedia untuk kelasmu.</div>';
-      return;
-    }
-
     list.style.display = 'flex';
-    if (!modePratinjauAdmin) document.getElementById('poin-wrap').style.display = 'flex';
+    document.getElementById('poin-wrap').style.display = 'flex';
 
     let mapelRes, materiRes, progressRes;
     try {
       [mapelRes, materiRes, progressRes] = await Promise.all([
-        Api.getMapel(),
+        Api.getMapelSiswa(user.kelas),
         Api.getMateri(idMapel),
-        modePratinjauAdmin ? Promise.resolve({ success: true, data: [] }) : Api.getProgress(user.nis)
+        Api.getProgress(user.nis)
       ]);
     } catch (err) {
       list.innerHTML = '<div class="empty-state">Tidak bisa memuat data. Periksa koneksi lalu muat ulang.</div>';
@@ -140,12 +123,10 @@
     const progress = progressRes.success ? progressRes.data : [];
     const idSelesai = new Set(progress.map(p => String(p.id_ref)));
 
-    if (!modePratinjauAdmin) {
-      const poinTerkumpul = materi
-        .filter(m => idSelesai.has(String(m.id_materi)))
-        .reduce((sum, m) => sum + Number(m.poin_baca || 0), 0);
-      document.getElementById('poin-mapel').textContent = poinTerkumpul;
-    }
+    const poinTerkumpul = materi
+      .filter(m => idSelesai.has(String(m.id_materi)))
+      .reduce((sum, m) => sum + Number(m.poin_baca || 0), 0);
+    document.getElementById('poin-mapel').textContent = poinTerkumpul;
 
     if (materi.length === 0) {
       list.innerHTML = '<div class="empty-state">Belum ada materi untuk mapel ini.</div>';
@@ -164,12 +145,10 @@
           </div>
           <div class="actions">
             <span class="badge badge-gold">${m.poin_baca} poin</span>
-            <a class="btn btn-ghost btn-sm" href="../${m.path_html}?id=${encodeURIComponent(m.id_materi)}&poin=${m.poin_baca}&mapel=${encodeURIComponent(idMapel)}" target="${modePratinjauAdmin ? '_blank' : '_self'}">Baca</a>
-            ${modePratinjauAdmin
-              ? ''
-              : (sudahSelesai
-                ? '<span class="badge badge-teal">selesai</span>'
-                : `<button class="btn btn-primary btn-sm" onclick="tandaiSelesai('${m.id_materi}', ${m.poin_baca}, this)">Tandai selesai</button>`)}
+            <a class="btn btn-ghost btn-sm" href="../${m.path_html}?id=${encodeURIComponent(m.id_materi)}&poin=${m.poin_baca}&mapel=${encodeURIComponent(idMapel)}">Baca</a>
+            ${sudahSelesai
+              ? '<span class="badge badge-teal">selesai</span>'
+              : `<button class="btn btn-primary btn-sm" onclick="tandaiSelesai('${m.id_materi}', ${m.poin_baca}, this)">Tandai selesai</button>`}
           </div>
         </div>`;
     }).join('');
