@@ -23,7 +23,7 @@
 <div class="app-shell">
   <aside class="sidebar">
     <div class="sidebar-brand">MP01&middot;MP02&middot;MP03<strong>LMS Siswa</strong></div>
-    <div class="nav-item" onclick="location.href=(Auth.ambilSesi() && Auth.ambilSesi().role === 'admin') ? '../admin/dashboard.html' : 'dashboard.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Beranda</div>
+    <div class="nav-item" onclick="location.href='dashboard.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Beranda</div>
     <div class="nav-item" onclick="location.href='materi.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5a2 2 0 0 1 2-2h11v18H6a2 2 0 0 1-2-2V5z"/><path d="M17 3v18"/></svg>Materi</div>
     <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="8" width="20" height="9" rx="4"/><path d="M7 12h2M8 11v2M15 12h.01M18 12h.01"/></svg>Games</div>
     <div class="nav-item" onclick="segeraHadir()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>Riwayat poin</div>
@@ -51,17 +51,10 @@
 
 <script src="../assets/js/api.js"></script>
 <script src="../assets/js/auth.js"></script>
-<script src="../assets/js/mapel-config.js"></script>
 <script>
-  const user = Auth.wajibLogin(['siswa', 'admin']);
-  const modePratinjauAdmin = !!(user && user.role === 'admin');
+  const user = Auth.wajibLogin(['siswa','admin']);
   document.getElementById('btn-logout').addEventListener('click', () => Auth.logout());
   function segeraHadir() { alert('Halaman ini masih dalam pengembangan.'); }
-
-  if (modePratinjauAdmin) {
-    document.querySelector('.sidebar-brand').innerHTML = 'mode pratinjau<strong>Panel Admin</strong>';
-    document.getElementById('subjudul').textContent = 'Pratinjau tampilan siswa (mode admin, poin tidak disimpan).';
-  }
 
   const params = new URLSearchParams(window.location.search);
   const idMapel = params.get('mapel');
@@ -71,12 +64,6 @@
 
   async function muat() {
     if (idMapel) {
-      if (!modePratinjauAdmin && !MapelConfig.bolehAkses(idMapel, user.kelas)) {
-        const area = document.getElementById('area-games');
-        area.style.display = 'flex';
-        area.innerHTML = '<div class="empty-state">Mapel ini tidak tersedia untuk kelasmu.</div>';
-        return;
-      }
       await tampilkanGames(idMapel);
     } else {
       await tampilkanPilihanMapel();
@@ -88,19 +75,18 @@
     area.style.display = 'grid';
     let res;
     try {
-      res = await Api.getMapel();
+      res = await Api.getMapelSiswa(user.kelas);
     } catch (err) {
       area.innerHTML = '<div class="empty-state">Tidak bisa memuat data. Periksa koneksi.</div>';
       return;
     }
-    const daftarSemua = res.success ? res.data : [];
-    const daftar = modePratinjauAdmin ? daftarSemua : MapelConfig.filterMapel(daftarSemua, user.kelas);
-    area.innerHTML = daftar.length ? daftar.map(m => `
+    const daftar = res.success ? res.data : [];
+    area.innerHTML = daftar.map(m => `
       <div class="card clickable" onclick="location.href='games.html?mapel=${m.id_mapel}'">
         <div class="eyebrow">${m.id_mapel}</div>
         <h3>${m.nama}</h3>
         <p>Lihat games yang tersedia untuk mapel ini.</p>
-      </div>`).join('') : '<div class="empty-state">Belum ada mapel untuk kelasmu.</div>';
+      </div>`).join('');
   }
 
   async function tampilkanGames(idMapel) {
@@ -110,7 +96,7 @@
 
     let mapelRes, gamesRes;
     try {
-      [mapelRes, gamesRes] = await Promise.all([Api.getMapel(), Api.getGames(idMapel)]);
+      [mapelRes, gamesRes] = await Promise.all([Api.getMapelSiswa(user.kelas), Api.getGames(idMapel)]);
     } catch (err) {
       area.innerHTML = '<div class="empty-state">Tidak bisa memuat data. Periksa koneksi.</div>';
       return;
