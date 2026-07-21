@@ -34,8 +34,8 @@
 <div class="app-shell">
   <aside class="sidebar">
     <div class="sidebar-brand">MP01&middot;MP02&middot;MP03<strong>LMS Siswa</strong></div>
-    <div class="nav-item" onclick="location.href=(Auth.ambilSesi() && Auth.ambilSesi().role === 'admin') ? '../admin/dashboard.html' : 'dashboard.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Beranda</div>
-    <div class="nav-item" onclick="segeraHadir()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5a2 2 0 0 1 2-2h11v18H6a2 2 0 0 1-2-2V5z"/><path d="M17 3v18"/></svg>Materi</div>
+    <div class="nav-item" onclick="location.href='dashboard.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Beranda</div>
+    <div class="nav-item" onclick="location.href='materi.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5a2 2 0 0 1 2-2h11v18H6a2 2 0 0 1-2-2V5z"/><path d="M17 3v18"/></svg>Materi</div>
     <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="8" width="20" height="9" rx="4"/><path d="M7 12h2M8 11v2M15 12h.01M18 12h.01"/></svg>Games</div>
     <div class="nav-item" onclick="segeraHadir()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>Riwayat poin</div>
     <div class="nav-spacer"></div>
@@ -63,15 +63,9 @@
 <script src="../assets/js/api.js"></script>
 <script src="../assets/js/auth.js"></script>
 <script>
-  const user = Auth.wajibLogin(['siswa', 'admin']);
-  const modePratinjauAdmin = !!(user && user.role === 'admin');
+  const user = Auth.wajibLogin(['siswa','admin']);
   document.getElementById('btn-logout').addEventListener('click', () => Auth.logout());
   function segeraHadir() { alert('Halaman ini masih dalam pengembangan.'); }
-
-  if (modePratinjauAdmin) {
-    document.querySelector('.sidebar-brand').innerHTML = 'mode pratinjau<strong>Panel Admin</strong>';
-    document.querySelector('.topbar .subtitle').textContent = 'Pratinjau game (mode admin, poin tidak disimpan).';
-  }
 
   const params = new URLSearchParams(window.location.search);
   const idGame = params.get('id');
@@ -197,10 +191,13 @@
     document.getElementById('area-selesai').innerHTML = `
       <div class="selesai-box">
         <div class="value">+${poinMax}</div>
-        <p style="color:var(--text-secondary); margin-top:6px;">${modePratinjauAdmin ? 'Semua pasangan cocok! (mode pratinjau, poin tidak disimpan)' : 'Semua pasangan cocok! Poin sedang disimpan...'}</p>
+        <p style="color:var(--text-secondary); margin-top:6px;">Semua pasangan cocok! Poin sedang disimpan...</p>
       </div>`;
 
-    if (modePratinjauAdmin) return;
+    if (user.role !== 'siswa') {
+      document.querySelector('.selesai-box p').textContent = 'Mode pratinjau admin \u2014 poin tidak disimpan.';
+      return;
+    }
 
     try {
       const res = await Api.submitProgress(user.nis, idGame, 'game', poinMax);
