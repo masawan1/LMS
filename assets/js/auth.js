@@ -21,9 +21,7 @@ const Auth = {
   },
 
   /** Panggil di atas tiap halaman dashboard untuk jaga-jaga akses tanpa login.
-   *  roleYangDiizinkan bisa berupa satu string ('siswa') atau array
-   *  ['siswa', 'admin'] kalau halamannya boleh diakses lebih dari satu role
-   *  (contoh: halaman materi/games yang juga dipakai admin buat pratinjau). */
+   *  roleYangDiizinkan bisa berupa string ('siswa') atau array (['siswa','admin']). */
   wajibLogin(roleYangDiizinkan) {
     const user = this.ambilSesi();
     if (!user) {
@@ -32,7 +30,7 @@ const Auth = {
     }
     if (roleYangDiizinkan) {
       const daftarRole = Array.isArray(roleYangDiizinkan) ? roleYangDiizinkan : [roleYangDiizinkan];
-      if (!daftarRole.includes(user.role)) {
+      if (daftarRole.indexOf(user.role) === -1) {
         window.location.href = '../index.html';
         return null;
       }
