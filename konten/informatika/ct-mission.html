@@ -1,0 +1,1320 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mission: Think Like a Computer</title>
+<style>
+:root{
+  --blue:#2563EB;
+  --blue-2:#3B82F6;
+  --blue-soft:#93C5FD;
+  --purple:#7C3AED;
+  --purple-2:#8B5CF6;
+  --purple-soft:#C4B5FD;
+  --white:#FFFFFF;
+  --gray-l:#F3F4F6;
+  --gray-l2:#E5E7EB;
+  --ink:#0F172A;
+  --ink-soft:#475569;
+  --ok:#10B981;
+  --bad:#EF4444;
+  --bg-grad: radial-gradient(1200px 800px at 10% -10%, #DBEAFE 0%, transparent 60%),
+             radial-gradient(1000px 700px at 110% 10%, #EDE9FE 0%, transparent 55%),
+             linear-gradient(180deg,#F8FAFC,#F1F5F9);
+  --glass: rgba(255,255,255,0.55);
+  --glass-border: rgba(255,255,255,0.7);
+  --card-shadow: 0 8px 32px rgba(37,99,235,0.12);
+  --text: var(--ink);
+  --text-soft: var(--ink-soft);
+  --mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+:root.dark{
+  --bg-grad: radial-gradient(1200px 800px at 10% -10%, #1e2a52 0%, transparent 60%),
+             radial-gradient(1000px 700px at 110% 10%, #2c1e52 0%, transparent 55%),
+             linear-gradient(180deg,#0B1220,#0B1220);
+  --glass: rgba(15,23,42,0.55);
+  --glass-border: rgba(148,163,184,0.18);
+  --card-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  --text: #E2E8F0;
+  --text-soft: #94A3B8;
+  --gray-l:#111827;
+  --gray-l2:#1F2937;
+}
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  margin:0;
+  font-family:var(--sans);
+  background:var(--bg-grad);
+  color:var(--text);
+  min-height:100vh;
+  transition:background .4s ease,color .3s ease;
+  overflow-x:hidden;
+}
+.hud{
+  position:sticky;top:0;z-index:50;
+  display:flex;align-items:center;gap:12px;
+  padding:10px 16px;
+  background:var(--glass);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--glass-border);
+}
+.hud-title{
+  font-family:var(--mono);
+  font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--text-soft);white-space:nowrap;
+}
+.dots{display:flex;gap:5px;flex:1;flex-wrap:wrap;}
+.dot{
+  width:16px;height:6px;border-radius:4px;background:var(--gray-l2);
+  cursor:pointer;transition:.25s;position:relative;
+}
+.dot.done{background:linear-gradient(90deg,var(--blue),var(--purple));}
+.dot.current{background:linear-gradient(90deg,var(--blue),var(--purple));box-shadow:0 0 0 2px var(--purple-soft);}
+.hud-btns{display:flex;gap:8px;}
+.icon-btn{
+  border:1px solid var(--glass-border);background:var(--glass);
+  color:var(--text);width:34px;height:34px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  font-size:15px;transition:.2s;
+}
+.icon-btn:hover{transform:translateY(-1px);box-shadow:var(--card-shadow);}
+.stage{
+  max-width:920px;margin:0 auto;
+  padding:28px 18px 100px;
+  min-height:calc(100vh - 56px);
+  display:flex;flex-direction:column;justify-content:center;
+}
+.screen{display:none;animation:fadeIn .5s ease;}
+.screen.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+.card{
+  background:var(--glass);
+  border:1px solid var(--glass-border);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border-radius:22px;
+  padding:28px;
+  box-shadow:var(--card-shadow);
+}
+.eyebrow{
+  font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--purple);font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px;
+}
+.eyebrow::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--purple);box-shadow:0 0 0 4px rgba(124,58,237,.18);}
+h1{font-size:clamp(28px,5vw,42px);line-height:1.08;margin:0 0 12px;letter-spacing:-0.02em;font-weight:800;
+  background:linear-gradient(100deg,var(--blue),var(--purple));-webkit-background-clip:text;background-clip:text;color:transparent;}
+h2{font-size:clamp(21px,3.4vw,28px);margin:0 0 10px;letter-spacing:-0.01em;font-weight:800;color:var(--text);}
+p{color:var(--text-soft);line-height:1.65;font-size:15.5px;}
+.lead{font-size:17px;color:var(--text);}
+.btn{
+  border:none;cursor:pointer;font-weight:700;font-size:14.5px;border-radius:12px;padding:13px 26px;
+  background:linear-gradient(100deg,var(--blue),var(--purple));color:#fff;
+  box-shadow:0 6px 20px rgba(124,58,237,.28);transition:.2s;font-family:var(--sans);
+}
+.btn:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(124,58,237,.36);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none;}
+.btn.ghost{background:transparent;color:var(--blue);border:1.5px solid var(--blue-soft);box-shadow:none;}
+:root.dark .btn.ghost{color:var(--blue-soft);}
+.btn.small{padding:9px 16px;font-size:13px;border-radius:9px;}
+.navrow{display:flex;justify-content:space-between;align-items:center;margin-top:26px;gap:10px;flex-wrap:wrap;}
+.navrow .spacer{flex:1;}
+.pill{
+  display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:12px;
+  background:var(--gray-l);border:1px solid var(--gray-l2);color:var(--text-soft);
+  padding:5px 11px;border-radius:100px;
+}
+/* Hero */
+.hero-wrap{position:relative;text-align:center;padding:40px 20px;}
+.hero-bg{position:absolute;inset:-20px;z-index:-1;overflow:hidden;border-radius:26px;}
+.orbit{position:absolute;border-radius:50%;filter:blur(2px);opacity:.5;animation:float 9s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0) rotate(0deg);}50%{transform:translateY(-18px) rotate(8deg);}}
+.badge-icon{font-size:52px;display:inline-block;animation:pulse 2.4s ease-in-out infinite;}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
+.terminal{
+  font-family:var(--mono);background:var(--ink);color:#8FE3B5;border-radius:14px;padding:16px 18px;
+  font-size:13px;text-align:left;line-height:1.7;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);
+}
+:root.dark .terminal{background:#050B14;}
+.terminal .prompt{color:#60A5FA;}
+.cursor-blink{display:inline-block;width:8px;background:#8FE3B5;animation:blink 1s step-end infinite;}
+@keyframes blink{50%{opacity:0;}}
+
+/* Flow / steps */
+.flow{display:flex;flex-direction:column;gap:10px;margin:18px 0;}
+.step{
+  display:flex;gap:14px;align-items:flex-start;padding:14px 16px;border-radius:14px;
+  background:var(--gray-l);border:1px solid var(--gray-l2);opacity:.35;transform:translateX(-6px);
+  transition:.45s ease;
+}
+.step.show{opacity:1;transform:translateX(0);}
+.step-num{
+  font-family:var(--mono);font-size:12px;font-weight:700;min-width:26px;height:26px;border-radius:8px;
+  background:linear-gradient(100deg,var(--blue),var(--purple));color:#fff;display:flex;align-items:center;justify-content:center;
+}
+.step b{color:var(--text);}
+.step span{color:var(--text-soft);font-size:14px;display:block;margin-top:2px;}
+
+/* Grids / chips */
+.grid{display:grid;gap:12px;}
+.grid.cols-2{grid-template-columns:repeat(2,1fr);}
+.grid.cols-3{grid-template-columns:repeat(3,1fr);}
+.grid.cols-4{grid-template-columns:repeat(4,1fr);}
+@media(max-width:640px){.grid.cols-3,.grid.cols-4{grid-template-columns:repeat(2,1fr);}}
+.feature-tile{
+  background:var(--gray-l);border:1px solid var(--gray-l2);border-radius:16px;padding:16px 12px;
+  text-align:center;cursor:pointer;transition:.2s;position:relative;
+}
+.feature-tile:hover{transform:translateY(-3px);border-color:var(--blue-soft);}
+.feature-tile.explored{border-color:var(--ok);background:rgba(16,185,129,.08);}
+.feature-tile .fi{font-size:26px;display:block;margin-bottom:6px;}
+.feature-tile .fn{font-weight:700;font-size:13.5px;color:var(--text);}
+.feature-note{
+  margin-top:14px;padding:14px 16px;border-radius:12px;background:rgba(37,99,235,.08);
+  border:1px solid rgba(37,99,235,.2);font-size:14px;color:var(--text);display:none;
+}
+.feature-note.show{display:block;animation:fadeIn .3s ease;}
+.progress-track{height:8px;border-radius:6px;background:var(--gray-l2);overflow:hidden;margin:14px 0 4px;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--purple));border-radius:6px;transition:width .4s ease;width:0%;}
+
+/* chips select-place mechanic */
+.chip{
+  padding:10px 14px;border-radius:11px;background:var(--white);border:1.5px solid var(--gray-l2);
+  font-size:13.5px;font-weight:600;cursor:pointer;transition:.15s;color:var(--text);
+  box-shadow:0 2px 6px rgba(0,0,0,.04);
+}
+:root.dark .chip{background:#1E293B;}
+.chip.selected{border-color:var(--purple);box-shadow:0 0 0 3px rgba(124,58,237,.18);}
+.chip.placed{opacity:.35;pointer-events:none;}
+.bin{
+  min-height:120px;border:2px dashed var(--gray-l2);border-radius:16px;padding:12px;
+  display:flex;flex-direction:column;gap:8px;transition:.2s;
+}
+.bin.highlight{border-color:var(--purple);background:rgba(124,58,237,.06);}
+.bin-title{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-soft);margin-bottom:4px;}
+.bin .chip{background:linear-gradient(100deg,var(--blue),var(--purple));color:#fff;border:none;cursor:default;}
+
+.slot-list{display:flex;flex-direction:column;gap:8px;margin:14px 0;}
+.slot{
+  display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:12px;
+  background:var(--gray-l);border:1.5px dashed var(--gray-l2);min-height:46px;cursor:pointer;transition:.15s;
+}
+.slot.filled{border-style:solid;background:var(--white);}
+:root.dark .slot.filled{background:#1E293B;}
+.slot.highlight{border-color:var(--purple);}
+.slot-idx{font-family:var(--mono);font-weight:700;color:var(--purple);font-size:13px;min-width:18px;}
+.chip-bank{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+
+/* pattern game */
+.seq{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:18px 0;}
+.seq-item{
+  width:56px;height:56px;border-radius:14px;background:var(--gray-l);border:1.5px solid var(--gray-l2);
+  display:flex;align-items:center;justify-content:center;font-size:24px;
+}
+.seq-item.q{background:linear-gradient(100deg,var(--blue),var(--purple));color:#fff;font-family:var(--mono);font-weight:700;font-size:20px;}
+.option-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;}
+.opt-btn{
+  padding:12px 18px;border-radius:12px;border:1.5px solid var(--gray-l2);background:var(--white);
+  cursor:pointer;font-size:18px;transition:.15s;font-weight:600;
+}
+:root.dark .opt-btn{background:#1E293B;}
+.opt-btn:hover{border-color:var(--blue-soft);}
+.opt-btn.correct{border-color:var(--ok);background:rgba(16,185,129,.14);}
+.opt-btn.wrong{border-color:var(--bad);background:rgba(239,68,68,.14);}
+.feedback{margin-top:12px;font-weight:700;font-size:14px;min-height:20px;}
+.feedback.ok{color:var(--ok);}
+.feedback.bad{color:var(--bad);}
+
+/* abstraction / maps */
+.map-box{
+  position:relative;border-radius:18px;overflow:hidden;height:230px;
+  background:linear-gradient(135deg,#DBEAFE,#EDE9FE);border:1px solid var(--gray-l2);
+}
+.map-route{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;}
+.map-pin{font-size:34px;}
+.layer-detail{
+  position:absolute;inset:0;background:rgba(15,23,42,.88);color:#CBD5E1;font-family:var(--mono);
+  font-size:11.5px;padding:16px;line-height:1.8;opacity:0;pointer-events:none;transition:.35s;overflow:auto;
+}
+.layer-detail.show{opacity:1;pointer-events:auto;}
+.layer-detail .l{color:#60A5FA;}
+
+/* translate blackbox */
+.bb-box{display:flex;flex-direction:column;gap:12px;}
+textarea, select, input[type=text]{
+  width:100%;padding:12px 14px;border-radius:12px;border:1.5px solid var(--gray-l2);
+  background:var(--white);color:var(--text);font-family:var(--sans);font-size:14.5px;resize:vertical;
+}
+:root.dark textarea, :root.dark select, :root.dark input[type=text]{background:#1E293B;}
+.bb-visual{display:flex;align-items:center;gap:14px;justify-content:center;padding:14px 0;flex-wrap:wrap;}
+.bb-node{padding:10px 16px;border-radius:10px;background:var(--gray-l);border:1px solid var(--gray-l2);font-weight:700;font-size:13px;}
+.bb-black{
+  width:74px;height:56px;border-radius:10px;background:repeating-linear-gradient(45deg,#0F172A,#0F172A 6px,#1E293B 6px,#1E293B 12px);
+  display:flex;align-items:center;justify-content:center;color:#94A3B8;font-family:var(--mono);font-size:10px;
+}
+.arrow{font-size:20px;color:var(--purple);}
+
+/* robot algorithm */
+.robot-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:6px;max-width:340px;margin:16px auto;
+}
+.cell{
+  aspect-ratio:1;border-radius:10px;background:var(--gray-l);border:1px solid var(--gray-l2);
+  display:flex;align-items:center;justify-content:center;font-size:20px;position:relative;transition:.2s;
+}
+.cell.wall{background:repeating-linear-gradient(45deg,#94A3B8,#94A3B8 5px,#CBD5E1 5px,#CBD5E1 10px);}
+.cell.goal{background:rgba(16,185,129,.18);border-color:var(--ok);}
+.cell.robot::after{content:"🤖";font-size:22px;}
+.cmd-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.cmd-btn{
+  width:52px;height:52px;border-radius:12px;border:1.5px solid var(--gray-l2);background:var(--white);
+  font-size:20px;cursor:pointer;transition:.15s;
+}
+:root.dark .cmd-btn{background:#1E293B;}
+.cmd-btn:hover{border-color:var(--purple);}
+.program-log{
+  min-height:44px;background:var(--ink);color:#8FE3B5;font-family:var(--mono);font-size:13px;
+  border-radius:10px;padding:10px 14px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;
+}
+:root.dark .program-log{background:#050B14;}
+.program-log .empty{color:#475569;}
+.log-chip{background:rgba(143,227,181,.12);padding:3px 9px;border-radius:6px;}
+
+/* worksheet */
+.pillar-block{margin-bottom:16px;}
+.pillar-label{
+  display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;margin-bottom:6px;color:var(--text);
+}
+.pillar-dot{width:9px;height:9px;border-radius:50%;}
+
+/* quiz */
+.quiz-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:10px;flex-wrap:wrap;}
+.timer{
+  font-family:var(--mono);font-weight:700;font-size:15px;padding:7px 14px;border-radius:10px;
+  background:var(--gray-l);border:1px solid var(--gray-l2);
+}
+.timer.low{color:var(--bad);border-color:var(--bad);}
+.qcount{font-family:var(--mono);font-size:12px;color:var(--text-soft);}
+.quiz-opt{
+  display:block;width:100%;text-align:left;padding:13px 16px;border-radius:12px;margin-bottom:9px;
+  border:1.5px solid var(--gray-l2);background:var(--white);cursor:pointer;font-size:14.5px;transition:.15s;color:var(--text);
+}
+:root.dark .quiz-opt{background:#1E293B;}
+.quiz-opt:hover{border-color:var(--blue-soft);}
+.quiz-opt.selected{border-color:var(--purple);background:rgba(124,58,237,.08);}
+.quiz-opt.correct{border-color:var(--ok);background:rgba(16,185,129,.14);}
+.quiz-opt.wrong{border-color:var(--bad);background:rgba(239,68,68,.14);}
+.qnav-dots{display:flex;flex-wrap:wrap;gap:5px;margin-top:16px;}
+.qdot{width:22px;height:22px;border-radius:6px;font-family:var(--mono);font-size:10px;display:flex;align-items:center;justify-content:center;
+  background:var(--gray-l);border:1px solid var(--gray-l2);cursor:pointer;color:var(--text-soft);}
+.qdot.answered{background:var(--blue-soft);color:#0F172A;border-color:var(--blue);}
+.qdot.current{outline:2px solid var(--purple);}
+
+/* badge */
+.badge-stage{text-align:center;position:relative;padding:20px 10px;}
+.badge-medal{
+  width:170px;height:170px;border-radius:50%;margin:0 auto 18px;
+  background:conic-gradient(from 180deg, var(--blue), var(--purple), var(--blue));
+  display:flex;align-items:center;justify-content:center;position:relative;
+  box-shadow:0 20px 50px rgba(124,58,237,.35);
+}
+.badge-medal::before{content:"";position:absolute;inset:10px;border-radius:50%;background:var(--white);}
+:root.dark .badge-medal::before{background:#0F172A;}
+.badge-medal span{position:relative;font-size:64px;}
+.confetti{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden;}
+.confetti i{
+  position:absolute;top:-10px;width:8px;height:14px;opacity:.85;
+  animation:fall linear forwards;
+}
+@keyframes fall{to{transform:translateY(420px) rotate(360deg);opacity:0;}}
+.cert-name{
+  font-family:var(--mono);font-size:15px;text-align:center;border-bottom:2px dashed var(--gray-l2);
+  padding:8px 0;margin:14px 0;background:transparent;
+}
+.stat-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:18px 0;}
+.stat{background:var(--gray-l);border:1px solid var(--gray-l2);border-radius:14px;padding:12px 20px;min-width:100px;}
+.stat b{display:block;font-size:22px;font-family:var(--mono);background:linear-gradient(100deg,var(--blue),var(--purple));-webkit-background-clip:text;background-clip:text;color:transparent;}
+.stat span{font-size:11px;color:var(--text-soft);text-transform:uppercase;letter-spacing:.05em;}
+
+@media print{
+  .hud,.navrow{display:none !important;}
+  body{background:#fff;}
+}
+::selection{background:var(--purple-soft);}
+.footer-hint{margin-top:8px;font-size:12px;color:var(--text-soft);font-family:var(--mono);}
+</style>
+</head>
+<body>
+
+<div class="hud">
+  <div class="hud-title">MISSION://THINK-LIKE-A-COMPUTER</div>
+  <div class="dots" id="dots"></div>
+  <div class="hud-btns">
+    <a class="icon-btn back-link" href="#" title="Kembali ke daftar materi" style="text-decoration:none;">←</a>
+    <button class="icon-btn" id="soundBtn" title="Suara">🔊</button>
+    <button class="icon-btn" id="darkBtn" title="Mode gelap">🌙</button>
+  </div>
+</div>
+
+<div class="stage">
+
+  <!-- PAGE 1 : HERO -->
+  <section class="screen active" data-page="1">
+    <div class="card hero-wrap">
+      <div class="eyebrow" style="justify-content:center">Software Engineer Onboarding</div>
+      <span class="badge-icon">🧠</span>
+      <h1>Mission: Think Like a Computer</h1>
+      <p class="lead" style="max-width:520px;margin:0 auto 20px">Kamu baru direkrut sebagai <b>software engineer</b> di HQ. Sebelum ngoding, kamu wajib menguasai satu skill dasar: <b>berpikir komputasional</b>.</p>
+      <div class="terminal" style="max-width:460px;margin:0 auto 22px">
+        <div><span class="prompt">hq@onboarding</span> ~ $ mulai_misi.sh</div>
+        <div>&gt; Pernah gak kamu mikir, gimana caranya satu ketukan tombol di HP bisa nganter makanan sampai depan pintu rumahmu?<span class="cursor-blink">&nbsp;</span></div>
+      </div>
+      <button class="btn" onclick="goTo(2)">Mulai Misi →</button>
+    </div>
+  </section>
+
+  <!-- PAGE 2 : GOFOOD DECOMPOSITION ANIM -->
+  <section class="screen" data-page="2">
+    <div class="card">
+      <div class="eyebrow">Konsep 1 · Dekomposisi</div>
+      <h2>Di Balik Layar: Satu Pesanan GoFood</h2>
+      <p>Kelihatannya cuma "pesan lalu makanan datang". Tapi sebenarnya itu <b>proses besar</b> yang dipecah jadi langkah-langkah kecil. Klik <b>Putar</b> untuk melihat prosesnya satu per satu.</p>
+      <div class="flow" id="gofoodFlow"></div>
+      <div class="progress-track"><div class="progress-fill" id="gofoodProgress"></div></div>
+      <div class="navrow">
+        <button class="btn ghost small" onclick="goTo(1)">← Kembali</button>
+        <button class="btn small" id="playGofood">▶ Putar Proses</button>
+        <button class="btn" onclick="goTo(3)" id="gofoodNext" disabled>Lanjut →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 3 : MISI DEKOMPOSISI - WHATSAPP -->
+  <section class="screen" data-page="3">
+    <div class="card">
+      <div class="eyebrow">Konsep 1 · Dekomposisi</div>
+      <h2>Misi: Pecah Aplikasi WhatsApp</h2>
+      <p><b>Dekomposisi</b> = memecah sesuatu yang besar & rumit jadi bagian-bagian kecil yang lebih mudah dipahami. Ketuk tiap fitur WhatsApp untuk melihat perannya masing-masing.</p>
+      <div class="grid cols-4" id="waGrid"></div>
+      <div class="feature-note" id="waNote"></div>
+      <div class="progress-track"><div class="progress-fill" id="waProgress"></div></div>
+      <p class="footer-hint" id="waCount">0/8 fitur dijelajahi</p>
+      <div class="navrow">
+        <button class="btn ghost small" onclick="goTo(2)">← Kembali</button>
+        <button class="btn" onclick="goTo(4)">Lanjut →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 4 : DRAG DROP GAME -->
+  <section class="screen" data-page="4">
+    <div class="card">
+      <div class="eyebrow">Konsep 1 · Latihan</div>
+      <h2>Susun Fitur ke Kategorinya</h2>
+      <p>Pilih (ketuk) satu fitur, lalu ketuk kotak kategori yang cocok. Ini melatih cara kamu memecah aplikasi jadi kelompok-kelompok fungsi.</p>
+      <div class="chip-bank" id="chipBank"></div>
+      <div class="grid cols-3" id="binGrid" style="margin-top:16px"></div>
+      <div class="feedback" id="dndFeedback"></div>
+      <div class="navrow">
+        <button class="btn ghost small" onclick="goTo(3)">← Kembali</button>
+        <button class="btn ghost small" id="resetDnd">↺ Ulangi</button>
+        <button class="btn" onclick="goTo(5)" id="dndNext" disabled>Lanjut →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 5 : PATTERN RECOGNITION MARKETPLACE -->
+  <section class="screen" data-page="5">
+    <div class="card">
+      <div class="eyebrow">Konsep 2 · Pengenalan Pola</div>
+      <h2>Kenapa Marketplace "Tahu" Kamu?</h2>
+      <p><b>Pattern Recognition</b> = menemukan kemiripan atau kebiasaan berulang, lalu memakainya untuk memprediksi sesuatu. Coba lihat riwayat belanja fiktif berikut ini:</p>
+      <div class="terminal" style="font-size:12.5px">
+        <div>&gt; Dilihat: Sepatu lari &nbsp;→&nbsp; Kaos olahraga &nbsp;→&nbsp; Botol minum</div>
+        <div>&gt; Pola terdeteksi: <span class="prompt">minat = gaya hidup olahraga</span></div>
+        <div>&gt; Rekomendasi berikutnya: <span class="cursor-blink">&nbsp;</span></div>
+      </div>
+      <div class="option-row" id="patternRecoOptions"></div>
+      <div class="feedback" id="patternRecoFeedback"></div>
+      <p style="margin-top:14px">Begitulah marketplace bekerja: bukan menebak asal, tapi <b>mengenali pola</b> dari perilakumu sebelumnya.</p>
+      <div class="navrow">
+        <button class="btn ghost small" onclick="goTo(4)">← Kembali</button>
+        <button class="btn" onclick="goTo(6)">Lanjut →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 6 : PATTERN GAME -->
+  <section class="screen" data-page="6">
+    <div class="card">
+      <div class="eyebrow">Konsep 2 · Latihan</div>
+      <h2>Game: Temukan Polanya</h2>
+      <p>Tebak elemen yang hilang dari setiap deret. Ronde <span id="patRoundLabel">1</span>/4.</p>
+      <div class="seq" id="patSeq"></div>
+      <div class="option-row" id="patOptions"></div>
+      <div class="feedback" id="patFeedback"></div>
+      <div class="navrow">
+        <button class="btn ghost small" onclick="goTo(5)">← Kembali</button>
+        <button class="btn" onclick="goTo(7)" id="patNext" disabled>Lanjut →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 7 : ABSTRACTION - GOOGLE MAPS -->
+  <section class="screen" data-page="7">
+    <div class="card">
+      <div class="eyebrow">Konsep 3 · Abstraksi</div>
+      <h2>Google Maps: Simpel di Luar, Rumit di Dalam</h2>
+      <p><b>Abstraksi</b> = menyembunyikan detail rumit, dan hanya menampilkan yang penting buat penggunanya. Kamu cuma lihat garis rute biru — bukan satelit, algoritma, atau jutaan data jalan di baliknya.</p>
+      <div class="map-box" id="mapBox">
+        <div class="map-route">
+          <div class="map-pin">📍 → 🏁</div>
+          <div class="pill">Estimasi 12 menit</div>
+        </div>
+        <div class="layer-detail" id="mapLayer">
+          <div><span class="l">[GPS]</span> Sinyal dari 4+ satelit dihitung untuk lokasi presisi</div>
+          <div><span class="l">[DATA]</span> Jutaan titik jalan, kecepatan rata-rata, tikungan tersimpan</div>
+          <div><span class="l">[TRAFIK]</span> Data lokasi anonim jutaan HP lain diagregasi real-time</div>
+          <div><span class="l">[ALGORITMA]</span> Pencarian jalur tercepat (graph shortest-path)</div>
+          <div><span class="l">[PREDIKSI]</span> Model estimasi waktu tempuh berdasar histori</div>
+        </div>
+      </div>
+      <div class="navrow" style="margin-top:14px">
+        <button class="btn ghost small" id="toggleLayer">🔍 Lihat kerumitan asli</button>
+      </div>
+      <p style="margin-top:14px">Itulah abstraksi: pengguna cukup lihat "belok kiri 200m", tanpa perlu tahu isi di baliknya.</p>
+      <div class="navrow">
+        <button class="btn ghost small" onclick="goTo(6)">← Kembali</button>
+        <button class="btn" onclick="goTo(8)">Lanjut →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 8 : BLACK BOX - GOOGLE TRANSLATE -->
+  <section class="screen" data-page="8">
+    <div class="card">
+      <div class="eyebrow">Konsep 3 · Black Box</div>
+      <h2>Google Translate: Kotak Hitam</h2>
+      <p>Sebuah <b>black box</b> adalah sistem di mana kamu hanya melihat <b>input</b> dan <b>output</b>-nya, tanpa tahu proses di dalamnya. Coba ketik satu kata bahasa Indonesia:</p>
+      <div class="bb-box">
+        <input type="text" id="bbInput" placeholder="contoh: rumah, buku, makan, kucing, sekolah">
+        <button class="btn small" id="bbTranslate" style="align-self:flex-start">Terjemahkan →</button>
+        <div class="bb-visual">
+          <div class="bb-node" id="bbInWord">input</div>
+          <span class="arrow">→</span>
+          <div class="bb-black">?????</div>
+          <span class="arrow">→</span>
+          <div class="bb-node" id="bbOutWord">output</div>
+        </div>
+      </div>
+      <p style="margin-top:6px">Kamu tahu <i>apa</i> yang masuk dan <i>apa</i> yang keluar — tapi jaringan saraf & aturan bahasa di dalamnya tetap tersembunyi. Itulah kenapa disebut "kotak hitam".</p>
+      <div class="navrow">
+        <button class="btn ghost small" onclick="goTo(7)">← Kembali</button>
+        <button class="btn" onclick="goTo(9)">Lanjut →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 9 : ALGORITHM - ROBOT -->
+  <section class="screen" data-page="9">
+    <div class="card">
+      <div class="eyebrow">Konsep 4 · Algoritma</div>
+      <h2>Program Si Robot</h2>
+      <p><b>Algoritma</b> = urutan langkah yang jelas untuk menyelesaikan masalah. Susun perintah agar robot 🤖 sampai ke cangkir teh 🍵 tanpa menabrak tembok.</p>
+      <div class="robot-grid" id="robotGrid"></div>
+      <div class="cmd-row">
+        <button class="cmd-btn" data-cmd="up">⬆️</button>
+        <button class="cmd-btn" data-cmd="down">⬇️</button>
+        <button class="cmd-btn" data-cmd="left">⬅️</button>
+        <button class="cmd-btn" data-cmd="right">➡️</button>
+      </div>
+      <div class="program-log" id="programLog"><span class="empty">// tambahkan perintah di atas</span></div>
+      <div class="feedback" id="robotFeedback"></div>
+      <div class="navrow">
+        <button class="btn ghost small" onclick="goTo(8)">← Kembali</button>
+        <button class="btn ghost small" id="robotReset">↺ Reset</button>
+        <button class="btn small" id="robotRun">▶ Jalankan Program</button>
+        <button class="btn" onclick="goTo(10)" id="robotNext" disabled>Lanjut →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 10 : TEA STEPS GAME -->
+  <section class="screen" data-page="10">
+    <div class="card">
+      <div class="eyebrow">Konsep 4 · Latihan</div>
+      <h2>Susun Algoritma Membuat Teh</h2>
+      <p>Ketuk satu langkah dari bank di bawah, lalu ketuk slot urutan yang sesuai. Ingat: algoritma harus <b>urut dan jelas</b>.</p>
+      <div class="slot-list" id="teaSlots"></div>
+      <div class="chip-bank" id="teaBank"></div>
+      <div class="feedback" id="teaFeedback"></div>
+      <div class="navrow">
+        <button class="btn ghost small" onclick="goTo(9)">← Kembali</button>
+        <button class="btn ghost small" id="teaReset">↺ Ulangi</button>
+        <button class="btn" onclick="goTo(11)" id="teaNext" disabled>Lanjut →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 11 : WORKSHEET -->
+  <section class="screen" data-page="11">
+    <div class="card">
+      <div class="eyebrow">Latihan Akhir</div>
+      <h2>Worksheet: Analisis Aplikasi</h2>
+      <p>Pilih satu aplikasi yang sering kamu pakai, lalu analisis pakai <b>4 Pilar Berpikir Komputasional</b>.</p>
+      <select id="wsApp">
+        <option value="">— Pilih aplikasi —</option>
+        <option>Instagram</option>
+        <option>GoFood</option>
+        <option>WhatsApp</option>
+        <option>Google Maps</option>
+        <option>Aplikasi lain (tulis sendiri)</option>
+      </select>
+      <div id="wsCustomWrap" style="display:none;margin-top:8px">
+        <input type="text" id="wsCustom" placeholder="Nama aplikasi...">
+      </div>
+      <div style="margin-top:18px">
+        <div class="pillar-block">
+          <div class="pillar-label"><span class="pillar-dot" style="background:var(--blue)"></span>Dekomposisi — bagian apa saja penyusun aplikasi ini?</div>
+          <textarea rows="2" id="wsD" placeholder="Contoh: fitur unggah foto, fitur komentar, fitur pesan..."></textarea>
+        </div>
+        <div class="pillar-block">
+          <div class="pillar-label"><span class="pillar-dot" style="background:var(--purple)"></span>Pengenalan Pola — pola perilaku apa yang dipakai aplikasi ini?</div>
+          <textarea rows="2" id="wsP" placeholder="Contoh: rekomendasi berdasarkan konten yang sering disukai..."></textarea>
+        </div>
+        <div class="pillar-block">
+          <div class="pillar-label"><span class="pillar-dot" style="background:var(--blue-2)"></span>Abstraksi — detail rumit apa yang disembunyikan dari pengguna?</div>
+          <textarea rows="2" id="wsA" placeholder="Contoh: pengguna tidak lihat proses kompresi gambar di server..."></textarea>
+        </div>
+        <div class="pillar-block">
+          <div class="pillar-label"><span class="pillar-dot" style="background:var(--purple-2)"></span>Algoritma — urutan langkah apa yang terjadi saat kamu memakainya?</div>
+          <textarea rows="2" id="wsAl" placeholder="Contoh: buka app → pilih foto → edit → unggah → tampil di feed..."></textarea>
+        </div>
+      </div>
+      <p class="footer-hint" id="wsStatus">Isi semua kolom untuk melanjutkan.</p>
+      <div class="navrow">
+        <button class="btn ghost small" onclick="goTo(10)">← Kembali</button>
+        <button class="btn" onclick="goTo(12)" id="wsNext" disabled>Lanjut ke Kuis →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 12 : QUIZ -->
+  <section class="screen" data-page="12">
+    <div class="card" id="quizCard">
+      <div class="eyebrow">Ujian Akhir</div>
+      <h2>Kuis: Computational Thinker</h2>
+      <div id="quizIntro">
+        <p>20 soal pilihan ganda seputar 4 pilar berpikir komputasional. Kamu punya waktu <b>10 menit</b>. Siap?</p>
+        <button class="btn" id="startQuiz">Mulai Kuis →</button>
+      </div>
+      <div id="quizBody" style="display:none">
+        <div class="quiz-top">
+          <span class="qcount" id="qCount">Soal 1/20</span>
+          <span class="timer" id="qTimer">10:00</span>
+        </div>
+        <h2 id="qText" style="font-size:18px"></h2>
+        <div id="qOptions"></div>
+        <div class="qnav-dots" id="qDots"></div>
+        <div class="navrow">
+          <button class="btn ghost small" id="qPrev">← Sebelumnya</button>
+          <span class="spacer"></span>
+          <button class="btn small" id="qNextBtn">Berikutnya →</button>
+          <button class="btn" id="qSubmit" style="display:none">Selesai & Lihat Skor</button>
+        </div>
+      </div>
+      <div id="quizResult" style="display:none">
+        <h2>Hasil Kuismu</h2>
+        <div class="stat-row">
+          <div class="stat"><b id="resScore">0</b><span>Skor</span></div>
+          <div class="stat"><b id="resCorrect">0/20</b><span>Benar</span></div>
+          <div class="stat"><b id="resTime">0:00</b><span>Waktu Dipakai</span></div>
+        </div>
+        <p id="resMsg"></p>
+        <div class="navrow">
+          <button class="btn ghost small" id="reviewBtn">Lihat Pembahasan</button>
+          <button class="btn" onclick="goTo(13)">Ambil Lencana →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 13 : BADGE -->
+  <section class="screen" data-page="13">
+    <div class="card badge-stage">
+      <div class="confetti" id="confetti"></div>
+      <div class="eyebrow" style="justify-content:center">Misi Selesai</div>
+      <div class="badge-medal"><span>🏅</span></div>
+      <h1 style="font-size:30px">Computational Thinker</h1>
+      <p>Selamat! Kamu telah menyelesaikan <b>Mission: Think Like a Computer</b> dan menguasai 4 pilar berpikir komputasional: Dekomposisi, Pengenalan Pola, Abstraksi, dan Algoritma.</p>
+      <input type="text" class="cert-name" id="certName" placeholder="Ketik namamu untuk sertifikat...">
+      <div class="stat-row">
+        <div class="stat"><b id="badgeScore">–</b><span>Skor Kuis</span></div>
+        <div class="stat"><b id="badgeDate"></b><span>Tanggal</span></div>
+      </div>
+      <div class="navrow" style="justify-content:center">
+        <button class="btn ghost small" onclick="goTo(12)">← Kembali ke Kuis</button>
+        <button class="btn" id="printBtn">🖨 Cetak Sertifikat</button>
+      </div>
+      <div id="akhir-materi"></div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* ===================== GLOBAL ===================== */
+const TOTAL_PAGES = 13;
+let current = 1;
+let visited = new Set([1]);
+let soundOn = true;
+
+const dotsWrap = document.getElementById('dots');
+for(let i=1;i<=TOTAL_PAGES;i++){
+  const d = document.createElement('div');
+  d.className = 'dot';
+  d.dataset.p = i;
+  d.title = 'Halaman '+i;
+  d.onclick = ()=>{ if(visited.has(i)) goTo(i); };
+  dotsWrap.appendChild(d);
+}
+function renderDots(){
+  document.querySelectorAll('.dot').forEach(d=>{
+    const p = +d.dataset.p;
+    d.classList.toggle('done', visited.has(p) && p!==current);
+    d.classList.toggle('current', p===current);
+  });
+}
+function goTo(n){
+  if(n<1||n>TOTAL_PAGES) return;
+  document.querySelector('.screen.active')?.classList.remove('active');
+  current = n;
+  visited.add(n);
+  document.querySelector(`.screen[data-page="${n}"]`).classList.add('active');
+  renderDots();
+  window.scrollTo({top:0,behavior:'smooth'});
+  playTone(440,0.05);
+}
+renderDots();
+
+/* sound */
+let actx;
+function playTone(freq=520,dur=0.08,type='sine'){
+  if(!soundOn) return;
+  try{
+    actx = actx || new (window.AudioContext||window.webkitAudioContext)();
+    const o = actx.createOscillator(); const g = actx.createGain();
+    o.type=type; o.frequency.value=freq;
+    g.gain.setValueAtTime(0.06, actx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, actx.currentTime+dur);
+    o.connect(g); g.connect(actx.destination);
+    o.start(); o.stop(actx.currentTime+dur);
+  }catch(e){}
+}
+document.getElementById('soundBtn').onclick = function(){
+  soundOn = !soundOn;
+  this.textContent = soundOn ? '🔊' : '🔇';
+};
+document.getElementById('darkBtn').onclick = function(){
+  document.documentElement.classList.toggle('dark');
+  const dark = document.documentElement.classList.contains('dark');
+  this.textContent = dark ? '☀️' : '🌙';
+  playTone(dark?300:600,0.08);
+};
+
+/* ===================== PAGE 2 : GOFOOD FLOW ===================== */
+const gofoodSteps = [
+  ['Klik pesan','Kamu memilih menu & menekan tombol "Pesan" di aplikasi.'],
+  ['Checkout & bayar','Sistem menghitung total harga, ongkir, lalu memproses pembayaran.'],
+  ['Restoran menerima','Notifikasi masuk ke dapur, restoran mulai memasak pesananmu.'],
+  ['Driver ditugaskan','Sistem mencocokkan driver terdekat untuk mengambil pesanan.'],
+  ['Driver mengantar','Driver membawa makanan ke alamatmu sambil sistem melacak posisi GPS.'],
+  ['Pesanan diterima','Kamu menerima makanan — dan sistem menutup satu transaksi.'],
+];
+const gofoodFlowEl = document.getElementById('gofoodFlow');
+gofoodSteps.forEach((s,i)=>{
+  const div = document.createElement('div');
+  div.className='step';
+  div.innerHTML = `<div class="step-num">${i+1}</div><div><b>${s[0]}</b><span>${s[1]}</span></div>`;
+  gofoodFlowEl.appendChild(div);
+});
+let gofoodPlaying = false;
+document.getElementById('playGofood').onclick = function(){
+  if(gofoodPlaying) return;
+  gofoodPlaying = true;
+  this.disabled = true;
+  const steps = document.querySelectorAll('#gofoodFlow .step');
+  let i=0;
+  const iv = setInterval(()=>{
+    if(i<steps.length){
+      steps[i].classList.add('show');
+      document.getElementById('gofoodProgress').style.width = ((i+1)/steps.length*100)+'%';
+      playTone(500+i*40,0.06);
+      i++;
+    } else {
+      clearInterval(iv);
+      document.getElementById('gofoodNext').disabled = false;
+      this.textContent = '✓ Selesai Diputar';
+    }
+  }, 750);
+};
+
+/* ===================== PAGE 3 : WHATSAPP DECOMPOSITION ===================== */
+const waFeatures = [
+  ['💬','Chat','Mengirim & menerima pesan teks secara real-time ke satu kontak.'],
+  ['📸','Status','Membagikan foto/video/teks yang otomatis hilang setelah 24 jam.'],
+  ['📞','Panggilan Suara','Melakukan komunikasi suara langsung lewat internet (VoIP).'],
+  ['🎥','Panggilan Video','Komunikasi tatap muka lewat kamera & internet.'],
+  ['👥','Grup','Mewadahi banyak orang dalam satu ruang obrolan bersama.'],
+  ['📎','Kirim Media','Mengirim foto, video, dokumen, dan lokasi.'],
+  ['⚙️','Pengaturan','Mengatur privasi, notifikasi, dan tampilan akun.'],
+  ['🔒','Enkripsi','Mengamankan isi pesan agar hanya pengirim & penerima yang bisa membacanya.'],
+];
+const waGrid = document.getElementById('waGrid');
+let waExplored = new Set();
+waFeatures.forEach((f,i)=>{
+  const tile = document.createElement('div');
+  tile.className='feature-tile';
+  tile.innerHTML = `<span class="fi">${f[0]}</span><span class="fn">${f[1]}</span>`;
+  tile.onclick = ()=>{
+    document.getElementById('waNote').textContent = `${f[0]} ${f[1]}: ${f[2]}`;
+    document.getElementById('waNote').classList.add('show');
+    if(!waExplored.has(i)){
+      waExplored.add(i);
+      tile.classList.add('explored');
+      document.getElementById('waProgress').style.width = (waExplored.size/waFeatures.length*100)+'%';
+      document.getElementById('waCount').textContent = `${waExplored.size}/8 fitur dijelajahi`;
+      playTone(600,0.05);
+    }
+  };
+  waGrid.appendChild(tile);
+});
+
+/* ===================== PAGE 4 : DRAG-DROP (select-then-place) FEATURE CATEGORIZATION ===================== */
+const dndItems = [
+  {name:'Chat', bin:'komunikasi'},
+  {name:'Panggilan Video', bin:'komunikasi'},
+  {name:'Kirim Foto', bin:'media'},
+  {name:'Kirim Dokumen', bin:'media'},
+  {name:'Status', bin:'media'},
+  {name:'Ubah Nama Profil', bin:'pengaturan'},
+  {name:'Notifikasi', bin:'pengaturan'},
+  {name:'Blokir Kontak', bin:'pengaturan'},
+];
+const bins = [
+  {id:'komunikasi', label:'💬 Komunikasi'},
+  {id:'media', label:'📎 Media'},
+  {id:'pengaturan', label:'⚙️ Pengaturan'},
+];
+let dndSelected = null;
+let dndPlaced = {};
+function renderDnd(){
+  const bank = document.getElementById('chipBank');
+  const binGrid = document.getElementById('binGrid');
+  bank.innerHTML=''; binGrid.innerHTML='';
+  dndItems.forEach((it,i)=>{
+    const chip = document.createElement('div');
+    chip.className='chip'+(dndPlaced[i]!==undefined?' placed':'')+(dndSelected===i?' selected':'');
+    chip.textContent = it.name;
+    chip.onclick = ()=>{
+      if(dndPlaced[i]!==undefined) return;
+      dndSelected = (dndSelected===i)? null : i;
+      renderDnd();
+      playTone(500,0.04);
+    };
+    bank.appendChild(chip);
+  });
+  bins.forEach(b=>{
+    const binEl = document.createElement('div');
+    binEl.className='bin';
+    binEl.innerHTML = `<div class="bin-title">${b.label}</div>`;
+    binEl.onclick = ()=>{
+      if(dndSelected===null) return;
+      const item = dndItems[dndSelected];
+      const correct = item.bin === b.id;
+      playTone(correct?700:220, correct?0.1:0.15, correct?'sine':'square');
+      dndPlaced[dndSelected] = b.id;
+      const fb = document.getElementById('dndFeedback');
+      if(correct){
+        fb.textContent = `✓ Tepat! "${item.name}" masuk kategori ${b.label}.`;
+        fb.className='feedback ok';
+      } else {
+        fb.textContent = `Hmm, coba lagi lain kali — "${item.name}" sebenarnya masuk kategori lain.`;
+        fb.className='feedback bad';
+      }
+      dndSelected = null;
+      renderDnd();
+      checkDndDone();
+    };
+    Object.keys(dndPlaced).forEach(k=>{
+      if(dndPlaced[k]===b.id){
+        const chip = document.createElement('div');
+        chip.className='chip';
+        chip.textContent = dndItems[k].name;
+        binEl.appendChild(chip);
+      }
+    });
+    binGrid.appendChild(binEl);
+  });
+}
+function checkDndDone(){
+  if(Object.keys(dndPlaced).length===dndItems.length){
+    document.getElementById('dndNext').disabled = false;
+  }
+}
+document.getElementById('resetDnd').onclick = ()=>{
+  dndPlaced={}; dndSelected=null;
+  document.getElementById('dndFeedback').textContent='';
+  document.getElementById('dndNext').disabled = true;
+  renderDnd();
+};
+renderDnd();
+
+/* ===================== PAGE 5 : PATTERN RECO EXAMPLE ===================== */
+const recoOptions = ['🎧 Headphone gaming','🩳 Celana renang','🏃 Jam tangan olahraga','📚 Novel fiksi'];
+const recoCorrect = 2;
+const recoWrap = document.getElementById('patternRecoOptions');
+recoOptions.forEach((o,i)=>{
+  const b = document.createElement('button');
+  b.className='opt-btn'; b.textContent=o; b.style.fontSize='14px';
+  b.onclick = ()=>{
+    document.querySelectorAll('#patternRecoOptions .opt-btn').forEach(x=>x.disabled=true);
+    const fb = document.getElementById('patternRecoFeedback');
+    if(i===recoCorrect){
+      b.classList.add('correct');
+      fb.textContent='✓ Benar! Jam tangan olahraga paling sesuai pola "gaya hidup olahraga".';
+      fb.className='feedback ok';
+      playTone(700,0.1);
+    } else {
+      b.classList.add('wrong');
+      document.querySelectorAll('#patternRecoOptions .opt-btn')[recoCorrect].classList.add('correct');
+      fb.textContent='Bukan itu — yang paling cocok dengan pola belanjanya adalah jam tangan olahraga.';
+      fb.className='feedback bad';
+      playTone(220,0.15,'square');
+    }
+  };
+  recoWrap.appendChild(b);
+});
+
+/* ===================== PAGE 6 : PATTERN GAME ===================== */
+const patRounds = [
+  {seq:['🔵','🟣','🔵','🟣','?'], opts:['🔵','🟣','🟢','🟡'], correct:0},
+  {seq:['2','4','6','8','?'], opts:['9','10','12','14'], correct:1},
+  {seq:['🔺','🔺','🔻','🔺','🔺','?'], opts:['🔺','🔻','⬛','🔵'], correct:1},
+  {seq:['🛒','🛒','💳','🛒','🛒','?'], opts:['🛒','💳','🚚','⭐'], correct:1},
+];
+let patRoundIdx = 0;
+function renderPatRound(){
+  const r = patRounds[patRoundIdx];
+  document.getElementById('patRoundLabel').textContent = patRoundIdx+1;
+  const seqEl = document.getElementById('patSeq');
+  seqEl.innerHTML='';
+  r.seq.forEach(s=>{
+    const d = document.createElement('div');
+    d.className='seq-item'+(s==='?'?' q':'');
+    d.textContent = s==='?'?'?':s;
+    seqEl.appendChild(d);
+  });
+  const optEl = document.getElementById('patOptions');
+  optEl.innerHTML='';
+  document.getElementById('patFeedback').textContent='';
+  r.opts.forEach((o,i)=>{
+    const b = document.createElement('button');
+    b.className='opt-btn'; b.textContent=o;
+    b.onclick = ()=>{
+      document.querySelectorAll('#patOptions .opt-btn').forEach(x=>x.disabled=true);
+      const fb = document.getElementById('patFeedback');
+      if(i===r.correct){
+        b.classList.add('correct');
+        fb.textContent='✓ Tepat sekali!';
+        fb.className='feedback ok';
+        playTone(700,0.1);
+        setTimeout(()=>{
+          patRoundIdx++;
+          if(patRoundIdx<patRounds.length) renderPatRound();
+          else document.getElementById('patNext').disabled=false;
+        },700);
+      } else {
+        b.classList.add('wrong');
+        document.querySelectorAll('#patOptions .opt-btn')[r.correct].classList.add('correct');
+        fb.textContent='Belum tepat, perhatikan pengulangannya lagi.';
+        fb.className='feedback bad';
+        playTone(220,0.15,'square');
+        setTimeout(()=>{
+          patRoundIdx++;
+          if(patRoundIdx<patRounds.length) renderPatRound();
+          else document.getElementById('patNext').disabled=false;
+        },900);
+      }
+    };
+    optEl.appendChild(b);
+  });
+}
+renderPatRound();
+
+/* ===================== PAGE 7 : ABSTRACTION LAYER TOGGLE ===================== */
+let layerShown = false;
+document.getElementById('toggleLayer').onclick = function(){
+  layerShown = !layerShown;
+  document.getElementById('mapLayer').classList.toggle('show', layerShown);
+  this.textContent = layerShown ? '🙈 Sembunyikan lagi' : '🔍 Lihat kerumitan asli';
+  playTone(layerShown?350:550,0.08);
+};
+
+/* ===================== PAGE 8 : BLACK BOX TRANSLATE ===================== */
+const dict = {
+  'rumah':'house','buku':'book','makan':'eat','kucing':'cat','sekolah':'school',
+  'teman':'friend','mobil':'car','air':'water','matahari':'sun','malam':'night',
+  'belajar':'study','komputer':'computer'
+};
+document.getElementById('bbTranslate').onclick = ()=>{
+  const val = document.getElementById('bbInput').value.trim().toLowerCase();
+  if(!val) return;
+  document.getElementById('bbInWord').textContent = val;
+  const out = dict[val] || '('+val+')';
+  document.getElementById('bbOutWord').textContent = out;
+  playTone(650,0.08);
+};
+
+/* ===================== PAGE 9 : ROBOT ALGORITHM ===================== */
+// 4x4 grid, index 0 top-left. Start bottom-left(12), goal top-right(3)
+const GRID_SIZE = 4;
+const START = 12, GOAL = 3;
+const WALLS = [6,9]; // obstacles
+let robotPos = START;
+let program = [];
+function renderRobotGrid(){
+  const g = document.getElementById('robotGrid');
+  g.innerHTML='';
+  for(let i=0;i<16;i++){
+    const c = document.createElement('div');
+    c.className='cell';
+    if(WALLS.includes(i)) c.classList.add('wall');
+    if(i===GOAL) c.classList.add('goal');
+    if(i===GOAL && i!==robotPos) c.textContent='🍵';
+    if(i===robotPos) c.classList.add('robot');
+    g.appendChild(c);
+  }
+}
+renderRobotGrid();
+document.querySelectorAll('.cmd-btn').forEach(btn=>{
+  btn.onclick = ()=>{
+    program.push(btn.dataset.cmd);
+    renderProgramLog();
+    playTone(480,0.05);
+  };
+});
+function renderProgramLog(){
+  const log = document.getElementById('programLog');
+  if(program.length===0){ log.innerHTML='<span class="empty">// tambahkan perintah di atas</span>'; return; }
+  const icons = {up:'⬆️',down:'⬇️',left:'⬅️',right:'➡️'};
+  log.innerHTML = program.map(p=>`<span class="log-chip">${icons[p]}</span>`).join('');
+}
+document.getElementById('robotReset').onclick = ()=>{
+  program=[]; robotPos=START; renderProgramLog(); renderRobotGrid();
+  document.getElementById('robotFeedback').textContent='';
+  document.getElementById('robotNext').disabled=true;
+};
+document.getElementById('robotRun').onclick = async ()=>{
+  robotPos = START; renderRobotGrid();
+  const fb = document.getElementById('robotFeedback');
+  fb.textContent=''; fb.className='feedback';
+  for(const cmd of program){
+    await new Promise(r=>setTimeout(r,350));
+    let next = robotPos;
+    const row = Math.floor(robotPos/GRID_SIZE), col = robotPos%GRID_SIZE;
+    if(cmd==='up' && row>0) next = robotPos-GRID_SIZE;
+    if(cmd==='down' && row<GRID_SIZE-1) next = robotPos+GRID_SIZE;
+    if(cmd==='left' && col>0) next = robotPos-1;
+    if(cmd==='right' && col<GRID_SIZE-1) next = robotPos+1;
+    if(WALLS.includes(next)){
+      fb.textContent = '💥 Robot menabrak tembok! Program gagal — coba susun ulang urutannya.';
+      fb.className='feedback bad';
+      playTone(180,0.2,'square');
+      renderRobotGrid();
+      return;
+    }
+    robotPos = next;
+    renderRobotGrid();
+    playTone(520,0.05);
+  }
+  if(robotPos===GOAL){
+    fb.textContent = '✓ Berhasil! Robot sampai ke tehnya. Itulah algoritma yang benar.';
+    fb.className='feedback ok';
+    playTone(750,0.15);
+    document.getElementById('robotNext').disabled = false;
+  } else {
+    fb.textContent = 'Belum sampai tujuan. Tambahkan/perbaiki urutan perintah.';
+    fb.className='feedback bad';
+  }
+};
+
+/* ===================== PAGE 10 : TEA STEPS ===================== */
+const teaStepsCorrect = [
+  'Didihkan air',
+  'Masukkan teh celup ke cangkir',
+  'Tuang air panas ke cangkir',
+  'Tunggu 3-5 menit',
+  'Angkat teh celup',
+  'Aduk & sajikan',
+];
+let teaShuffled = [...teaStepsCorrect].sort(()=>Math.random()-0.5);
+let teaSlotsFilled = new Array(teaStepsCorrect.length).fill(null);
+let teaSelected = null;
+function renderTea(){
+  const slotWrap = document.getElementById('teaSlots');
+  slotWrap.innerHTML='';
+  teaSlotsFilled.forEach((val,i)=>{
+    const s = document.createElement('div');
+    s.className='slot'+(val?' filled':'');
+    s.innerHTML = `<span class="slot-idx">${i+1}.</span><span>${val || '— kosong —'}</span>`;
+    s.onclick = ()=>{
+      if(teaSelected===null) return;
+      teaSlotsFilled[i] = teaSelected;
+      teaSelected = null;
+      renderTea();
+      checkTea();
+    };
+    slotWrap.appendChild(s);
+  });
+  const bank = document.getElementById('teaBank');
+  bank.innerHTML='';
+  teaShuffled.forEach(step=>{
+    if(teaSlotsFilled.includes(step)) return;
+    const chip = document.createElement('div');
+    chip.className='chip'+(teaSelected===step?' selected':'');
+    chip.textContent = step;
+    chip.onclick = ()=>{
+      teaSelected = (teaSelected===step)?null:step;
+      renderTea();
+      playTone(500,0.04);
+    };
+    bank.appendChild(chip);
+  });
+}
+function checkTea(){
+  if(teaSlotsFilled.every(v=>v!==null)){
+    const fb = document.getElementById('teaFeedback');
+    const isCorrect = teaSlotsFilled.every((v,i)=>v===teaStepsCorrect[i]);
+    if(isCorrect){
+      fb.textContent='✓ Urutan algoritmamu benar! Teh siap diseduh.';
+      fb.className='feedback ok';
+      playTone(750,0.15);
+      document.getElementById('teaNext').disabled=false;
+    } else {
+      fb.textContent='Urutannya belum pas. Coba cek lagi logikanya (air dulu, atau teh dulu?).';
+      fb.className='feedback bad';
+      playTone(220,0.15,'square');
+    }
+  }
+}
+document.getElementById('teaReset').onclick = ()=>{
+  teaShuffled = [...teaStepsCorrect].sort(()=>Math.random()-0.5);
+  teaSlotsFilled = new Array(teaStepsCorrect.length).fill(null);
+  teaSelected = null;
+  document.getElementById('teaFeedback').textContent='';
+  document.getElementById('teaNext').disabled=true;
+  renderTea();
+};
+renderTea();
+
+/* ===================== PAGE 11 : WORKSHEET ===================== */
+document.getElementById('wsApp').onchange = function(){
+  document.getElementById('wsCustomWrap').style.display = this.value==='Aplikasi lain (tulis sendiri)' ? 'block':'none';
+  checkWs();
+};
+['wsD','wsP','wsA','wsAl'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', checkWs);
+});
+document.getElementById('wsCustom')?.addEventListener?.('input', checkWs);
+function checkWs(){
+  const appChosen = document.getElementById('wsApp').value;
+  const filled = ['wsD','wsP','wsA','wsAl'].every(id=>document.getElementById(id).value.trim().length>3);
+  const ok = appChosen && filled;
+  document.getElementById('wsNext').disabled = !ok;
+  document.getElementById('wsStatus').textContent = ok ? '✓ Worksheet lengkap, siap lanjut ke kuis.' : 'Isi semua kolom untuk melanjutkan.';
+}
+
+/* ===================== PAGE 12 : QUIZ ===================== */
+const quizQuestions = [
+  {q:'Memecah masalah besar menjadi bagian-bagian kecil disebut...', o:['Algoritma','Dekomposisi','Abstraksi','Debugging'], c:1},
+  {q:'Proses pemesanan GoFood yang dipecah jadi langkah "pesan, bayar, masak, antar, terima" adalah contoh dari...', o:['Pattern recognition','Black box','Dekomposisi','Enkripsi'], c:2},
+  {q:'Marketplace merekomendasikan produk berdasarkan riwayat belanjamu. Ini menerapkan konsep...', o:['Pengenalan pola','Dekomposisi','Algoritma','Abstraksi'], c:0},
+  {q:'Apa inti dari "abstraksi" dalam berpikir komputasional?', o:['Mengulang pola','Menyembunyikan detail rumit yang tidak perlu','Membuat kode berjalan cepat','Menyusun langkah berurutan'], c:1},
+  {q:'Google Maps menampilkan rute simpel tanpa menunjukkan data satelit & algoritma di baliknya. Ini contoh...', o:['Algoritma','Abstraksi','Black box','Dekomposisi'], c:1},
+  {q:'Sistem yang hanya bisa dilihat input dan outputnya, tanpa tahu proses di dalamnya, disebut...', o:['Open box','Flowchart','Black box','Framework'], c:2},
+  {q:'Google Translate adalah contoh black box karena...', o:['Prosesnya lambat','Kita tidak melihat cara kerja penerjemahan di dalamnya','Hasilnya selalu salah','Hanya bisa satu bahasa'], c:1},
+  {q:'Urutan langkah yang jelas untuk menyelesaikan suatu masalah disebut...', o:['Algoritma','Abstraksi','Pattern recognition','Dekomposisi'], c:0},
+  {q:'Robot yang diberi perintah "maju, belok kanan, maju" sedang menjalankan sebuah...', o:['Dekomposisi','Algoritma','Pola','Black box'], c:1},
+  {q:'Langkah pertama membuat teh yang benar secara algoritmik adalah...', o:['Tuang air panas','Didihkan air','Aduk teh','Angkat teh celup'], c:1},
+  {q:'Manakah dari berikut ini yang BUKAN salah satu dari 4 pilar berpikir komputasional?', o:['Dekomposisi','Debugging','Abstraksi','Algoritma'], c:1},
+  {q:'Mengenali bahwa "3 pembelian terakhir semuanya alat olahraga" lalu memprediksi minat berikutnya adalah...', o:['Algoritma','Abstraksi','Pengenalan pola','Enkripsi'], c:2},
+  {q:'Fitur WhatsApp seperti Chat, Status, dan Panggilan Video adalah hasil dari proses...', o:['Mendekomposisi aplikasi menjadi fitur-fitur','Mengenkripsi pesan','Membuat black box','Menyusun algoritma acak'], c:0},
+  {q:'Kenapa berpikir komputasional penting bagi software engineer?', o:['Agar kode terlihat rapi saja','Membantu memecahkan masalah kompleks secara sistematis','Karena wajib untuk semua pekerjaan','Supaya bisa mengetik lebih cepat'], c:1},
+  {q:'Jika robot menabrak tembok saat menjalankan program, itu menandakan...', o:['Algoritmanya sudah pasti benar','Ada kesalahan pada urutan/logika algoritma','Robotnya rusak permanen','Programnya terlalu pendek'], c:1},
+  {q:'Ikon peta yang menunjukkan "belok kiri 200m" tanpa menjelaskan perhitungan GPS di baliknya adalah bentuk dari...', o:['Algoritma','Abstraksi','Dekomposisi','Pattern recognition'], c:1},
+  {q:'Ketika kita mengelompokkan fitur aplikasi ke dalam kategori "Komunikasi", "Media", dan "Pengaturan", kita sedang melakukan...', o:['Abstraksi','Dekomposisi','Enkripsi','Debugging'], c:1},
+  {q:'Manakah contoh algoritma dalam kehidupan sehari-hari?', o:['Rasa kopi yang enak','Resep membuat mie instan langkah demi langkah','Warna kemasan produk','Harga suatu barang'], c:1},
+  {q:'Pengenalan pola paling berguna untuk...', o:['Menyembunyikan kerumitan sistem','Memprediksi sesuatu berdasar kebiasaan/data sebelumnya','Memecah aplikasi jadi bagian kecil','Mengganti algoritma lama'], c:1},
+  {q:'Empat pilar berpikir komputasional adalah dekomposisi, pengenalan pola, abstraksi, dan...', o:['Enkripsi','Debugging','Algoritma','Kompilasi'], c:2},
+];
+let quizAnswers = new Array(quizQuestions.length).fill(null);
+let quizIdx = 0;
+let quizTimeLeft = 600;
+let quizTimerIv = null;
+let quizStartTime = null;
+let quizSubmitted = false;
+
+document.getElementById('startQuiz').onclick = ()=>{
+  document.getElementById('quizIntro').style.display='none';
+  document.getElementById('quizBody').style.display='block';
+  quizStartTime = Date.now();
+  renderQuizDots();
+  renderQuestion();
+  quizTimerIv = setInterval(tickTimer,1000);
+};
+function tickTimer(){
+  quizTimeLeft--;
+  const m = Math.floor(quizTimeLeft/60), s = quizTimeLeft%60;
+  const timerEl = document.getElementById('qTimer');
+  timerEl.textContent = `${m}:${s<10?'0':''}${s}`;
+  timerEl.classList.toggle('low', quizTimeLeft<=60);
+  if(quizTimeLeft<=0){
+    clearInterval(quizTimerIv);
+    submitQuiz();
+  }
+}
+function renderQuizDots(){
+  const wrap = document.getElementById('qDots');
+  wrap.innerHTML='';
+  quizQuestions.forEach((_,i)=>{
+    const d = document.createElement('div');
+    d.className='qdot'+(quizAnswers[i]!==null?' answered':'')+(i===quizIdx?' current':'');
+    d.textContent = i+1;
+    d.onclick=()=>{ quizIdx=i; renderQuestion(); };
+    wrap.appendChild(d);
+  });
+}
+function renderQuestion(){
+  const q = quizQuestions[quizIdx];
+  document.getElementById('qCount').textContent = `Soal ${quizIdx+1}/${quizQuestions.length}`;
+  document.getElementById('qText').textContent = q.q;
+  const optWrap = document.getElementById('qOptions');
+  optWrap.innerHTML='';
+  q.o.forEach((opt,i)=>{
+    const b = document.createElement('button');
+    b.className='quiz-opt'+(quizAnswers[quizIdx]===i?' selected':'');
+    b.textContent = opt;
+    b.onclick = ()=>{
+      quizAnswers[quizIdx]=i;
+      renderQuestion();
+      renderQuizDots();
+      playTone(500,0.04);
+    };
+    optWrap.appendChild(b);
+  });
+  document.getElementById('qPrev').disabled = quizIdx===0;
+  const isLast = quizIdx===quizQuestions.length-1;
+  document.getElementById('qNextBtn').style.display = isLast?'none':'inline-block';
+  document.getElementById('qSubmit').style.display = isLast?'inline-block':'none';
+  renderQuizDots();
+}
+document.getElementById('qPrev').onclick = ()=>{ if(quizIdx>0){quizIdx--; renderQuestion();} };
+document.getElementById('qNextBtn').onclick = ()=>{ if(quizIdx<quizQuestions.length-1){quizIdx++; renderQuestion();} };
+document.getElementById('qSubmit').onclick = ()=> submitQuiz();
+
+function submitQuiz(){
+  if(quizSubmitted) return;
+  quizSubmitted = true;
+  clearInterval(quizTimerIv);
+  const correctCount = quizAnswers.reduce((acc,a,i)=> acc + (a===quizQuestions[i].c?1:0), 0);
+  const score = Math.round((correctCount/quizQuestions.length)*100);
+  const elapsed = Math.round((Date.now()-quizStartTime)/1000);
+  document.getElementById('quizBody').style.display='none';
+  document.getElementById('quizResult').style.display='block';
+  document.getElementById('resScore').textContent = score;
+  document.getElementById('resCorrect').textContent = `${correctCount}/${quizQuestions.length}`;
+  const em = Math.floor(elapsed/60), es=elapsed%60;
+  document.getElementById('resTime').textContent = `${em}:${es<10?'0':''}${es}`;
+  const msgEl = document.getElementById('resMsg');
+  if(score>=80) msgEl.textContent = 'Luar biasa! Pemahamanmu tentang berpikir komputasional sangat kuat.';
+  else if(score>=60) msgEl.textContent = 'Bagus! Kamu sudah paham dasarnya — sedikit lagi jadi ahli.';
+  else msgEl.textContent = 'Lumayan sebagai awal. Coba pelajari lagi 4 pilarnya sebelum ambil lencana.';
+  window.__quizScore = score;
+  document.getElementById('badgeScore').textContent = score;
+  playTone(score>=60?750:300, 0.2);
+}
+document.getElementById('reviewBtn').onclick = ()=>{
+  const btn = document.getElementById('reviewBtn');
+  const showing = btn.dataset.showing==='1';
+  if(!showing){
+    quizIdx=0;
+    document.getElementById('quizResult').style.display='none';
+    document.getElementById('quizBody').style.display='block';
+    document.getElementById('qSubmit').style.display='none';
+    document.getElementById('qNextBtn').style.display='inline-block';
+    document.getElementById('qTimer').textContent='Selesai';
+    renderReviewQuestion();
+    btn.textContent='← Kembali ke Skor';
+    btn.dataset.showing='1';
+    document.getElementById('qNextBtn').onclick = ()=>{ if(quizIdx<quizQuestions.length-1){quizIdx++; renderReviewQuestion();} };
+    document.getElementById('qPrev').onclick = ()=>{ if(quizIdx>0){quizIdx--; renderReviewQuestion();} };
+  } else {
+    document.getElementById('quizBody').style.display='none';
+    document.getElementById('quizResult').style.display='block';
+    btn.textContent='Lihat Pembahasan';
+    btn.dataset.showing='0';
+  }
+};
+function renderReviewQuestion(){
+  const q = quizQuestions[quizIdx];
+  document.getElementById('qCount').textContent = `Soal ${quizIdx+1}/${quizQuestions.length}`;
+  document.getElementById('qText').textContent = q.q;
+  const optWrap = document.getElementById('qOptions');
+  optWrap.innerHTML='';
+  q.o.forEach((opt,i)=>{
+    const b = document.createElement('button');
+    b.className='quiz-opt';
+    if(i===q.c) b.classList.add('correct');
+    else if(i===quizAnswers[quizIdx]) b.classList.add('wrong');
+    b.textContent = opt;
+    b.disabled = true;
+    optWrap.appendChild(b);
+  });
+  document.getElementById('qPrev').disabled = quizIdx===0;
+  renderQuizDots();
+}
+
+/* ===================== PAGE 13 : BADGE ===================== */
+document.getElementById('badgeDate').textContent = new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
+function fireConfetti(){
+  const wrap = document.getElementById('confetti');
+  wrap.innerHTML='';
+  const colors = ['#2563EB','#7C3AED','#93C5FD','#C4B5FD'];
+  for(let i=0;i<40;i++){
+    const el = document.createElement('i');
+    el.style.left = Math.random()*100+'%';
+    el.style.background = colors[Math.floor(Math.random()*colors.length)];
+    el.style.animationDuration = (2+Math.random()*1.5)+'s';
+    el.style.animationDelay = (Math.random()*0.6)+'s';
+    wrap.appendChild(el);
+  }
+  setTimeout(()=>wrap.innerHTML='',3500);
+}
+document.getElementById('printBtn').onclick = ()=>window.print();
+
+/* fire confetti whenever badge page becomes active */
+const origGoTo = goTo;
+goTo = function(n){
+  origGoTo(n);
+  if(n===13) setTimeout(fireConfetti,150);
+};
+</script>
+
+<script src="../../assets/js/api.js"></script>
+<script src="../../assets/js/auth.js"></script>
+<script src="../../assets/js/materi-tracker.js"></script>
+</body>
+</html>
