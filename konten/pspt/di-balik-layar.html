@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Di Balik Layar — Profesi, Bidang Kerja & Level di Industri Broadcasting dan Perfilman</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f0d14;
+    --bg-soft:#1b1826;
+    --bg-card:#221f30;
+    --amber:#f2a93b;
+    --red:#e8483a;
+    --teal:#37c6b0;
+    --violet:#b56cf0;
+    --cream:#f4efe6;
+    --muted:#a79fc0;
+    --line: rgba(244,239,230,0.12);
+    --shadow: 0 20px 50px -20px rgba(0,0,0,0.6);
+    --disp: 'Anton', sans-serif;
+    --body: 'Plus Jakarta Sans', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--cream);
+    font-family:var(--body);
+    line-height:1.6;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{ background:var(--amber); color:#1b1826; }
+  a{color:inherit;}
+  img,svg{display:block; max-width:100%;}
+  h1,h2,h3{font-family:var(--disp); font-weight:400; letter-spacing:0.5px; text-transform:uppercase;}
+  .eyebrow{
+    font-family:var(--mono); font-size:0.72rem; letter-spacing:3px; text-transform:uppercase;
+    color:var(--amber); display:flex; align-items:center; gap:10px; margin-bottom:14px;
+  }
+  .eyebrow::before{content:''; width:26px; height:2px; background:var(--amber); display:inline-block;}
+  .section{ position:relative; padding:110px 8vw; max-width:1240px; margin:0 auto; }
+  .section-inner{ max-width:1240px; margin:0 auto; }
+  .sprockets{
+    position:absolute; left:0; right:0; height:14px; display:flex; justify-content:space-around;
+    align-items:center; opacity:0.35; pointer-events:none;
+  }
+  .sprockets span{ width:8px; height:8px; border-radius:2px; background:var(--muted); }
+  .sprockets.top{ top:0; } .sprockets.bottom{ bottom:0; }
+
+  /* ---------- HUD ---------- */
+  .hud{
+    position:fixed; top:0; left:0; right:0; z-index:500;
+    display:flex; justify-content:space-between; align-items:center;
+    padding:16px 24px; font-family:var(--mono); font-size:0.72rem; letter-spacing:1px;
+    pointer-events:none; mix-blend-mode:difference;
+  }
+  .hud-rec{ display:flex; align-items:center; gap:8px; color:var(--cream); }
+  .hud-dot{ width:8px; height:8px; border-radius:50%; background:var(--red); animation:pulse 1.4s infinite; }
+  @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:0.25;} }
+  .hud-scene{ color:var(--cream); }
+  .progress-rail{
+    position:fixed; top:0; left:0; height:3px; background:linear-gradient(90deg,var(--red),var(--amber));
+    z-index:501; transition:width 0.1s linear; width:0%;
+  }
+
+  /* scene dot nav */
+  .dotnav{
+    position:fixed; right:20px; top:50%; transform:translateY(-50%); z-index:400;
+    display:flex; flex-direction:column; gap:14px;
+  }
+  .dotnav button{
+    width:10px; height:10px; border-radius:50%; border:1px solid var(--muted); background:transparent;
+    cursor:pointer; padding:0; transition:all 0.25s ease; position:relative;
+  }
+  .dotnav button.active{ background:var(--amber); border-color:var(--amber); transform:scale(1.3); }
+  @media (max-width:900px){ .dotnav{ display:none; } }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; position:relative; padding:120px 6vw 80px;
+    background:
+      radial-gradient(ellipse at 50% -10%, rgba(242,169,59,0.18), transparent 60%),
+      radial-gradient(ellipse at 80% 110%, rgba(232,72,58,0.15), transparent 55%),
+      var(--bg);
+  }
+  .clapper{ width:min(340px, 70vw); margin-bottom:38px; }
+  .clapper-top{ transform-origin:8% 92%; animation:clap 1.4s cubic-bezier(.5,-0.4,.5,1.4) 0.3s 1 both; }
+  @keyframes clap{
+    0%{ transform:rotate(-28deg); }
+    55%{ transform:rotate(-28deg); }
+    75%{ transform:rotate(3deg); }
+    100%{ transform:rotate(0deg); }
+  }
+  .hero-slate{
+    font-family:var(--mono); font-size:0.78rem; color:var(--muted); letter-spacing:2px;
+    display:flex; gap:18px; flex-wrap:wrap; justify-content:center; margin-bottom:24px;
+  }
+  .hero-slate b{ color:var(--amber); }
+  .hero h1{
+    font-size:clamp(2.6rem, 8vw, 6rem); line-height:0.95; color:var(--cream);
+    text-shadow:0 0 40px rgba(242,169,59,0.25);
+  }
+  .hero h1 .hi{ color:var(--amber); }
+  .hero p.tag{
+    max-width:560px; margin:26px auto 0; color:var(--muted); font-size:1.05rem;
+  }
+  .scrollcue{
+    margin-top:56px; font-family:var(--mono); font-size:0.7rem; letter-spacing:3px; color:var(--muted);
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+  }
+  .scrollcue .arrow{ animation:bob 1.8s infinite; font-size:1.1rem; color:var(--amber); }
+  @keyframes bob{ 0%,100%{transform:translateY(0);} 50%{transform:translateY(8px);} }
+
+  /* ---------- reveal on scroll ---------- */
+  .reveal{ opacity:0; transform:translateY(36px); transition:opacity 0.8s ease, transform 0.8s ease; }
+  .reveal.in{ opacity:1; transform:translateY(0); }
+  .reveal.d1{ transition-delay:0.08s; } .reveal.d2{ transition-delay:0.18s; } .reveal.d3{ transition-delay:0.28s; }
+  .reveal.d4{ transition-delay:0.38s; } .reveal.d5{ transition-delay:0.48s; } .reveal.d6{ transition-delay:0.58s; }
+
+  /* ---------- konsep / stat ---------- */
+  .konsep-grid{ display:grid; grid-template-columns:1.1fr 0.9fr; gap:60px; align-items:center; }
+  @media (max-width:860px){ .konsep-grid{ grid-template-columns:1fr; } }
+  .konsep h2{ font-size:clamp(2rem,4.4vw,3.2rem); color:var(--cream); margin-bottom:20px; }
+  .konsep p{ color:var(--muted); font-size:1.05rem; max-width:520px; }
+  .stat-card{
+    background:var(--bg-soft); border:1px solid var(--line); border-radius:20px; padding:38px;
+    text-align:center; box-shadow:var(--shadow);
+  }
+  .stat-num{ font-family:var(--disp); font-size:clamp(3rem,7vw,4.6rem); color:var(--amber); line-height:1; }
+  .stat-label{ font-family:var(--mono); font-size:0.75rem; letter-spacing:2px; color:var(--muted); margin-top:10px; text-transform:uppercase; }
+  .film-icons{ display:flex; justify-content:center; gap:18px; margin-top:26px; font-size:1.6rem; }
+  .film-icons span{ animation:float 3s ease-in-out infinite; }
+  .film-icons span:nth-child(2){ animation-delay:0.4s; } .film-icons span:nth-child(3){ animation-delay:0.8s; }
+  @keyframes float{ 0%,100%{transform:translateY(0);} 50%{transform:translateY(-8px);} }
+
+  /* ---------- bidang kerja tabs ---------- */
+  .act-tabs{ display:flex; gap:12px; flex-wrap:wrap; margin-bottom:44px; }
+  .act-tab{
+    font-family:var(--mono); font-size:0.78rem; letter-spacing:1.5px; text-transform:uppercase;
+    padding:14px 22px; border-radius:10px; border:1px solid var(--line); background:var(--bg-soft);
+    color:var(--muted); cursor:pointer; transition:all 0.3s ease; position:relative; overflow:hidden;
+  }
+  .act-tab::before{
+    content:''; position:absolute; inset:0; background:repeating-linear-gradient(45deg, rgba(0,0,0,0.25) 0 6px, transparent 6px 12px);
+    opacity:0; transition:opacity 0.3s ease;
+  }
+  .act-tab.active{ color:var(--bg); background:var(--amber); border-color:var(--amber); }
+  .act-tab.active::before{ opacity:0.12; }
+  .act-panel{ display:none; }
+  .act-panel.active{ display:block; animation:fadein 0.5s ease both; }
+  @keyframes fadein{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+
+  .card-grid{ display:grid; grid-template-columns:repeat(3, 1fr); gap:22px; }
+  @media (max-width:920px){ .card-grid{ grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:600px){ .card-grid{ grid-template-columns:1fr; } }
+
+  .flip-card{ perspective:1200px; height:190px; cursor:pointer; }
+  .flip-inner{
+    position:relative; width:100%; height:100%; transition:transform 0.6s cubic-bezier(.4,.2,.2,1);
+    transform-style:preserve-3d;
+  }
+  .flip-card.flipped .flip-inner{ transform:rotateY(180deg); }
+  .flip-face{
+    position:absolute; inset:0; backface-visibility:hidden; border-radius:16px; padding:22px;
+    display:flex; flex-direction:column; justify-content:center; border:1px solid var(--line);
+  }
+  .flip-front{ background:var(--bg-card); box-shadow:var(--shadow); }
+  .flip-front .role-emoji{ font-size:1.8rem; margin-bottom:10px; }
+  .flip-front h3{ font-family:var(--body); font-weight:700; text-transform:none; letter-spacing:0; font-size:1.05rem; color:var(--cream); }
+  .flip-front .hint{ margin-top:auto; font-family:var(--mono); font-size:0.65rem; color:var(--muted); letter-spacing:1px; }
+  .flip-back{ background:linear-gradient(145deg, var(--amber), #d98f26); color:#231a0a; transform:rotateY(180deg); }
+  .flip-back .tag-label{ font-family:var(--mono); font-size:0.62rem; letter-spacing:1.5px; text-transform:uppercase; opacity:0.75; margin-bottom:6px; }
+  .flip-back p{ font-size:0.86rem; line-height:1.4; }
+  .flip-back .comp{ margin-top:10px; font-size:0.78rem; font-weight:600; }
+
+  /* mood tint per act */
+  .act-panel[data-act="produksi"] .flip-back{ background:linear-gradient(145deg, var(--red), #a8291f); color:var(--cream); }
+  .act-panel[data-act="pasca"] .flip-back{ background:linear-gradient(145deg, var(--teal), #1d7d6d); color:#04211c; }
+  .digital-zone .flip-back{ background:linear-gradient(145deg, var(--violet), #6b2fa0); color:#fff; }
+
+  .scale-row{ display:flex; gap:20px; flex-wrap:wrap; }
+  .scale-node{
+    flex:1; min-width:220px; background:var(--bg-soft); border:1px solid var(--line); border-radius:16px;
+    padding:26px; transition:all 0.3s ease;
+  }
+  .scale-node:hover{ border-color:var(--violet); transform:translateY(-4px); }
+  .scale-node .n{ font-family:var(--mono); color:var(--violet); font-size:0.72rem; letter-spacing:2px; margin-bottom:10px; }
+  .scale-node h3{ font-family:var(--body); text-transform:none; letter-spacing:0; font-size:1.05rem; color:var(--cream); margin-bottom:8px; font-weight:700; }
+  .scale-node p{ color:var(--muted); font-size:0.85rem; }
+
+  /* ---------- ladder ---------- */
+  .ladder-wrap{ display:flex; flex-direction:column-reverse; gap:16px; max-width:720px; margin:0 auto; }
+  .rung{
+    background:var(--bg-soft); border:1px solid var(--line); border-radius:14px; padding:22px 26px;
+    cursor:pointer; transition:all 0.3s ease; position:relative;
+  }
+  .rung:hover, .rung.open{ border-color:var(--amber); background:var(--bg-card); }
+  .rung-head{ display:flex; align-items:center; justify-content:space-between; gap:14px; }
+  .rung-title{ display:flex; align-items:center; gap:14px; }
+  .rung-badge{
+    font-family:var(--mono); font-size:0.7rem; width:34px; height:34px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center; background:var(--amber); color:#231a0a; flex:none;
+  }
+  .rung h3{ font-family:var(--body); font-weight:700; letter-spacing:0; text-transform:none; font-size:1.05rem; color:var(--cream); }
+  .rung-plus{ font-size:1.3rem; color:var(--muted); transition:transform 0.3s ease; }
+  .rung.open .rung-plus{ transform:rotate(45deg); color:var(--amber); }
+  .rung-body{ max-height:0; overflow:hidden; transition:max-height 0.4s ease; }
+  .rung.open .rung-body{ max-height:220px; }
+  .rung-body-inner{ padding-top:16px; color:var(--muted); font-size:0.92rem; }
+  .rung-body-inner .jobs{ margin-top:10px; display:flex; flex-wrap:wrap; gap:8px; }
+  .rung-body-inner .jobs span{
+    font-family:var(--mono); font-size:0.68rem; background:rgba(244,239,230,0.08); padding:5px 10px; border-radius:20px; color:var(--cream);
+  }
+
+  /* ---------- studi kasus org chart ---------- */
+  .org-wrap{ display:flex; flex-direction:column; align-items:center; gap:0; }
+  .org-top{
+    background:var(--amber); color:#231a0a; font-weight:700; padding:16px 26px; border-radius:12px;
+    font-size:0.95rem; position:relative; box-shadow:var(--shadow);
+  }
+  .org-line{ width:2px; height:34px; background:var(--line); }
+  .org-row{ display:flex; gap:16px; flex-wrap:wrap; justify-content:center; position:relative; }
+  .org-node{
+    background:var(--bg-card); border:1px solid var(--line); border-radius:12px; padding:14px 18px;
+    font-size:0.85rem; text-align:center; cursor:pointer; transition:all 0.3s ease; min-width:120px;
+  }
+  .org-node:hover{ border-color:var(--teal); transform:translateY(-4px); }
+  .org-node .role{ font-weight:700; color:var(--cream); }
+  .org-node .info{
+    max-height:0; overflow:hidden; transition:max-height 0.3s ease; color:var(--muted); font-size:0.75rem; margin-top:0;
+  }
+  .org-node:hover .info{ max-height:80px; margin-top:8px; }
+
+  /* ---------- quiz ---------- */
+  .quiz-box{
+    background:var(--bg-soft); border:1px solid var(--line); border-radius:22px; padding:44px;
+    max-width:680px; margin:0 auto; box-shadow:var(--shadow);
+  }
+  .quiz-progress{ display:flex; gap:6px; margin-bottom:26px; }
+  .quiz-progress span{ flex:1; height:4px; border-radius:4px; background:var(--line); }
+  .quiz-progress span.done{ background:var(--teal); }
+  .quiz-progress span.current{ background:var(--amber); }
+  .quiz-q{ font-size:1.15rem; color:var(--cream); margin-bottom:26px; min-height:70px; }
+  .quiz-opts{ display:grid; gap:12px; }
+  .quiz-opt{
+    text-align:left; padding:15px 18px; border-radius:12px; border:1px solid var(--line); background:transparent;
+    color:var(--cream); font-family:var(--body); font-size:0.95rem; cursor:pointer; transition:all 0.25s ease;
+  }
+  .quiz-opt:hover{ border-color:var(--amber); background:rgba(242,169,59,0.08); }
+  .quiz-opt.correct{ background:rgba(55,198,176,0.18); border-color:var(--teal); }
+  .quiz-opt.wrong{ background:rgba(232,72,58,0.18); border-color:var(--red); }
+  .quiz-feedback{ margin-top:18px; font-size:0.9rem; color:var(--muted); min-height:24px; }
+  .quiz-next{
+    margin-top:20px; font-family:var(--mono); font-size:0.78rem; letter-spacing:1.5px; text-transform:uppercase;
+    background:var(--amber); color:#231a0a; border:none; padding:12px 24px; border-radius:10px; cursor:pointer;
+    opacity:0; pointer-events:none; transition:opacity 0.3s ease;
+  }
+  .quiz-next.show{ opacity:1; pointer-events:all; }
+  .quiz-result{ text-align:center; display:none; }
+  .quiz-result.show{ display:block; }
+  .quiz-result .score{ font-family:var(--disp); font-size:4rem; color:var(--amber); }
+  .quiz-result p{ color:var(--muted); margin-top:10px; }
+  .quiz-restart{
+    margin-top:20px; font-family:var(--mono); font-size:0.75rem; background:transparent; color:var(--cream);
+    border:1px solid var(--line); padding:10px 20px; border-radius:10px; cursor:pointer;
+  }
+
+  /* ---------- refleksi ---------- */
+  .journal{
+    background:linear-gradient(180deg, var(--bg-card), var(--bg-soft)); border:1px solid var(--line);
+    border-radius:20px; padding:40px; box-shadow:var(--shadow);
+  }
+  .journal label{ display:block; font-family:var(--mono); font-size:0.72rem; letter-spacing:1.5px; color:var(--amber); text-transform:uppercase; margin:22px 0 10px; }
+  .journal label:first-of-type{ margin-top:0; }
+  .journal textarea{
+    width:100%; background:rgba(244,239,230,0.05); border:1px solid var(--line); border-radius:12px;
+    padding:14px 16px; color:var(--cream); font-family:var(--body); font-size:0.95rem; resize:vertical; min-height:70px;
+  }
+  .journal textarea:focus{ outline:2px solid var(--amber); outline-offset:2px; }
+  .journal-note{ font-size:0.78rem; color:var(--muted); margin-top:18px; }
+
+  /* ---------- glossary / footer ---------- */
+  .footer{ background:var(--bg-soft); padding:90px 8vw 50px; }
+  .glossary{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; max-width:900px; margin:0 auto 60px; }
+  @media (max-width:700px){ .glossary{ grid-template-columns:1fr; } }
+  .gloss-item{ border-bottom:1px solid var(--line); padding:16px 4px; cursor:pointer; }
+  .gloss-item summary{ list-style:none; display:flex; justify-content:space-between; color:var(--cream); font-weight:600; font-size:0.92rem; }
+  .gloss-item summary::-webkit-details-marker{ display:none; }
+  .gloss-item summary::after{ content:'+'; color:var(--amber); font-family:var(--mono); }
+  .gloss-item[open] summary::after{ content:'–'; }
+  .gloss-item p{ margin-top:10px; color:var(--muted); font-size:0.85rem; }
+  .credits{ text-align:center; font-family:var(--mono); font-size:0.72rem; color:var(--muted); letter-spacing:1px; }
+  .credits b{ color:var(--amber); }
+
+  /* focus visibility */
+  a:focus-visible, button:focus-visible, textarea:focus-visible, summary:focus-visible{
+    outline:2px solid var(--amber); outline-offset:3px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; scroll-behavior:auto !important; }
+  }
+
+  h2.section-title{ font-size:clamp(1.9rem, 4.2vw, 3rem); color:var(--cream); margin-bottom:16px; }
+  p.section-sub{ color:var(--muted); max-width:640px; margin-bottom:48px; font-size:1rem; }
+</style>
+</head>
+<body>
+
+<div class="progress-rail" id="progressRail"></div>
+<div class="hud">
+  <a class="back-link" href="#" style="pointer-events:auto; text-decoration:none; color:var(--cream); font-family:var(--mono); font-size:0.72rem; letter-spacing:1px; display:flex; align-items:center; gap:6px;">&larr; KEMBALI</a>
+  <div class="hud-rec"><span class="hud-dot"></span> REC <span id="timecode">00:00:00</span></div>
+  <div class="hud-scene" id="hudScene">ADEGAN 1 / 8 — OPENING</div>
+</div>
+
+<div class="dotnav" id="dotNav"></div>
+
+<!-- ============ HERO ============ -->
+<section class="hero" id="scene-1" data-scene="1" data-label="OPENING">
+  <svg class="clapper" viewBox="0 0 300 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="10" y="70" width="280" height="140" rx="10" fill="#221f30" stroke="#f4efe6" stroke-opacity="0.15"/>
+    <g>
+      <rect x="10" y="70" width="280" height="20" fill="#f4efe6" opacity="0.06"/>
+      <text x="150" y="130" text-anchor="middle" font-family="Anton, sans-serif" font-size="20" fill="#f2a93b" letter-spacing="2">BROADCASTING</text>
+      <text x="150" y="158" text-anchor="middle" font-family="Anton, sans-serif" font-size="20" fill="#f4efe6" letter-spacing="2">&amp; PERFILMAN</text>
+      <text x="150" y="188" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#a79fc0" letter-spacing="1">SCENE 01 · TAKE 01 · KELAS X SMK</text>
+    </g>
+    <g class="clapper-top">
+      <rect x="10" y="20" width="280" height="40" rx="8" fill="#0f0d14" stroke="#f4efe6" stroke-opacity="0.15"/>
+      <g>
+        <polygon points="10,60 45,20 65,20 30,60" fill="#f2a93b"/>
+        <polygon points="65,60 100,20 120,20 85,60" fill="#f4efe6"/>
+        <polygon points="120,60 155,20 175,20 140,60" fill="#f2a93b"/>
+        <polygon points="175,60 210,20 230,20 195,60" fill="#f4efe6"/>
+        <polygon points="230,60 265,20 285,20 250,60" fill="#f2a93b"/>
+      </g>
+    </g>
+  </svg>
+
+  <div class="hero-slate reveal">
+    <span>MAPEL: <b>BROADCASTING &amp; PERFILMAN</b></span>
+    <span>KELAS: <b>X SMK</b></span>
+    <span>TOPIK: <b>PROFESI · BIDANG KERJA · LEVEL</b></span>
+  </div>
+
+  <h1 class="reveal d1">DI BALIK <span class="hi">LAYAR</span></h1>
+  <p class="tag reveal d2">Setiap film, siaran, dan konten yang kamu tonton dibuat oleh puluhan tangan dengan peran berbeda. Yuk, kenali siapa saja mereka — dan temukan peranmu sendiri.</p>
+
+  <div class="scrollcue reveal d3">
+    <span>GULIR UNTUK MULAI</span>
+    <span class="arrow">↓</span>
+  </div>
+</section>
+
+<!-- ============ KONSEP DASAR ============ -->
+<section class="section" id="scene-2" data-scene="2" data-label="SATU FILM, BANYAK TANGAN">
+  <div class="konsep-grid">
+    <div class="konsep reveal">
+      <div class="eyebrow">Konsep Dasar</div>
+      <h2>Satu Film, Banyak Tangan</h2>
+      <p>Industri broadcasting dan perfilman adalah industri yang <b style="color:var(--cream)">kolaboratif</b>. Tidak ada karya yang lahir dari satu orang saja — ada tim besar dengan keahlian berbeda yang bekerja bersama, masing-masing punya <b style="color:var(--amber)">profesi</b>, <b style="color:var(--teal)">bidang kerja</b>, dan <b style="color:var(--red)">level pekerjaan</b> sendiri.</p>
+      <div class="film-icons"><span>🎬</span><span>🎙️</span><span>💡</span><span>🎨</span><span>✂️</span></div>
+    </div>
+    <div class="stat-card reveal d2">
+      <div class="stat-num" id="statCounter">0</div>
+      <div class="stat-label">Orang kru di balik satu film layar lebar</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ BIDANG KERJA ============ -->
+<section class="section" id="scene-3" data-scene="3" data-label="TIGA BABAK PRODUKSI">
+  <div class="eyebrow reveal">Bidang Kerja</div>
+  <h2 class="section-title reveal">Tiga Babak Produksi</h2>
+  <p class="section-sub reveal">Klik tiap kartu untuk membalik dan melihat tugas serta kompetensi profesi tersebut.</p>
+
+  <div class="act-tabs reveal">
+    <button class="act-tab active" data-act="pra">🎬 Pra-Produksi</button>
+    <button class="act-tab" data-act="produksi">📹 Produksi</button>
+    <button class="act-tab" data-act="pasca">✂️ Pasca-Produksi</button>
+  </div>
+
+  <div class="act-panel active" data-act="pra">
+    <div class="card-grid" id="grid-pra"></div>
+  </div>
+  <div class="act-panel" data-act="produksi">
+    <div class="card-grid" id="grid-produksi"></div>
+  </div>
+  <div class="act-panel" data-act="pasca">
+    <div class="card-grid" id="grid-pasca"></div>
+  </div>
+</section>
+
+<!-- ============ LEVEL KARIER ============ -->
+<section class="section" id="scene-4" data-scene="4" data-label="TANGGA KARIER">
+  <div class="eyebrow reveal">Level Pekerjaan</div>
+  <h2 class="section-title reveal">Tangga Karier</h2>
+  <p class="section-sub reveal">Setiap profesi punya jenjang. Klik tiap anak tangga dari bawah untuk melihat ciri-ciri dan contoh jabatannya.</p>
+  <div class="ladder-wrap" id="ladder"></div>
+</section>
+
+<!-- ============ STUDI KASUS ============ -->
+<section class="section" id="scene-5" data-scene="5" data-label="DI BALIK LAYAR SEKOLAH">
+  <div class="eyebrow reveal">Studi Kasus</div>
+  <h2 class="section-title reveal">Kru Film Pendek Sekolah</h2>
+  <p class="section-sub reveal">Arahkan kursor / sentuh tiap peran untuk melihat tanggung jawabnya dalam produksi film pendek 5 menit ala siswa SMK.</p>
+  <div class="org-wrap reveal">
+    <div class="org-top">🎬 Sutradara — memimpin visi cerita</div>
+    <div class="org-line"></div>
+    <div class="org-row" id="orgRow"></div>
+  </div>
+</section>
+
+<!-- ============ KRU PODCAST & YOUTUBE ============ -->
+<section class="section" id="scene-6" data-scene="6" data-label="KRU PODCAST & YOUTUBE">
+  <div class="eyebrow reveal">Industri Digital</div>
+  <h2 class="section-title reveal">Kru di Balik Podcast &amp; YouTube</h2>
+  <p class="section-sub reveal">Bukan cuma film dan TV — podcast serta YouTube juga punya "kru" sendiri, meski sering satu orang merangkap beberapa peran sekaligus. Klik kartu untuk mengenal mereka.</p>
+
+  <div class="card-grid digital-zone" id="grid-digital"></div>
+
+  <div class="scale-block reveal" style="margin-top:64px;">
+    <div class="eyebrow">Dari Solo Sampai Studio</div>
+    <p style="color:var(--muted); max-width:640px; margin-bottom:28px; font-size:0.95rem;">Skala tim podcast/YouTube tumbuh seiring berkembangnya channel — dari satu orang merangkap semua peran, sampai tim dengan spesialisasi masing-masing.</p>
+    <div class="scale-row" id="scaleRow"></div>
+  </div>
+</section>
+
+<!-- ============ KUIS ============ -->
+<section class="section" id="scene-7" data-scene="7" data-label="UJI PEMAHAMANMU">
+  <div class="eyebrow reveal">Main Yuk</div>
+  <h2 class="section-title reveal">Tebak, Siapa Aku?</h2>
+  <p class="section-sub reveal">7 pertanyaan singkat untuk menguji pemahamanmu tentang profesi, bidang kerja, level pekerjaan, hingga kru podcast &amp; YouTube.</p>
+
+  <div class="quiz-box reveal">
+    <div class="quiz-progress" id="quizProgress"></div>
+    <div id="quizActive">
+      <div class="quiz-q" id="quizQ"></div>
+      <div class="quiz-opts" id="quizOpts"></div>
+      <div class="quiz-feedback" id="quizFeedback"></div>
+      <button class="quiz-next" id="quizNext">Lanjut →</button>
+    </div>
+    <div class="quiz-result" id="quizResult">
+      <div class="score" id="quizScore">0/5</div>
+      <p id="quizMsg">Bagus!</p>
+      <button class="quiz-restart" id="quizRestart">Ulangi Kuis</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ REFLEKSI ============ -->
+<section class="section" id="scene-8" data-scene="8" data-label="CATATAN SUTRADARA">
+  <div class="eyebrow reveal">Refleksi</div>
+  <h2 class="section-title reveal">Catatan Sutradara</h2>
+  <p class="section-sub reveal">Tuliskan pemikiranmu sendiri di bawah ini. Catatan ini hanya untuk sesi belajarmu saat ini (tidak tersimpan otomatis).</p>
+  <div class="journal reveal">
+    <label for="r1">Profesi apa yang paling menarik minatmu? Kenapa?</label>
+    <textarea id="r1" placeholder="Tulis di sini..."></textarea>
+    <label for="r2">Keterampilan apa yang perlu kamu latih mulai sekarang?</label>
+    <textarea id="r2" placeholder="Tulis di sini..."></textarea>
+    <label for="r3">Langkah apa yang bisa kamu mulai selama sekolah di SMK ini?</label>
+    <textarea id="r3" placeholder="Tulis di sini..."></textarea>
+    <p class="journal-note">💡 Tip: foto atau salin catatanmu sebelum menutup halaman ini agar tidak hilang.</p>
+  </div>
+</section>
+
+<!-- ============ FOOTER / GLOSARIUM ============ -->
+<div class="footer" id="scene-9" data-scene="9" data-label="CREDITS">
+  <div class="eyebrow reveal" style="justify-content:center;">Glosarium</div>
+  <h2 class="section-title reveal" style="text-align:center;">Istilah Penting</h2>
+  <div class="glossary reveal" id="glossary"></div>
+  <div class="credits">
+    Dibuat untuk mapel <b>Broadcasting &amp; Perfilman</b> — Kelas X SMK<br>
+    Topik: Profesi, Bidang Kerja, dan Level Pekerjaan di Industri Broadcasting dan Perfilman
+  </div>
+  <div id="akhir-materi"></div>
+</div>
+
+<script>
+/* ---------------- DATA ---------------- */
+const roles = {
+  pra: [
+    {emoji:'🎥', name:'Produser', task:'Mencari pendanaan & mengawasi keseluruhan proyek dari sisi bisnis dan kreatif.', comp:'Manajemen proyek, negosiasi, kepemimpinan'},
+    {emoji:'✍️', name:'Penulis Skenario', task:'Menulis naskah cerita, dialog, dan struktur alur.', comp:'Menulis kreatif, riset, story structure'},
+    {emoji:'🎬', name:'Sutradara', task:'Menerjemahkan naskah menjadi visi visual dan memimpin kru.', comp:'Kepemimpinan, visi artistik'},
+    {emoji:'🎭', name:'Casting Director', task:'Mencari dan memilih pemain sesuai karakter.', comp:'Kepekaan akting, jejaring talent'},
+    {emoji:'📍', name:'Location Manager', task:'Mencari, mengurus izin, dan mengelola lokasi syuting.', comp:'Negosiasi, riset lokasi'},
+    {emoji:'🖼️', name:'Storyboard Artist', task:'Menggambarkan visual tiap adegan sebelum syuting.', comp:'Menggambar, imajinasi visual'},
+  ],
+  produksi: [
+    {emoji:'🎞️', name:'Director of Photography', task:'Bertanggung jawab atas keseluruhan visual/sinematografi.', comp:'Estetika visual, teknis kamera & cahaya'},
+    {emoji:'📷', name:'Kameramen', task:'Mengoperasikan kamera sesuai arahan DOP.', comp:'Teknis kamera, komposisi gambar'},
+    {emoji:'💡', name:'Gaffer', task:'Memimpin tim pencahayaan di lokasi syuting.', comp:'Teknis lighting, kelistrikan dasar'},
+    {emoji:'🎙️', name:'Sound Recordist', task:'Merekam audio dialog dan suara ambient di lokasi.', comp:'Teknis audio, kepekaan pendengaran'},
+    {emoji:'🎭', name:'Aktor / Talent', task:'Memerankan karakter atau membawakan acara.', comp:'Akting, olah vokal, ekspresi'},
+    {emoji:'🛋️', name:'Art Director', task:'Menata set, properti, dan kostum sesuai konsep.', comp:'Detail visual, kerajinan tangan'},
+  ],
+  pasca: [
+    {emoji:'✂️', name:'Editor', task:'Menyusun dan memotong gambar menjadi alur cerita utuh.', comp:'Software editing, rasa ritme cerita'},
+    {emoji:'🎨', name:'Colorist', task:'Melakukan pewarnaan gambar agar sesuai mood cerita.', comp:'Kepekaan warna, software grading'},
+    {emoji:'🔊', name:'Sound Designer', task:'Menata efek suara & menyeimbangkan audio akhir.', comp:'Teknis audio digital'},
+    {emoji:'✨', name:'VFX Artist', task:'Membuat dan menggabungkan efek visual digital.', comp:'Software VFX/CGI, ketelitian'},
+    {emoji:'🌀', name:'Motion Graphic Designer', task:'Membuat animasi grafis judul & transisi.', comp:'Desain grafis, animasi digital'},
+    {emoji:'🗣️', name:'Dubbing Artist', task:'Mengisi suara/dialog tambahan pasca-syuting.', comp:'Olah vokal, akting suara'},
+  ]
+};
+
+const digitalRoles = [
+  {emoji:'🎙️', name:'Host / Content Creator', task:'Tampil di depan kamera atau mikrofon, membawakan konten sesuai gaya channel.', comp:'Public speaking, karisma, konsistensi'},
+  {emoji:'🗒️', name:'Content Planner', task:'Merancang ide, riset topik, dan menulis outline atau skrip konten.', comp:'Riset, storytelling, peka tren'},
+  {emoji:'📷', name:'Videographer', task:'Merekam gambar dengan kualitas dan gaya sesuai kebutuhan platform.', comp:'Teknis kamera, komposisi, framing vertikal & horizontal'},
+  {emoji:'✂️', name:'Video Editor', task:'Menyunting video menjadi tayangan berirama cepat dan menarik.', comp:'Software editing, sense of pacing, tren editing'},
+  {emoji:'🎧', name:'Podcast Audio Producer', task:'Mengatur kualitas rekaman dan mixing audio podcast.', comp:'Teknis audio, mixing, mastering dasar'},
+  {emoji:'📊', name:'Channel Manager', task:'Menganalisis performa (views, retention, SEO) dan menyusun strategi konten.', comp:'Analisis data, SEO, perencanaan strategi'},
+];
+
+const scaleStages = [
+  {n:'01', title:'Solo Creator', desc:'Satu orang merangkap semua peran: jadi host, kamerawan, editor, sekaligus admin akun. Cocok untuk pemula yang baru mulai membuat konten.'},
+  {n:'02', title:'Tim Kecil (2–4 Orang)', desc:'Mulai ada pembagian tugas sederhana: satu host, satu editor, satu admin/desainer thumbnail.'},
+  {n:'03', title:'Rumah Produksi Digital', desc:'Tim lengkap dengan spesialisasi masing-masing, seperti channel besar atau agensi konten profesional.'},
+];
+
+const ladder = [
+  {level:'Entry Level', badge:'01', desc:'Baru masuk industri, tugas bersifat teknis/asistensi, dibimbing senior.', jobs:['Runner','Production Assistant','Camera Assistant','Junior Editor']},
+  {level:'Mid Level', badge:'02', desc:'Sudah berpengalaman, mampu bertanggung jawab mandiri atas satu bagian pekerjaan.', jobs:['Kameramen','Editor','Sound Recordist','Asisten Sutradara']},
+  {level:'Senior / Expert', badge:'03', desc:'Memimpin tim dan menjadi pengambil keputusan kreatif/teknis utama.', jobs:['Director of Photography','Senior Editor','Sutradara']},
+  {level:'Eksekutif / Manajerial', badge:'04', desc:'Bertanggung jawab atas keseluruhan proyek, termasuk bisnis dan strategi.', jobs:['Executive Producer','Creative Director','Head of Production']},
+];
+
+const orgChart = [
+  {role:'Penulis Skenario', info:'Menulis naskah cerita film pendek.'},
+  {role:'Kameramen', info:'Mengambil seluruh gambar adegan.'},
+  {role:'Penata Suara', info:'Merekam dialog & suara di lokasi.'},
+  {role:'Editor', info:'Menyunting hasil syuting jadi film utuh.'},
+  {role:'Talent / Pemain', info:'Memerankan tokoh dalam cerita.'},
+];
+
+const glossary = [
+  ['Pra-produksi','Tahap perencanaan sebelum pengambilan gambar dimulai.'],
+  ['Produksi','Tahap pengambilan gambar dan suara di lokasi syuting.'],
+  ['Pasca-produksi','Tahap penyuntingan dan penyelesaian akhir karya.'],
+  ['Credit title','Daftar nama & jabatan kru yang tampil di awal/akhir tayangan.'],
+  ['Shooting schedule','Jadwal rinci pengambilan gambar selama produksi.'],
+  ['Color grading','Proses pewarnaan gambar agar sesuai mood cerita.'],
+  ['Retention','Persentase penonton yang bertahan menonton video sampai durasi tertentu.'],
+  ['SEO Video','Optimasi judul, deskripsi, dan tag agar video mudah ditemukan lewat pencarian.'],
+  ['Podcast','Konten audio (kadang juga video) yang dirilis berseri dan bisa didengarkan kapan saja.'],
+];
+
+const quizData = [
+  {q:'Aku merekam suara dialog & suasana langsung di lokasi syuting. Siapa aku?', opts:['Sound Recordist','Colorist','Editor','Casting Director'], correct:0},
+  {q:'Menyusun potongan gambar menjadi cerita utuh setelah syuting selesai adalah pekerjaan di bidang...', opts:['Produksi','Pra-Produksi','Pasca-Produksi','Distribusi'], correct:2},
+  {q:'Contoh profesi level ENTRY (pemula) di bidang kamera adalah...', opts:['Director of Photography','Camera Assistant','Gaffer','Line Producer'], correct:1},
+  {q:'Memimpin visi artistik film sekaligus mengarahkan pemain & kru adalah tugas...', opts:['Editor','Boom Operator','Sutradara','Colorist'], correct:2},
+  {q:'"Executive Producer" termasuk profesi pada level...', opts:['Entry','Mid','Senior','Eksekutif / Manajerial'], correct:3},
+  {q:'Orang yang menganalisis jumlah penonton, retention, dan SEO pada sebuah channel YouTube disebut...', opts:['Video Editor','Channel Manager','Podcast Audio Producer','Host'], correct:1},
+  {q:'Ciri khas seorang "Solo Creator" dalam produksi konten YouTube adalah...', opts:['Punya tim besar dengan spesialisasi masing-masing','Merangkap semua peran sendirian','Hanya bertugas mengedit video','Hanya menjadi manajer channel'], correct:1},
+];
+
+/* ---------------- RENDER: profession cards ---------------- */
+function renderCards(){
+  Object.keys(roles).forEach(act=>{
+    const grid = document.getElementById('grid-'+act);
+    roles[act].forEach(r=>{
+      const card = document.createElement('div');
+      card.className = 'flip-card';
+      card.innerHTML = `
+        <div class="flip-inner">
+          <div class="flip-face flip-front">
+            <div class="role-emoji">${r.emoji}</div>
+            <h3>${r.name}</h3>
+            <div class="hint">KETUK UNTUK LIHAT TUGAS →</div>
+          </div>
+          <div class="flip-face flip-back">
+            <div class="tag-label">Tugas Utama</div>
+            <p>${r.task}</p>
+            <div class="comp">🧩 ${r.comp}</div>
+          </div>
+        </div>`;
+      card.addEventListener('click', ()=> card.classList.toggle('flipped'));
+      grid.appendChild(card);
+    });
+  });
+}
+
+/* ---------------- RENDER: digital roles (podcast/youtube) ---------------- */
+function renderDigitalCards(){
+  const grid = document.getElementById('grid-digital');
+  digitalRoles.forEach(r=>{
+    const card = document.createElement('div');
+    card.className = 'flip-card';
+    card.innerHTML = `
+      <div class="flip-inner">
+        <div class="flip-face flip-front">
+          <div class="role-emoji">${r.emoji}</div>
+          <h3>${r.name}</h3>
+          <div class="hint">KETUK UNTUK LIHAT TUGAS →</div>
+        </div>
+        <div class="flip-face flip-back">
+          <div class="tag-label">Tugas Utama</div>
+          <p>${r.task}</p>
+          <div class="comp">🧩 ${r.comp}</div>
+        </div>
+      </div>`;
+    card.addEventListener('click', ()=> card.classList.toggle('flipped'));
+    grid.appendChild(card);
+  });
+}
+
+function renderScale(){
+  const row = document.getElementById('scaleRow');
+  scaleStages.forEach(s=>{
+    const node = document.createElement('div');
+    node.className = 'scale-node';
+    node.innerHTML = `<div class="n">${s.n}</div><h3>${s.title}</h3><p>${s.desc}</p>`;
+    row.appendChild(node);
+  });
+}
+
+/* ---------------- RENDER: ladder ---------------- */
+function renderLadder(){
+  const wrap = document.getElementById('ladder');
+  ladder.forEach((step,i)=>{
+    const rung = document.createElement('div');
+    rung.className = 'rung';
+    rung.innerHTML = `
+      <div class="rung-head">
+        <div class="rung-title">
+          <div class="rung-badge">${step.badge}</div>
+          <h3>${step.level}</h3>
+        </div>
+        <div class="rung-plus">+</div>
+      </div>
+      <div class="rung-body"><div class="rung-body-inner">
+        <p>${step.desc}</p>
+        <div class="jobs">${step.jobs.map(j=>`<span>${j}</span>`).join('')}</div>
+      </div></div>`;
+    rung.addEventListener('click', ()=> rung.classList.toggle('open'));
+    wrap.appendChild(rung);
+  });
+}
+
+/* ---------------- RENDER: org chart ---------------- */
+function renderOrg(){
+  const row = document.getElementById('orgRow');
+  orgChart.forEach(n=>{
+    const node = document.createElement('div');
+    node.className = 'org-node';
+    node.innerHTML = `<div class="role">${n.role}</div><div class="info">${n.info}</div>`;
+    row.appendChild(node);
+  });
+}
+
+/* ---------------- RENDER: glossary ---------------- */
+function renderGlossary(){
+  const box = document.getElementById('glossary');
+  glossary.forEach(([term,def])=>{
+    const el = document.createElement('details');
+    el.className = 'gloss-item';
+    el.innerHTML = `<summary>${term}</summary><p>${def}</p>`;
+    box.appendChild(el);
+  });
+}
+
+/* ---------------- TABS ---------------- */
+function initTabs(){
+  const tabs = document.querySelectorAll('.act-tab');
+  const panels = document.querySelectorAll('.act-panel');
+  tabs.forEach(tab=>{
+    tab.addEventListener('click', ()=>{
+      tabs.forEach(t=>t.classList.remove('active'));
+      panels.forEach(p=>p.classList.remove('active'));
+      tab.classList.add('active');
+      document.querySelector('.act-panel[data-act="'+tab.dataset.act+'"]').classList.add('active');
+    });
+  });
+}
+
+/* ---------------- QUIZ ---------------- */
+let quizIndex = 0, quizScore = 0, answered = false;
+function renderQuizProgress(){
+  const p = document.getElementById('quizProgress');
+  p.innerHTML = '';
+  quizData.forEach((_,i)=>{
+    const s = document.createElement('span');
+    if(i < quizIndex) s.classList.add('done');
+    if(i === quizIndex) s.classList.add('current');
+    p.appendChild(s);
+  });
+}
+function renderQuiz(){
+  answered = false;
+  renderQuizProgress();
+  const item = quizData[quizIndex];
+  document.getElementById('quizQ').textContent = item.q;
+  const optsBox = document.getElementById('quizOpts');
+  optsBox.innerHTML = '';
+  document.getElementById('quizFeedback').textContent = '';
+  document.getElementById('quizNext').classList.remove('show');
+  item.opts.forEach((opt,i)=>{
+    const btn = document.createElement('button');
+    btn.className = 'quiz-opt';
+    btn.textContent = opt;
+    btn.addEventListener('click', ()=>{
+      if(answered) return;
+      answered = true;
+      const fb = document.getElementById('quizFeedback');
+      if(i === item.correct){
+        btn.classList.add('correct');
+        quizScore++;
+        fb.textContent = '✅ Tepat sekali!';
+      } else {
+        btn.classList.add('wrong');
+        [...optsBox.children][item.correct].classList.add('correct');
+        fb.textContent = '❌ Belum tepat, jawaban benar sudah ditandai hijau.';
+      }
+      document.getElementById('quizNext').classList.add('show');
+    });
+    optsBox.appendChild(btn);
+  });
+}
+function nextQuiz(){
+  quizIndex++;
+  if(quizIndex >= quizData.length){
+    document.getElementById('quizActive').style.display = 'none';
+    const result = document.getElementById('quizResult');
+    result.classList.add('show');
+    document.getElementById('quizScore').textContent = quizScore + '/' + quizData.length;
+    let msg = 'Terus semangat belajar!';
+    if(quizScore === quizData.length) msg = '🏆 Sempurna! Kamu paham betul dunia broadcasting & perfilman!';
+    else if(quizScore >= quizData.length - 1) msg = '🎉 Hampir sempurna, kerja bagus!';
+    document.getElementById('quizMsg').textContent = msg;
+  } else {
+    renderQuiz();
+  }
+}
+document.getElementById('quizNext').addEventListener('click', nextQuiz);
+document.getElementById('quizRestart').addEventListener('click', ()=>{
+  quizIndex = 0; quizScore = 0;
+  document.getElementById('quizActive').style.display = 'block';
+  document.getElementById('quizResult').classList.remove('show');
+  renderQuiz();
+});
+
+/* ---------------- STAT COUNTER ---------------- */
+function animateCounter(){
+  const el = document.getElementById('statCounter');
+  let current = 0; const target = 250; const duration = 1400;
+  const startTime = performance.now();
+  function tick(now){
+    const progress = Math.min((now - startTime) / duration, 1);
+    current = Math.floor(progress * target);
+    el.textContent = current;
+    if(progress < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+/* ---------------- HUD: timecode + progress + scene ---------------- */
+let seconds = 0;
+setInterval(()=>{
+  seconds++;
+  const h = String(Math.floor(seconds/3600)).padStart(2,'0');
+  const m = String(Math.floor((seconds%3600)/60)).padStart(2,'0');
+  const s = String(seconds%60).padStart(2,'0');
+  document.getElementById('timecode').textContent = `${h}:${m}:${s}`;
+}, 1000);
+
+function updateProgressRail(){
+  const scrollTop = window.scrollY;
+  const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+  const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+  document.getElementById('progressRail').style.width = pct + '%';
+}
+window.addEventListener('scroll', updateProgressRail);
+
+/* ---------------- Dot Nav ---------------- */
+const sceneEls = document.querySelectorAll('[data-scene]');
+function buildDotNav(){
+  const nav = document.getElementById('dotNav');
+  sceneEls.forEach(sec=>{
+    const btn = document.createElement('button');
+    btn.dataset.target = sec.id;
+    btn.title = 'Adegan ' + sec.dataset.scene;
+    btn.addEventListener('click', ()=> sec.scrollIntoView({behavior:'smooth'}));
+    nav.appendChild(btn);
+  });
+}
+
+/* ---------------- IntersectionObserver: reveal + scene tracking ---------------- */
+function initObservers(){
+  const revealEls = document.querySelectorAll('.reveal');
+  const revealObs = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('in'); });
+  }, {threshold:0.15});
+  revealEls.forEach(el=> revealObs.observe(el));
+
+  const sceneObs = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        const scene = e.target.dataset.scene;
+        const label = e.target.dataset.label;
+        document.getElementById('hudScene').textContent = `ADEGAN ${scene} / ${sceneEls.length} — ${label}`;
+        document.querySelectorAll('.dotnav button').forEach(b=>{
+          b.classList.toggle('active', b.dataset.target === e.target.id);
+        });
+      }
+    });
+  }, {threshold:0.5});
+  sceneEls.forEach(el=> sceneObs.observe(el));
+
+  const statObs = new IntersectionObserver((entries, obs)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){ animateCounter(); obs.disconnect(); }
+    });
+  }, {threshold:0.5});
+  statObs.observe(document.getElementById('statCounter'));
+}
+
+/* ---------------- INIT ---------------- */
+renderCards();
+renderDigitalCards();
+renderScale();
+renderLadder();
+renderOrg();
+renderGlossary();
+initTabs();
+renderQuiz();
+buildDotNav();
+initObservers();
+</script>
+
+<script src="../../assets/js/api.js"></script>
+<script src="../../assets/js/auth.js"></script>
+<script src="../../assets/js/materi-tracker.js"></script>
+</body>
+</html>
