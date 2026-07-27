@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CV ATS &amp; Surat Lamaran Kerja — Modul Interaktif Informatika</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b1120;
+    --panel:#121a2e;
+    --panel-alt:#17223b;
+    --border:#26324d;
+    --text:#e7ecf5;
+    --text-muted:#8b96b3;
+    --accent:#2dd4bf;
+    --accent-dim:rgba(45,212,191,.14);
+    --good:#34d399;
+    --good-dim:rgba(52,211,153,.12);
+    --warn:#fbbf24;
+    --warn-dim:rgba(251,191,36,.12);
+    --bad:#f87171;
+    --bad-dim:rgba(248,113,113,.12);
+    --blue:#60a5fa;
+    --blue-dim:rgba(96,165,250,.12);
+    --mono:'JetBrains Mono',monospace;
+    --sans:'Inter',sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);}
+  ::selection{background:var(--accent-dim);color:var(--accent);}
+  a{color:var(--blue);}
+  .app{display:flex;height:100vh;overflow:hidden;}
+
+  /* ===== SIDEBAR ===== */
+  .sidebar{
+    width:280px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--border);
+    display:flex;flex-direction:column;overflow-y:auto;transition:transform .25s ease;z-index:50;
+  }
+  .sidebar-head{padding:20px 18px 14px;border-bottom:1px solid var(--border);}
+  .sidebar-head .tag{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--accent);text-transform:uppercase;}
+  .sidebar-head h1{font-family:var(--mono);font-size:16px;line-height:1.4;margin:6px 0 0;font-weight:700;color:var(--text);}
+  .sidebar-progress{padding:14px 18px;border-bottom:1px solid var(--border);}
+  .sidebar-progress .label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--text-muted);margin-bottom:6px;}
+  .bar{height:6px;background:var(--panel-alt);border-radius:3px;overflow:hidden;}
+  .bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--blue));width:0%;transition:width .4s ease;border-radius:3px;}
+  nav.navlist{padding:10px 10px 20px;flex:1;}
+  .nav-group{margin-bottom:4px;}
+  .nav-item{
+    display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:none;
+    color:var(--text-muted);font-family:var(--mono);font-size:13px;padding:10px 10px;border-radius:8px;cursor:pointer;
+    position:relative;
+  }
+  .nav-item .dot{width:7px;height:7px;border-radius:50%;background:var(--border);flex-shrink:0;transition:background .2s;}
+  .nav-item:hover{background:var(--panel-alt);color:var(--text);}
+  .nav-item.active{background:var(--accent-dim);color:var(--accent);}
+  .nav-item.active .dot{background:var(--accent);box-shadow:0 0 6px var(--accent);}
+  .nav-item.visited .dot{background:var(--good);}
+  .nav-item .num{color:var(--text-muted);font-size:11px;opacity:.7;}
+  .sidebar-foot{padding:14px 18px;border-top:1px solid var(--border);font-family:var(--mono);font-size:10.5px;color:var(--text-muted);line-height:1.6;}
+
+  .sidebar-toggle{display:none;position:fixed;top:14px;left:14px;z-index:60;background:var(--panel);border:1px solid var(--border);color:var(--text);
+    width:40px;height:40px;border-radius:8px;font-size:18px;align-items:center;justify-content:center;cursor:pointer;}
+  .backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:40;}
+
+  /* ===== MAIN ===== */
+  .main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+  .topbar{
+    display:flex;align-items:center;gap:14px;padding:12px 28px;border-bottom:1px solid var(--border);
+    background:var(--panel);flex-shrink:0;
+  }
+  .breadcrumb{font-family:var(--mono);font-size:12.5px;color:var(--text-muted);}
+  .breadcrumb b{color:var(--accent);}
+  .traffic{display:flex;gap:6px;margin-right:4px;}
+  .traffic span{width:10px;height:10px;border-radius:50%;display:block;}
+  .traffic span:nth-child(1){background:#f87171;}
+  .traffic span:nth-child(2){background:#fbbf24;}
+  .traffic span:nth-child(3){background:#34d399;}
+
+  .content-wrap{flex:1;overflow-y:auto;padding:40px 48px 90px;}
+  .content-section{display:none;max-width:900px;margin:0 auto;animation:fadein .35s ease;}
+  .content-section.active{display:block;}
+  @keyframes fadein{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:8px;}
+  h2.sec-title{font-family:var(--mono);font-size:30px;margin:0 0 18px;line-height:1.25;}
+  h3{font-family:var(--sans);font-weight:800;font-size:19px;margin:30px 0 10px;color:var(--text);}
+  h4{font-family:var(--sans);font-weight:700;font-size:16px;margin:20px 0 8px;color:var(--blue);}
+  p{line-height:1.75;color:#cfd7e8;font-size:15px;margin:0 0 14px;}
+  ul,ol{line-height:1.8;color:#cfd7e8;font-size:15px;padding-left:22px;margin:0 0 14px;}
+  li{margin-bottom:6px;}
+  strong{color:var(--text);}
+
+  .callout{border:1px solid var(--border);border-left:4px solid var(--accent);background:var(--panel-alt);border-radius:10px;padding:16px 20px;margin:18px 0;}
+  .callout .callout-title{font-family:var(--mono);font-weight:700;color:var(--accent);font-size:13px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
+  .callout p{margin:0;color:#cfd7e8;}
+
+  .goodline,.badline{display:flex;gap:10px;align-items:flex-start;padding:10px 14px;border-radius:8px;margin-bottom:8px;font-size:14.5px;line-height:1.6;}
+  .goodline{background:var(--good-dim);border:1px solid rgba(52,211,153,.3);}
+  .badline{background:var(--bad-dim);border:1px solid rgba(248,113,113,.3);}
+  .goodline .mk{color:var(--good);font-weight:800;font-family:var(--mono);}
+  .badline .mk{color:var(--bad);font-weight:800;font-family:var(--mono);}
+
+  /* buttons */
+  .btn{font-family:var(--mono);font-size:13px;border:1px solid var(--accent);color:var(--accent);background:var(--accent-dim);
+    padding:11px 20px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:all .15s;}
+  .btn:hover{background:var(--accent);color:#06231e;}
+
+  /* identity cards */
+  .id-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:20px 0 26px;}
+  .id-card{background:var(--panel-alt);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+  .id-card .k{font-family:var(--mono);font-size:10.5px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+  .id-card .v{font-size:14px;color:var(--text);font-weight:600;}
+
+  /* accordion (native details) */
+  details.acc{background:var(--panel-alt);border:1px solid var(--border);border-radius:10px;margin-bottom:10px;overflow:hidden;}
+  details.acc summary{cursor:pointer;padding:14px 18px;font-weight:700;font-size:15px;list-style:none;display:flex;align-items:center;gap:10px;color:var(--text);}
+  details.acc summary::-webkit-details-marker{display:none;}
+  details.acc summary::before{content:"▸";color:var(--accent);font-size:13px;transition:transform .2s;flex-shrink:0;}
+  details.acc[open] summary::before{transform:rotate(90deg);}
+  details.acc summary .step-badge{font-family:var(--mono);font-size:11px;background:var(--accent-dim);color:var(--accent);padding:2px 8px;border-radius:20px;}
+  details.acc .acc-body{padding:0 18px 18px 42px;}
+
+  /* subtabs */
+  .subtabs{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0 4px;}
+  .subtab-btn{font-family:var(--mono);font-size:12.5px;background:var(--panel-alt);border:1px solid var(--border);color:var(--text-muted);
+    padding:8px 14px;border-radius:20px;cursor:pointer;}
+  .subtab-btn.active{background:var(--accent);color:#06231e;border-color:var(--accent);font-weight:700;}
+  .subtab-panel{display:none;padding-top:16px;}
+  .subtab-panel.active{display:block;}
+
+  /* tables */
+  table{width:100%;border-collapse:collapse;margin:14px 0 22px;font-size:14px;}
+  th,td{border:1px solid var(--border);padding:10px 12px;text-align:left;vertical-align:top;line-height:1.6;}
+  th{background:var(--panel-alt);color:var(--accent);font-family:var(--mono);font-size:12px;text-transform:uppercase;letter-spacing:.03em;}
+  td{color:#cfd7e8;}
+  tr:nth-child(even) td{background:rgba(255,255,255,.015);}
+
+  /* keyword chips */
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 20px;}
+  .chip{font-family:var(--mono);font-size:12.5px;background:var(--blue-dim);color:var(--blue);border:1px solid rgba(96,165,250,.35);
+    padding:6px 12px;border-radius:6px;}
+
+  /* checklist */
+  .checklist{background:var(--panel-alt);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin:20px 0;}
+  .checklist-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px;}
+  .checklist-counter{font-family:var(--mono);font-size:13px;color:var(--accent);font-weight:700;}
+  .checklist-bar{height:8px;background:var(--bg);border-radius:4px;overflow:hidden;margin-bottom:16px;}
+  .checklist-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--good));transition:width .35s ease;}
+  .check-item{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px dashed var(--border);}
+  .check-item:last-child{border-bottom:none;}
+  .check-item input{margin-top:4px;width:16px;height:16px;accent-color:var(--accent);flex-shrink:0;cursor:pointer;}
+  .check-item label{font-size:14.5px;color:#cfd7e8;line-height:1.55;cursor:pointer;}
+  .check-item.checked label{color:var(--text-muted);text-decoration:line-through;}
+
+  /* document card (CV / letter) */
+  .doc-card{background:#f4f1ea;color:#1f2937;border-radius:12px;padding:30px 34px;box-shadow:0 10px 30px rgba(0,0,0,.35);font-family:var(--sans);}
+  .doc-card h4{color:#1f2937;font-family:var(--mono);font-size:20px;margin:0 0 4px;}
+  .doc-card .contact{font-size:12.5px;color:#4b5563;font-family:var(--mono);margin-bottom:18px;padding-bottom:14px;border-bottom:2px solid #d97706;}
+  .doc-card h5{font-family:var(--mono);font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:#d97706;margin:18px 0 6px;border-bottom:1px solid #e5e7eb;padding-bottom:4px;}
+  .doc-card p, .doc-card li{color:#374151;font-size:14px;line-height:1.65;}
+  .doc-card ul{padding-left:18px;margin:0 0 6px;}
+  .doc-card .role{font-weight:700;color:#1f2937;font-size:14px;margin-top:8px;}
+  .letter-meta{font-family:var(--mono);font-size:11.5px;background:#eff6ff;color:#1e3a8a;border:1px dashed #93c5fd;border-radius:8px;padding:8px 12px;display:inline-block;margin-bottom:14px;}
+
+  /* timeline */
+  .timeline{position:relative;margin:22px 0;padding-left:34px;}
+  .timeline::before{content:"";position:absolute;left:10px;top:6px;bottom:6px;width:2px;background:var(--border);}
+  .tl-item{position:relative;margin-bottom:14px;}
+  .tl-dot{position:absolute;left:-34px;top:14px;width:22px;height:22px;border-radius:50%;background:var(--panel);border:2px solid var(--accent);
+    display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;color:var(--accent);font-weight:700;}
+
+  /* flashcards */
+  .flash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin:20px 0;}
+  .flashcard{perspective:1000px;height:150px;cursor:pointer;}
+  .flashcard-inner{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d;}
+  .flashcard.flipped .flashcard-inner{transform:rotateY(180deg);}
+  .flash-face{position:absolute;inset:0;backface-visibility:hidden;border-radius:12px;padding:18px;display:flex;flex-direction:column;justify-content:center;border:1px solid var(--border);}
+  .flash-front{background:var(--panel-alt);}
+  .flash-front .term{font-family:var(--mono);font-weight:700;font-size:16px;color:var(--accent);}
+  .flash-front .hint{font-size:11.5px;color:var(--text-muted);margin-top:8px;font-family:var(--mono);}
+  .flash-back{background:var(--accent-dim);transform:rotateY(180deg);}
+  .flash-back p{font-size:13.5px;margin:0;color:var(--text);line-height:1.5;}
+
+  /* error console for kesalahan umum */
+  .console{background:#050a16;border:1px solid var(--border);border-radius:12px;padding:6px 0;margin:20px 0;overflow:hidden;}
+  .console-head{display:flex;gap:6px;padding:10px 16px;border-bottom:1px solid var(--border);}
+  .console-head span{width:10px;height:10px;border-radius:50%;}
+  .console-head span:nth-child(1){background:#f87171;}
+  .console-head span:nth-child(2){background:#fbbf24;}
+  .console-head span:nth-child(3){background:#34d399;}
+  .console-body{padding:16px 20px;}
+  .console-line{font-family:var(--mono);font-size:13px;color:#f87171;margin-bottom:12px;line-height:1.6;}
+  .console-line .lbl{color:#6b7280;}
+  .console-line b{color:#fca5a5;}
+
+  /* hero terminal */
+  .hero{border:1px solid var(--border);border-radius:14px;background:#050a16;margin:22px 0 10px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.4);}
+  .hero-bar{display:flex;align-items:center;gap:8px;padding:10px 16px;background:#0d1526;border-bottom:1px solid var(--border);}
+  .hero-bar span{width:10px;height:10px;border-radius:50%;}
+  .hero-bar span:nth-child(1){background:#f87171;}
+  .hero-bar span:nth-child(2){background:#fbbf24;}
+  .hero-bar span:nth-child(3){background:#34d399;}
+  .hero-bar .fname{font-family:var(--mono);font-size:12px;color:var(--text-muted);margin-left:10px;}
+  .hero-body{padding:22px 24px;font-family:var(--mono);font-size:14px;min-height:190px;}
+  #heroTyped{white-space:pre-wrap;color:#9fe6d9;line-height:1.9;}
+  #heroTyped .g{color:var(--good);}
+  #heroTyped .w{color:var(--warn);}
+  #heroTyped .c{color:var(--text-muted);}
+  .cursor{display:inline-block;width:8px;height:16px;background:var(--accent);animation:blink 1s step-start infinite;vertical-align:middle;}
+  @keyframes blink{50%{opacity:0;}}
+
+  .nav-btns{display:flex;justify-content:space-between;margin-top:44px;padding-top:24px;border-top:1px solid var(--border);}
+
+  .rubric-note{font-size:13px;color:var(--text-muted);font-style:italic;}
+
+  @media(max-width:960px){
+    .sidebar{position:fixed;top:0;bottom:0;left:0;transform:translateX(-100%);}
+    .sidebar.open{transform:translateX(0);}
+    .sidebar-toggle{display:flex;}
+    .content-wrap{padding:70px 20px 70px;}
+    .topbar{padding:12px 16px 12px 60px;}
+    .doc-card{padding:20px 18px;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+  <div class="backdrop" id="backdrop"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-head">
+      <div class="tag">// modul_interaktif.informatika</div>
+      <h1>CV ATS &amp; Surat Lamaran Kerja</h1>
+    </div>
+    <div class="sidebar-progress">
+      <div class="label"><span>progres_belajar</span><span id="progressLabel">0/11</span></div>
+      <div class="bar"><div class="bar-fill" id="progressBar"></div></div>
+    </div>
+    <nav class="navlist" id="navlist">
+      <button class="nav-item" data-target="beranda"><span class="dot"></span><span class="num">00</span> beranda.md</button>
+      <button class="nav-item" data-target="pentingnya"><span class="dot"></span><span class="num">01</span> pendahuluan.md</button>
+      <button class="nav-item" data-target="cv-konsep"><span class="dot"></span><span class="num">02</span> cv_ats_panduan.md</button>
+      <button class="nav-item" data-target="cv-contoh"><span class="dot"></span><span class="num">03</span> cv_ats_contoh.md</button>
+      <button class="nav-item" data-target="surat-panduan"><span class="dot"></span><span class="num">04</span> surat_lamaran_panduan.md</button>
+      <button class="nav-item" data-target="surat-contoh"><span class="dot"></span><span class="num">05</span> surat_lamaran_contoh.md</button>
+      <button class="nav-item" data-target="seleksi"><span class="dot"></span><span class="num">06</span> budaya_seleksi.md</button>
+      <button class="nav-item" data-target="aktivitas"><span class="dot"></span><span class="num">07</span> aktivitas_tugas.md</button>
+      <button class="nav-item" data-target="rubrik"><span class="dot"></span><span class="num">08</span> rubrik_penilaian.md</button>
+      <button class="nav-item" data-target="kesalahan"><span class="dot"></span><span class="num">09</span> kesalahan_umum.md</button>
+      <button class="nav-item" data-target="glosarium"><span class="dot"></span><span class="num">10</span> glosarium.md</button>
+    </nav>
+    <div class="sidebar-foot">Informatika · Kelas X SMK<br>Fase E — Dampak Sosial Informatika &amp; PLB</div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="traffic"><span></span><span></span><span></span></div>
+      <div class="breadcrumb">modul <span id="bcSep">›</span> <b id="bcCurrent">beranda.md</b></div>
+    </div>
+
+    <div class="content-wrap" id="contentWrap">
+
+      <!-- 00 BERANDA -->
+      <section class="content-section active" id="beranda">
+        <div class="eyebrow">Modul Ajar Informatika · Kelas X SMK</div>
+        <h2 class="sec-title">Budaya Kerja Bidang Informatika:<br>CV ATS, Surat Lamaran &amp; Seleksi Kerja</h2>
+        <p>Sebelum lulus dan terjun ke dunia kerja, kamu perlu tahu satu hal penting: <strong>CV yang bagus di mata manusia belum tentu "lolos" di mata mesin.</strong> Modul ini akan membawamu memahami cara kerja sistem seleksi digital, menyusun dokumen lamaran yang profesional, dan mengenal budaya seleksi kerja khas industri teknologi.</p>
+
+        <div class="hero">
+          <div class="hero-bar"><span></span><span></span><span></span><span class="fname">terminal — cek_cv.sh</span></div>
+          <div class="hero-body"><span id="heroTyped"></span><span class="cursor"></span></div>
+        </div>
+
+        <h3>Identitas Modul</h3>
+        <div class="id-grid">
+          <div class="id-card"><div class="k">Mata Pelajaran</div><div class="v">Informatika</div></div>
+          <div class="id-card"><div class="k">Jenjang / Kelas</div><div class="v">SMK · Kelas X (Fase E)</div></div>
+          <div class="id-card"><div class="k">Elemen CP</div><div class="v">Dampak Sosial Informatika &amp; Praktik Lintas Bidang</div></div>
+          <div class="id-card"><div class="k">Alokasi Waktu</div><div class="v">3 × Pertemuan (2 JP/90 menit)</div></div>
+          <div class="id-card"><div class="k">Model Pembelajaran</div><div class="v">Project Based Learning &amp; Diskusi</div></div>
+        </div>
+
+        <h3>Capaian Pembelajaran</h3>
+        <p>Pada akhir fase E, peserta didik memahami dampak sosial dan cara kerja perkembangan teknologi informasi dalam dunia kerja, termasuk memahami budaya kerja (etika profesi, cara melamar kerja, dan komunikasi profesional) sesuai bidang keahliannya, khususnya di bidang Informatika/Rekayasa Perangkat Lunak, Teknik Jaringan, dan Sistem Informasi.</p>
+
+        <h3>Tujuan Pembelajaran</h3>
+        <ol>
+          <li>Menjelaskan konsep dan pentingnya Curriculum Vitae (CV) berformat ATS (<em>Applicant Tracking System</em>) dalam proses rekrutmen di industri Informatika.</li>
+          <li>Menyusun CV format ATS yang sesuai standar industri untuk posisi di bidang IT.</li>
+          <li>Menyusun surat lamaran kerja (<em>cover letter</em>) yang efektif dan profesional untuk posisi di bidang Informatika.</li>
+          <li>Menganalisis tahapan dan budaya seleksi kerja di industri Informatika, mulai dari seleksi berkas hingga wawancara teknis.</li>
+          <li>Menunjukkan sikap kerja profesional (etika digital, kejujuran data diri, dan komunikasi tertulis yang santun) sesuai budaya kerja industri.</li>
+        </ol>
+
+        <button class="btn" onclick="navigateTo('pentingnya')">Mulai Belajar →</button>
+      </section>
+
+      <!-- 01 PENDAHULUAN -->
+      <section class="content-section" id="pentingnya">
+        <div class="eyebrow">Bagian 01</div>
+        <h2 class="sec-title">Mengapa Budaya Kerja Penting bagi Lulusan Informatika?</h2>
+        <p>Lulusan SMK Program Keahlian Informatika tidak hanya dituntut memiliki kemampuan teknis (<em>hard skill</em>) seperti pemrograman, jaringan, atau basis data, tetapi juga harus memahami "budaya kerja" atau etika dan kebiasaan yang berlaku di industri saat melamar dan menjalani proses seleksi kerja.</p>
+        <p>Di era digital, hampir seluruh perusahaan teknologi maupun non-teknologi menggunakan sistem digital untuk menyaring pelamar sebelum wawancara dilakukan oleh manusia. Oleh karena itu, kemampuan menyusun dokumen lamaran yang "ramah mesin" sekaligus profesional menjadi keterampilan wajib bagi calon tenaga kerja bidang Informatika.</p>
+
+        <div class="callout">
+          <div class="callout-title">💡 Tahukah Kamu?</div>
+          <p>Menurut berbagai riset ketenagakerjaan, lebih dari 70% perusahaan menengah-besar di dunia menggunakan software ATS (<em>Applicant Tracking System</em>) untuk menyaring ratusan bahkan ribuan CV secara otomatis sebelum sampai ke tangan HRD. Jika format CV tidak dapat dibaca sistem, CV yang sangat bagus sekalipun bisa langsung tersingkir.</p>
+        </div>
+
+        <div class="nav-btns">
+          <button class="btn" onclick="navigateTo('beranda')">← Beranda</button>
+          <button class="btn" onclick="navigateTo('cv-konsep')">Lanjut: CV Format ATS →</button>
+        </div>
+      </section>
+
+      <!-- 02 CV KONSEP -->
+      <section class="content-section" id="cv-konsep">
+        <div class="eyebrow">Bagian 02</div>
+        <h2 class="sec-title">CV Format ATS — Konsep &amp; Panduan Penyusunan</h2>
+        <p><strong>ATS (Applicant Tracking System)</strong> adalah perangkat lunak yang digunakan perusahaan untuk mengelola proses rekrutmen secara digital: menerima, menyaring, hingga mengurutkan CV pelamar berdasarkan kata kunci (<em>keyword</em>) yang relevan dengan lowongan. Sistem ini "membaca" (<em>parsing</em>) teks dalam CV — jika desainnya terlalu rumit (banyak tabel, kolom, ikon, atau gambar), sistem bisa gagal membaca data penting seperti nama, kontak, atau pengalaman kerja.</p>
+
+        <div class="subtabs" data-group="cvk">
+          <button class="subtab-btn active" data-tab="dasar">🧩 Konsep Dasar</button>
+          <button class="subtab-btn" data-tab="langkah">✍️ Langkah Penulisan</button>
+          <button class="subtab-btn" data-tab="teknis">⚙️ Kaidah Teknis</button>
+          <button class="subtab-btn" data-tab="kata">🔑 Kata Kunci &amp; Kosakata</button>
+        </div>
+
+        <div class="subtab-panel active" data-panel="dasar">
+          <h3>Persiapan Sebelum Menulis CV</h3>
+          <p>Kumpulkan dahulu bahan-bahan berikut agar proses penyusunan CV lebih cepat dan terarah:</p>
+          <ol>
+            <li>Salinan iklan lowongan kerja — catat kata kunci penting di dalamnya.</li>
+            <li>Daftar riwayat pendidikan lengkap (nama sekolah, jurusan, tahun masuk-lulus).</li>
+            <li>Daftar pengalaman PKL/magang/organisasi beserta tanggal dan pencapaian konkret.</li>
+            <li>Daftar sertifikat, pelatihan, atau kompetisi yang pernah diikuti.</li>
+            <li>Daftar proyek/tugas praktik yang relevan, lengkap dengan teknologi yang digunakan.</li>
+            <li>Alamat email profesional (kombinasi nama, hindari alamat yang tidak formal).</li>
+          </ol>
+
+          <h3>Prinsip Utama CV Format ATS</h3>
+          <ul>
+            <li>Gunakan format file .docx atau .pdf yang sederhana (hindari desain dua kolom rumit).</li>
+            <li>Gunakan font standar: Arial, Calibri, atau Times New Roman.</li>
+            <li>Hindari tabel, gambar, ikon, atau grafik berlebihan sebagai pengganti teks.</li>
+            <li>Gunakan judul bagian umum: "Pengalaman Kerja", "Pendidikan", "Keterampilan".</li>
+            <li>Sisipkan kata kunci sesuai deskripsi lowongan kerja (job description).</li>
+            <li>Beri nama file jelas & profesional, contoh: <em>CV_AndiPratama_JuniorWebDeveloper.pdf</em>.</li>
+          </ul>
+
+          <h3>Struktur CV Format ATS</h3>
+          <ol>
+            <li><strong>Data Diri:</strong> nama lengkap, telepon, email profesional, kota domisili, tautan portofolio.</li>
+            <li><strong>Ringkasan Profil:</strong> 2–3 kalimat keahlian utama dan tujuan karier.</li>
+            <li><strong>Keterampilan:</strong> hard skill dan soft skill relevan.</li>
+            <li><strong>Pengalaman:</strong> posisi, instansi, periode, dan poin pencapaian.</li>
+            <li><strong>Pendidikan:</strong> nama sekolah, jurusan, tahun.</li>
+            <li><strong>Sertifikasi &amp; Pelatihan:</strong> sertifikat UKK, kursus daring, dsb.</li>
+            <li><strong>Proyek:</strong> judul, deskripsi, teknologi, tautan repository/demo.</li>
+          </ol>
+        </div>
+
+        <div class="subtab-panel" data-panel="langkah">
+          <p>Klik tiap langkah untuk membuka penjelasan lengkap beserta contoh kalimat yang benar dan yang keliru.</p>
+
+          <details class="acc">
+            <summary><span class="step-badge">Langkah 1</span> Data Diri / Informasi Kontak</summary>
+            <div class="acc-body">
+              <p>Letakkan di bagian paling atas CV, ditulis sebagai teks biasa (bukan di dalam kop/kepala tabel bergambar), agar mudah dibaca sistem ATS. Cantumkan: nama lengkap, nomor telepon aktif, email profesional, kota domisili, dan tautan portofolio (LinkedIn/GitHub) bila ada.</p>
+              <div class="goodline"><span class="mk">✓</span><span>Semarang, Jawa Tengah | 0812-xxxx-xxxx | nama@gmail.com | linkedin.com/in/nama</span></div>
+              <div class="badline"><span class="mk">✗</span><span>Kontak dimasukkan ke dalam gambar/logo atau tabel berkolom banyak sehingga tidak terbaca sistem ATS.</span></div>
+            </div>
+          </details>
+
+          <details class="acc">
+            <summary><span class="step-badge">Langkah 2</span> Ringkasan Profil (Professional Summary)</summary>
+            <div class="acc-body">
+              <p>Tulis 2–3 kalimat yang merangkum: (1) latar belakang pendidikan, (2) keahlian utama yang relevan dengan posisi, dan (3) nilai tambah/motivasi. Sisipkan kata kunci dari iklan lowongan.</p>
+              <div class="goodline"><span class="mk">✓</span><span>"Lulusan SMK Rekayasa Perangkat Lunak dengan penguasaan HTML, CSS, dan JavaScript. Berpengalaman membangun website responsif melalui program PKL. Siap berkontribusi sebagai Junior Web Developer yang teliti dan mudah beradaptasi."</span></div>
+              <div class="badline"><span class="mk">✗</span><span>"Saya adalah orang yang rajin, jujur, dan ingin bekerja di perusahaan Bapak/Ibu." — terlalu umum, tidak memuat kata kunci maupun keahlian spesifik.</span></div>
+            </div>
+          </details>
+
+          <details class="acc">
+            <summary><span class="step-badge">Langkah 3</span> Keterampilan (Skills)</summary>
+            <div class="acc-body">
+              <p>Pisahkan menjadi dua kelompok agar mudah dipindai sistem maupun dibaca rekruter:</p>
+              <ul>
+                <li><strong>Hard skill:</strong> bahasa pemrograman, software, tools, sistem operasi, jaringan, basis data — tulis nama teknologi persis seperti pada iklan lowongan (contoh: "MySQL", bukan "basis data" saja).</li>
+                <li><strong>Soft skill:</strong> maksimal 3–4 poin relevan, contoh: kerja sama tim, manajemen waktu, komunikasi, ketelitian.</li>
+              </ul>
+            </div>
+          </details>
+
+          <details class="acc">
+            <summary><span class="step-badge">Langkah 4</span> Pengalaman (Experience)</summary>
+            <div class="acc-body">
+              <p>Format: <em>Posisi – Nama Instansi (Bulan Tahun – Bulan Tahun)</em>, lalu 2–3 poin pencapaian menggunakan kata kerja aktif (action verb) dan angka/hasil konkret bila memungkinkan.</p>
+              <div class="goodline"><span class="mk">✓</span><span>Membangun 3 halaman landing page responsif menggunakan HTML, CSS, dan JavaScript dalam waktu 2 minggu.</span></div>
+              <div class="badline"><span class="mk">✗</span><span>Membantu-bantu di bagian IT. — tidak jelas apa yang dikerjakan dan hasilnya.</span></div>
+              <p>Belum punya pengalaman kerja formal? Isi dengan pengalaman PKL, organisasi sekolah (OSIS/ekstrakurikuler TIK), atau proyek kelas yang relevan.</p>
+            </div>
+          </details>
+
+          <details class="acc">
+            <summary><span class="step-badge">Langkah 5</span> Pendidikan (Education)</summary>
+            <div class="acc-body">
+              <p>Tulis nama sekolah, jurusan/program keahlian, serta tahun masuk dan (perkiraan) tahun lulus. Boleh ditambahkan nilai rata-rata atau prestasi akademik jika menonjol.</p>
+            </div>
+          </details>
+
+          <details class="acc">
+            <summary><span class="step-badge">Langkah 6</span> Sertifikasi &amp; Pelatihan</summary>
+            <div class="acc-body">
+              <p>Cantumkan sertifikat resmi seperti hasil Uji Kompetensi Keahlian (UKK), sertifikat pelatihan daring, atau sertifikat lomba/kompetisi TIK. Tulis nama sertifikat, penyelenggara, dan tahun.</p>
+            </div>
+          </details>
+
+          <details class="acc">
+            <summary><span class="step-badge">Langkah 7</span> Proyek (Projects)</summary>
+            <div class="acc-body">
+              <p>Bagian penting khusus bidang Informatika, sebagai bukti kemampuan praktik. Tulis judul proyek, deskripsi singkat (apa yang dibangun dan untuk apa), teknologi yang dipakai, serta tautan repository/demo jika ada.</p>
+            </div>
+          </details>
+        </div>
+
+        <div class="subtab-panel" data-panel="teknis">
+          <h3>Kaidah Teknis Agar CV Ramah ATS</h3>
+          <div class="goodline"><span class="mk">✓</span><span>Simpan file dalam format .docx atau .pdf berbasis teks (bukan hasil pindai/scan gambar).</span></div>
+          <div class="goodline"><span class="mk">✓</span><span>Gunakan font standar: Arial, Calibri, atau Times New Roman, ukuran 10–12 pt.</span></div>
+          <div class="goodline"><span class="mk">✓</span><span>Gunakan judul bagian umum: "Pengalaman", "Pendidikan", "Keterampilan" — bukan istilah yang terlalu kreatif.</span></div>
+          <div class="goodline"><span class="mk">✓</span><span>Gunakan bullet point sederhana (• atau -), hindari simbol dekoratif.</span></div>
+          <div class="goodline"><span class="mk">✓</span><span>Sisipkan kata kunci yang sama persis dengan yang tertulis di iklan lowongan kerja.</span></div>
+          <div class="goodline"><span class="mk">✓</span><span>Beri nama file yang jelas, contoh: CV_AndikaPratama_JuniorWebDeveloper.pdf.</span></div>
+          <div class="badline"><span class="mk">✗</span><span>Jangan menempatkan data diri, skill, atau pengalaman di dalam tabel berkolom, text box, header/footer, atau gambar — banyak sistem ATS tidak dapat membacanya.</span></div>
+          <div class="badline"><span class="mk">✗</span><span>Jangan menggunakan foto profil, ikon, atau grafik radar/bar untuk menunjukkan level skill — sistem tidak dapat menilai grafik sebagai data.</span></div>
+          <div class="badline"><span class="mk">✗</span><span>Jangan menggunakan singkatan tidak umum tanpa penjelasan (tulis "JavaScript (JS)", bukan "JS" saja).</span></div>
+
+          <h3>Checklist Sebelum Mengirim CV</h3>
+          <div class="checklist" id="checklistCV">
+            <div class="checklist-top"><span>Centang setiap poin yang sudah kamu periksa</span><span class="checklist-counter">0 dari 6 selesai</span></div>
+            <div class="checklist-bar"><div class="checklist-bar-fill"></div></div>
+            <div class="check-item"><input type="checkbox" id="c1"><label for="c1">Nama file sudah profesional dan jelas</label></div>
+            <div class="check-item"><input type="checkbox" id="c2"><label for="c2">Semua kontak (email, nomor telepon) sudah benar dan aktif</label></div>
+            <div class="check-item"><input type="checkbox" id="c3"><label for="c3">Kata kunci pada iklan lowongan sudah tercermin dalam CV</label></div>
+            <div class="check-item"><input type="checkbox" id="c4"><label for="c4">Tidak ada salah ketik (typo) atau kesalahan tata bahasa</label></div>
+            <div class="check-item"><input type="checkbox" id="c5"><label for="c5">Format file sederhana, tanpa tabel/kolom yang rumit</label></div>
+            <div class="check-item"><input type="checkbox" id="c6"><label for="c6">Panjang CV proporsional (idealnya 1 halaman untuk fresh graduate)</label></div>
+          </div>
+        </div>
+
+        <div class="subtab-panel" data-panel="kata">
+          <h3>Kata Kunci (Keyword) per Posisi Bidang Informatika</h3>
+          <table>
+            <tr><th>Posisi</th><th>Contoh Kata Kunci yang Perlu Disisipkan</th></tr>
+            <tr><td><strong>Junior Web Developer</strong></td><td>HTML, CSS, JavaScript, PHP, MySQL, Bootstrap, Git, GitHub, responsive design, REST API</td></tr>
+            <tr><td><strong>IT Support / Teknisi Jaringan</strong></td><td>Troubleshooting, LAN/WAN, TCP/IP, instalasi jaringan, maintenance perangkat keras, Windows/Linux, Microsoft Office, technical support</td></tr>
+            <tr><td><strong>Junior Data Analyst / Staf IT</strong></td><td>Microsoft Excel, entri data, database, SQL dasar, laporan data, ketelitian, pengolahan data, Google Sheets</td></tr>
+          </table>
+
+          <h3>Kata Kerja Aktif (Action Verbs) untuk CV</h3>
+          <p>Gunakan kata kerja berikut di awal poin pengalaman/proyek agar CV terlihat aktif dan meyakinkan:</p>
+          <div class="chips">
+            <span class="chip">Membangun</span><span class="chip">Merancang</span><span class="chip">Mengembangkan</span><span class="chip">Membuat</span>
+            <span class="chip">Menyusun</span><span class="chip">Memperbaiki</span><span class="chip">Mengatasi</span><span class="chip">Menyelesaikan</span>
+            <span class="chip">Mengelola</span><span class="chip">Memelihara</span><span class="chip">Menganalisis</span><span class="chip">Menguji</span>
+            <span class="chip">Mengonfigurasi</span><span class="chip">Menginstal</span><span class="chip">Mendokumentasikan</span><span class="chip">Membantu</span>
+            <span class="chip">Berkontribusi</span><span class="chip">Berkoordinasi</span><span class="chip">Melatih</span><span class="chip">Mempresentasikan</span>
+          </div>
+        </div>
+
+        <div class="nav-btns">
+          <button class="btn" onclick="navigateTo('pentingnya')">← Pendahuluan</button>
+          <button class="btn" onclick="navigateTo('cv-contoh')">Lanjut: Contoh CV →</button>
+        </div>
+      </section>
+
+      <!-- 03 CV CONTOH -->
+      <section class="content-section" id="cv-contoh">
+        <div class="eyebrow">Bagian 03</div>
+        <h2 class="sec-title">Contoh Lengkap CV Format ATS</h2>
+        <p>Berikut tiga contoh CV format ATS untuk tiga posisi berbeda di bidang Informatika. Klik tab untuk berpindah contoh.</p>
+
+        <div class="subtabs" data-group="cvc">
+          <button class="subtab-btn active" data-tab="web">💻 Junior Web Developer</button>
+          <button class="subtab-btn" data-tab="itsupport">🌐 IT Support / Teknisi Jaringan</button>
+          <button class="subtab-btn" data-tab="data">📊 Junior Data Analyst</button>
+        </div>
+
+        <div class="subtab-panel active" data-panel="web">
+          <div class="doc-card">
+            <h4>ANDIKA PRATAMA</h4>
+            <div class="contact">Semarang, Jawa Tengah | 0812-xxxx-xxxx | andika.pratama@email.com | linkedin.com/in/andikapratama | github.com/andikap</div>
+            <h5>Ringkasan Profil</h5>
+            <p>Lulusan SMK Rekayasa Perangkat Lunak dengan penguasaan HTML, CSS, JavaScript, dan dasar PHP. Terbiasa bekerja dalam tim menggunakan Git, memiliki ketelitian tinggi, dan siap berkontribusi sebagai Junior Web Developer.</p>
+            <h5>Keterampilan</h5>
+            <ul><li>Hard Skill: HTML5, CSS3, JavaScript, PHP dasar, MySQL, Git &amp; GitHub, Bootstrap</li><li>Soft Skill: Kerja sama tim, manajemen waktu, komunikasi, pemecahan masalah</li></ul>
+            <h5>Pengalaman</h5>
+            <p class="role">Praktik Kerja Lapangan (PKL) – CV Digital Karya, Semarang (Jan 2026 – Mar 2026)</p>
+            <ul><li>Membangun 3 halaman landing page responsif menggunakan HTML, CSS, dan JavaScript.</li><li>Memperbaiki bug pada sistem informasi internal berbasis PHP-MySQL bersama tim developer.</li></ul>
+            <h5>Pendidikan</h5>
+            <p>SMK Negeri 1 Contoh – Rekayasa Perangkat Lunak (2024 – 2027)</p>
+            <h5>Sertifikasi</h5>
+            <ul><li>Sertifikat Uji Kompetensi Keahlian (UKK) Pemrograman Web, 2026</li><li>Sertifikat Pelatihan "Dasar Pemrograman JavaScript" – Platform Daring, 2026</li></ul>
+            <h5>Proyek</h5>
+            <p class="role">Aplikasi Absensi Sederhana Berbasis Web — github.com/andikap/absensi-web</p>
+            <ul><li>Dibangun menggunakan PHP dan MySQL untuk mencatat kehadiran siswa secara digital.</li></ul>
+          </div>
+        </div>
+
+        <div class="subtab-panel" data-panel="itsupport">
+          <div class="doc-card">
+            <h4>BAGAS SETIAWAN</h4>
+            <div class="contact">Kudus, Jawa Tengah | 0813-xxxx-xxxx | bagas.setiawan@email.com | linkedin.com/in/bagassetiawan</div>
+            <h5>Ringkasan Profil</h5>
+            <p>Lulusan SMK Teknik Komputer dan Jaringan dengan kemampuan instalasi jaringan LAN/WAN, troubleshooting perangkat keras, dan pengelolaan sistem operasi Windows dan Linux. Berpengalaman menangani gangguan teknis melalui program PKL di bidang IT support.</p>
+            <h5>Keterampilan</h5>
+            <ul><li>Hard Skill: Instalasi &amp; konfigurasi jaringan LAN/WAN, TCP/IP, troubleshooting hardware, Windows Server dasar, Linux dasar, Microsoft Office</li><li>Soft Skill: Komunikasi, kesabaran melayani pengguna, kerja di bawah tekanan, disiplin</li></ul>
+            <h5>Pengalaman</h5>
+            <p class="role">Praktik Kerja Lapangan (PKL) – Bagian IT Support, RSUD Contoh, Kudus (Jul 2025 – Sep 2025)</p>
+            <ul><li>Menangani rata-rata 5–8 laporan gangguan komputer dan jaringan setiap minggu.</li><li>Melakukan instalasi ulang sistem operasi dan aplikasi perkantoran pada 20 unit komputer.</li><li>Membantu pemasangan kabel jaringan dan konfigurasi access point di ruang pelayanan.</li></ul>
+            <h5>Pendidikan</h5>
+            <p>SMK Negeri 2 Contoh – Teknik Komputer dan Jaringan (2024 – 2027)</p>
+            <h5>Sertifikasi</h5>
+            <ul><li>Sertifikat Uji Kompetensi Keahlian (UKK) Teknik Jaringan Komputer, 2026</li><li>Sertifikat Pelatihan "Dasar Administrasi Jaringan" – Platform Daring, 2025</li></ul>
+            <h5>Proyek</h5>
+            <p class="role">Simulasi Jaringan Kantor Kecil Menggunakan Cisco Packet Tracer</p>
+            <ul><li>Merancang topologi jaringan sederhana untuk kantor dengan 3 ruangan dan konfigurasi IP address.</li></ul>
+          </div>
+        </div>
+
+        <div class="subtab-panel" data-panel="data">
+          <div class="doc-card">
+            <h4>CITRA AMELIA</h4>
+            <div class="contact">Purwodadi, Jawa Tengah | 0815-xxxx-xxxx | citra.amelia@email.com | linkedin.com/in/citraamelia</div>
+            <h5>Ringkasan Profil</h5>
+            <p>Lulusan SMK Sistem Informasi dengan kemampuan pengolahan data menggunakan Microsoft Excel dan dasar SQL. Teliti, terbiasa menyusun laporan data, dan siap berkontribusi sebagai Junior Data Analyst atau Staf Administrasi IT.</p>
+            <h5>Keterampilan</h5>
+            <ul><li>Hard Skill: Microsoft Excel (rumus &amp; pivot table), Google Sheets, SQL dasar, entri dan validasi data, pembuatan laporan</li><li>Soft Skill: Ketelitian, manajemen waktu, komunikasi, kemampuan bekerja dengan target</li></ul>
+            <h5>Pengalaman</h5>
+            <p class="role">Praktik Kerja Lapangan (PKL) – Bagian Administrasi Data, Koperasi Sejahtera, Purwodadi (Jan 2026 – Mar 2026)</p>
+            <ul><li>Mengelola dan memvalidasi data transaksi lebih dari 500 baris data anggota koperasi per bulan.</li><li>Menyusun laporan rekap bulanan menggunakan Microsoft Excel dengan rumus dan pivot table.</li></ul>
+            <h5>Pendidikan</h5>
+            <p>SMK Negeri 3 Contoh – Sistem Informatika/Manajemen Informatika (2024 – 2027)</p>
+            <h5>Sertifikasi</h5>
+            <ul><li>Sertifikat Uji Kompetensi Keahlian (UKK) Pengolahan Data, 2026</li><li>Sertifikat Pelatihan "Microsoft Excel untuk Analisis Data Dasar", 2025</li></ul>
+            <h5>Proyek</h5>
+            <p class="role">Dashboard Rekap Nilai Siswa Berbasis Excel</p>
+            <ul><li>Membuat dashboard otomatis menggunakan rumus dan pivot table untuk merekap nilai satu angkatan.</li></ul>
+          </div>
+        </div>
+
+        <div class="nav-btns">
+          <button class="btn" onclick="navigateTo('cv-konsep')">← Panduan CV ATS</button>
+          <button class="btn" onclick="navigateTo('surat-panduan')">Lanjut: Surat Lamaran →</button>
+        </div>
+      </section>
+
+      <!-- 04 SURAT PANDUAN -->
+      <section class="content-section" id="surat-panduan">
+        <div class="eyebrow">Bagian 04</div>
+        <h2 class="sec-title">Panduan Menyusun Surat Lamaran Kerja</h2>
+        <p>Surat lamaran kerja adalah dokumen pengantar yang menyertai CV, berisi perkenalan diri, posisi yang dilamar, alasan melamar, serta keunggulan diri secara ringkas. Berbeda dengan CV yang bersifat data, surat lamaran bersifat naratif dan personal — menjadi kesempatan pelamar untuk "bercerita" mengapa ia layak dipertimbangkan.</p>
+
+        <h3>Struktur &amp; Panduan Menulis Tiap Bagian</h3>
+        <details class="acc">
+          <summary><span class="step-badge">1</span> Tempat dan Tanggal</summary>
+          <div class="acc-body"><p>Ditulis di kanan/kiri atas surat, contoh: <em>Semarang, 27 Juli 2026</em>. Untuk lamaran via email, bagian ini bisa dihilangkan karena tanggal sudah tercatat otomatis.</p></div>
+        </details>
+        <details class="acc">
+          <summary><span class="step-badge">2</span> Alamat Tujuan</summary>
+          <div class="acc-body"><p>Tulis nama penerima (jika diketahui) atau jabatan "HRD/Tim Rekrutmen", nama perusahaan, dan alamat singkat perusahaan.</p></div>
+        </details>
+        <details class="acc">
+          <summary><span class="step-badge">3</span> Salam Pembuka</summary>
+          <div class="acc-body"><p>Gunakan salam formal, contoh: "Dengan hormat,". Jika mengetahui nama penerima: "Yth. Bapak/Ibu [Nama],".</p></div>
+        </details>
+        <details class="acc">
+          <summary><span class="step-badge">4</span> Paragraf Pembuka</summary>
+          <div class="acc-body">
+            <p>Perkenalkan diri secara singkat, sebutkan posisi yang dilamar, dan cantumkan sumber informasi lowongan.</p>
+            <div class="goodline"><span class="mk">✓</span><span>"Saya yang bertanda tangan di bawah ini, Andika Pratama, bermaksud mengajukan lamaran untuk posisi Junior Web Developer yang saya ketahui melalui laman resmi perusahaan."</span></div>
+          </div>
+        </details>
+        <details class="acc">
+          <summary><span class="step-badge">5</span> Paragraf Isi</summary>
+          <div class="acc-body"><p>Jelaskan latar belakang pendidikan, keahlian utama, serta pengalaman relevan (PKL/proyek/organisasi) secara ringkas namun meyakinkan. Hindari mengulang seluruh isi CV kata demi kata; pilih 2–3 poin paling relevan dengan posisi yang dilamar.</p></div>
+        </details>
+        <details class="acc">
+          <summary><span class="step-badge">6</span> Paragraf Penutup</summary>
+          <div class="acc-body"><p>Sampaikan harapan untuk dipanggil pada tahap seleksi berikutnya, ucapan terima kasih, dan kesediaan untuk dihubungi.</p></div>
+        </details>
+        <details class="acc">
+          <summary><span class="step-badge">7</span> Salam Penutup &amp; Tanda Tangan</summary>
+          <div class="acc-body"><p>Gunakan "Hormat saya," diikuti nama lengkap. Untuk surat cetak, sertakan tanda tangan basah di atas nama.</p></div>
+        </details>
+
+        <h3>Perbedaan Surat Lamaran Cetak dan via Email</h3>
+        <table>
+          <tr><th>Aspek</th><th>Surat Lamaran Cetak</th><th>Surat Lamaran via Email</th></tr>
+          <tr><td>Format</td><td>Dicetak di kertas, lengkap dengan kop dan tanda tangan basah</td><td>Ditulis pada badan email, singkat (2–4 paragraf)</td></tr>
+          <tr><td>Lampiran</td><td>CV, ijazah, sertifikat disertakan sebagai lampiran fisik</td><td>CV dan dokumen pendukung dilampirkan sebagai file PDF</td></tr>
+          <tr><td>Subjek</td><td>Tidak ada (tertulis "Perihal" di dalam surat)</td><td>Subjek email diisi jelas, contoh: Lamaran_AndikaPratama_JuniorWebDeveloper</td></tr>
+        </table>
+
+        <h3>Checklist Surat Lamaran Kerja</h3>
+        <div class="checklist" id="checklistSurat">
+          <div class="checklist-top"><span>Centang setiap poin yang sudah kamu periksa</span><span class="checklist-counter">0 dari 5 selesai</span></div>
+          <div class="checklist-bar"><div class="checklist-bar-fill"></div></div>
+          <div class="check-item"><input type="checkbox" id="s1"><label for="s1">Posisi yang dilamar disebutkan jelas dan tepat (sesuai iklan lowongan)</label></div>
+          <div class="check-item"><input type="checkbox" id="s2"><label for="s2">Bahasa formal dan sopan, tanpa singkatan tidak baku</label></div>
+          <div class="check-item"><input type="checkbox" id="s3"><label for="s3">Tidak ada salah ketik nama perusahaan/posisi</label></div>
+          <div class="check-item"><input type="checkbox" id="s4"><label for="s4">Panjang surat proporsional (maks. 1 halaman/tidak bertele-tele)</label></div>
+          <div class="check-item"><input type="checkbox" id="s5"><label for="s5">Mencantumkan cara menghubungi kembali (nomor telepon/email)</label></div>
+        </div>
+
+        <div class="nav-btns">
+          <button class="btn" onclick="navigateTo('cv-contoh')">← Contoh CV</button>
+          <button class="btn" onclick="navigateTo('surat-contoh')">Lanjut: Contoh Surat →</button>
+        </div>
+      </section>
+
+      <!-- 05 SURAT CONTOH -->
+      <section class="content-section" id="surat-contoh">
+        <div class="eyebrow">Bagian 05</div>
+        <h2 class="sec-title">Contoh Lengkap Surat Lamaran Kerja</h2>
+        <p>Empat contoh surat lamaran untuk posisi dan format pengiriman yang berbeda-beda.</p>
+
+        <div class="subtabs" data-group="surc">
+          <button class="subtab-btn active" data-tab="a">📄 Web Developer (Cetak)</button>
+          <button class="subtab-btn" data-tab="b">📄 IT Support (Cetak)</button>
+          <button class="subtab-btn" data-tab="c">✉️ IT Support (Email)</button>
+          <button class="subtab-btn" data-tab="d">✉️ Data Analyst (Email)</button>
+        </div>
+
+        <div class="subtab-panel active" data-panel="a">
+          <div class="doc-card">
+            <p>Semarang, 27 Juli 2026</p>
+            <p>Yth. Bapak/Ibu HRD<br>PT Solusi Teknologi Nusantara<br>Jl. Merdeka No. 10, Semarang</p>
+            <p>Dengan hormat,</p>
+            <p>Saya yang bertanda tangan di bawah ini, Andika Pratama, bermaksud mengajukan lamaran pekerjaan untuk posisi Junior Web Developer yang saya ketahui informasinya melalui laman resmi perusahaan. Saya adalah lulusan SMK Program Keahlian Rekayasa Perangkat Lunak dengan pengalaman praktik kerja lapangan di bidang pengembangan website.</p>
+            <p>Selama menempuh pendidikan, saya telah mempelajari HTML, CSS, JavaScript, dan dasar PHP, serta terbiasa menggunakan Git untuk kerja tim. Melalui program PKL, saya berkesempatan membangun beberapa halaman web responsif dan membantu memperbaiki sistem informasi berbasis PHP-MySQL.</p>
+            <p>Bersama surat ini, saya lampirkan Curriculum Vitae, fotokopi ijazah, serta sertifikat pendukung sebagai bahan pertimbangan Bapak/Ibu. Besar harapan saya untuk dapat mengikuti tahap seleksi selanjutnya.</p>
+            <p>Atas perhatian dan kesempatan yang diberikan, saya ucapkan terima kasih.</p>
+            <p>Hormat saya,<br><strong>Andika Pratama</strong></p>
+          </div>
+        </div>
+
+        <div class="subtab-panel" data-panel="b">
+          <div class="doc-card">
+            <p>Semarang, 27 Juli 2026</p>
+            <p>Yth. Bapak/Ibu HRD<br>PT Solusi Teknologi Nusantara<br>Jl. Merdeka No. 10, Semarang</p>
+            <p>Dengan hormat,</p>
+            <p>Saya yang bertanda tangan di bawah ini, Bagas Setiawan, bermaksud mengajukan lamaran pekerjaan untuk posisi IT Support yang saya ketahui informasinya melalui laman resmi perusahaan. Saya adalah lulusan SMK Program Keahlian Teknik Komputer dan Jaringan dengan pengalaman praktik kerja lapangan di bidang penanganan gangguan komputer dan jaringan.</p>
+            <p>Selama menempuh pendidikan, saya telah mempelajari instalasi dan troubleshooting jaringan LAN/WAN, serta pengelolaan sistem operasi Windows dan Linux. Melalui program PKL, saya terbiasa melayani pengguna dan menangani gangguan teknis secara sabar dan komunikatif.</p>
+            <p>Bersama surat ini, saya lampirkan Curriculum Vitae, fotokopi ijazah, serta sertifikat pendukung sebagai bahan pertimbangan Bapak/Ibu. Besar harapan saya untuk dapat mengikuti tahap seleksi selanjutnya dan menjelaskan lebih lanjut mengenai kompetensi yang saya miliki.</p>
+            <p>Atas perhatian dan kesempatan yang diberikan, saya ucapkan terima kasih.</p>
+            <p>Hormat saya,<br><strong>Bagas Setiawan</strong></p>
+          </div>
+        </div>
+
+        <div class="subtab-panel" data-panel="c">
+          <div class="doc-card">
+            <span class="letter-meta">Subjek Email: Lamaran_BagasSetiawan_ITSupport</span>
+            <p>Yth. Bapak/Ibu Tim Rekrutmen PT Nusantara Digital,</p>
+            <p>Perkenalkan, saya Bagas Setiawan, lulusan SMK Teknik Komputer dan Jaringan. Melalui email ini, saya bermaksud melamar untuk posisi IT Support yang saya ketahui informasinya dari akun Instagram resmi perusahaan.</p>
+            <p>Saya memiliki kemampuan dasar instalasi dan troubleshooting jaringan LAN/WAN serta pengelolaan sistem operasi Windows dan Linux, yang telah saya praktikkan langsung selama PKL di bagian IT Support RSUD Contoh. Saya juga terbiasa melayani pengguna dengan sabar dan komunikatif saat menangani gangguan teknis.</p>
+            <p>Bersama email ini, saya lampirkan CV, ijazah, dan sertifikat pendukung dalam format PDF. Saya sangat berharap dapat diberikan kesempatan mengikuti proses seleksi lebih lanjut.</p>
+            <p>Terima kasih atas perhatian Bapak/Ibu.</p>
+            <p>Hormat saya,<br>Bagas Setiawan<br>0813-xxxx-xxxx</p>
+          </div>
+        </div>
+
+        <div class="subtab-panel" data-panel="d">
+          <div class="doc-card">
+            <span class="letter-meta">Subjek Email: Lamaran_CitraAmelia_JuniorDataAnalyst</span>
+            <p>Yth. Bapak/Ibu HRD Koperasi Maju Bersama,</p>
+            <p>Perkenalkan, saya Citra Amelia, lulusan SMK Program Keahlian Sistem Informatika. Saya bermaksud melamar untuk posisi Junior Data Analyst / Staf IT sesuai informasi lowongan yang saya peroleh dari guru pembimbing Bursa Kerja Khusus (BKK) sekolah.</p>
+            <p>Saya memiliki kemampuan mengolah data menggunakan Microsoft Excel, termasuk penggunaan rumus dan pivot table, serta pemahaman dasar SQL. Selama PKL, saya terbiasa memvalidasi dan merekap ratusan data transaksi setiap bulan secara teliti dan tepat waktu.</p>
+            <p>Bersama email ini, saya lampirkan CV, ijazah, dan sertifikat pendukung dalam format PDF sebagai bahan pertimbangan. Saya sangat terbuka untuk mengikuti tahap seleksi berikutnya.</p>
+            <p>Terima kasih atas perhatian dan kesempatan yang diberikan.</p>
+            <p>Hormat saya,<br>Citra Amelia<br>0815-xxxx-xxxx</p>
+          </div>
+        </div>
+
+        <div class="callout" style="margin-top:22px;">
+          <div class="callout-title">📌 Catatan Penting</div>
+          <p>Untuk lamaran melalui email atau portal daring, surat lamaran biasanya cukup ditulis singkat pada badan email (2–4 paragraf), sedangkan CV dan dokumen pendukung dilampirkan dalam format PDF terpisah.</p>
+        </div>
+
+        <div class="nav-btns">
+          <button class="btn" onclick="navigateTo('surat-panduan')">← Panduan Surat Lamaran</button>
+          <button class="btn" onclick="navigateTo('seleksi')">Lanjut: Budaya Seleksi Kerja →</button>
+        </div>
+      </section>
+
+      <!-- 06 SELEKSI -->
+      <section class="content-section" id="seleksi">
+        <div class="eyebrow">Bagian 06</div>
+        <h2 class="sec-title">Budaya Seleksi Kerja di Bidang Informatika</h2>
+        <p>Proses seleksi kerja di industri Informatika umumnya memiliki tahapan yang lebih teknis dibandingkan bidang lain, karena perusahaan perlu memastikan kemampuan praktik pelamar, bukan hanya berdasarkan dokumen tertulis.</p>
+
+        <h3>Tahapan Umum Seleksi Kerja Bidang IT</h3>
+        <div class="timeline">
+          <div class="tl-item"><div class="tl-dot">1</div><strong>Seleksi Administrasi/Berkas (CV &amp; Screening ATS)</strong><p>CV disaring otomatis oleh sistem ATS, kemudian ditinjau ulang oleh tim HRD/rekruter.</p></div>
+          <div class="tl-item"><div class="tl-dot">2</div><strong>Tes Kemampuan Dasar/Psikotes</strong><p>Menilai logika, kemampuan numerik, dan kepribadian pelamar.</p></div>
+          <div class="tl-item"><div class="tl-dot">3</div><strong>Tes Teknis (Technical Test)</strong><p>Berupa tes tertulis coding, studi kasus, atau take-home project, misalnya membuat program sederhana atau memperbaiki bug.</p></div>
+          <div class="tl-item"><div class="tl-dot">4</div><strong>Wawancara Teknis (Technical Interview)</strong><p>Dilakukan oleh tim IT/engineer untuk menggali pemahaman konsep, cara berpikir memecahkan masalah, dan pengalaman proyek.</p></div>
+          <div class="tl-item"><div class="tl-dot">5</div><strong>Wawancara HRD/User</strong><p>Menilai kecocokan budaya kerja (culture fit), motivasi, dan soft skill pelamar.</p></div>
+          <div class="tl-item"><div class="tl-dot">6</div><strong>Penawaran Kerja (Offering)</strong><p>Tahap akhir berupa negosiasi gaji, posisi, dan tanggal mulai bekerja.</p></div>
+        </div>
+
+        <h3>Hal Khas dalam Budaya Seleksi Kerja Bidang Informatika</h3>
+        <ul>
+          <li><strong>Portofolio digital:</strong> perusahaan IT sering meminta tautan GitHub, portofolio situs pribadi, atau hasil proyek nyata sebagai bukti kemampuan, bukan hanya nilai rapor atau ijazah.</li>
+          <li><strong>Uji coba langsung (live coding/whiteboard test):</strong> pelamar diminta menulis atau menjelaskan logika program secara langsung di depan pewawancara.</li>
+          <li><strong>Studi kasus/problem solving:</strong> pelamar diberi permasalahan nyata (misalnya jaringan bermasalah atau sistem error) untuk diselesaikan secara sistematis.</li>
+          <li><strong>Pentingnya soft skill:</strong> komunikasi, kerja tim, dan sikap terus belajar (growth mindset) sama pentingnya dengan kemampuan teknis, karena dunia teknologi terus berkembang.</li>
+          <li><strong>Etika digital:</strong> rekruter juga sering memeriksa jejak digital pelamar (media sosial, forum, atau repository publik), sehingga menjaga etika bermedia sosial menjadi bagian dari budaya kerja profesional.</li>
+        </ul>
+
+        <h3>Tips Menghadapi Seleksi Kerja Bidang Informatika</h3>
+        <ul>
+          <li>Selalu sesuaikan CV dan surat lamaran dengan kata kunci pada iklan lowongan kerja.</li>
+          <li>Siapkan portofolio proyek, meskipun berupa proyek sekolah atau tugas praktik, dan unggah ke GitHub.</li>
+          <li>Latih kemampuan menjelaskan logika berpikir (bukan hanya menghafal kode), karena pewawancara ingin melihat proses berpikir.</li>
+          <li>Datang tepat waktu, berpakaian rapi, dan bersikap sopan meskipun wawancara dilakukan secara daring.</li>
+          <li>Jujur terhadap kemampuan yang dimiliki; lebih baik mengatakan "masih belajar" daripada berbohong tentang kompetensi teknis.</li>
+        </ul>
+
+        <div class="nav-btns">
+          <button class="btn" onclick="navigateTo('surat-contoh')">← Contoh Surat</button>
+          <button class="btn" onclick="navigateTo('aktivitas')">Lanjut: Aktivitas &amp; Tugas →</button>
+        </div>
+      </section>
+
+      <!-- 07 AKTIVITAS -->
+      <section class="content-section" id="aktivitas">
+        <div class="eyebrow">Bagian 07</div>
+        <h2 class="sec-title">Aktivitas Pembelajaran &amp; Tugas Proyek</h2>
+
+        <div class="subtabs" data-group="akt">
+          <button class="subtab-btn active" data-tab="p1">Pertemuan 1</button>
+          <button class="subtab-btn" data-tab="p2">Pertemuan 2</button>
+          <button class="subtab-btn" data-tab="p3">Pertemuan 3</button>
+        </div>
+        <div class="subtab-panel active" data-panel="p1">
+          <h4>Diskusi dan Analisis</h4>
+          <ul>
+            <li>Peserta didik berdiskusi kelompok mengenai pengalaman atau pengetahuan awal tentang proses melamar kerja.</li>
+            <li>Guru menjelaskan konsep ATS dan menunjukkan contoh CV yang ramah maupun tidak ramah ATS.</li>
+            <li>Peserta didik menganalisis satu contoh lowongan kerja IT dan mengidentifikasi kata kunci pentingnya.</li>
+          </ul>
+        </div>
+        <div class="subtab-panel" data-panel="p2">
+          <h4>Praktik Menyusun Dokumen</h4>
+          <ul>
+            <li>Peserta didik menyusun CV format ATS pribadi (fiktif atau berdasarkan pengalaman PKL) sesuai posisi IT pilihan mereka.</li>
+            <li>Peserta didik menyusun surat lamaran kerja yang sesuai dengan posisi dan CV yang telah dibuat.</li>
+            <li>Guru memberikan umpan balik langsung terhadap hasil kerja peserta didik.</li>
+          </ul>
+        </div>
+        <div class="subtab-panel" data-panel="p3">
+          <h4>Simulasi Seleksi Kerja</h4>
+          <ul>
+            <li>Peserta didik melakukan simulasi wawancara kerja secara berpasangan (role play pewawancara – pelamar).</li>
+            <li>Peserta didik mempresentasikan portofolio proyek sederhana yang pernah dikerjakan.</li>
+            <li>Refleksi bersama mengenai pengalaman dan tantangan dalam proses seleksi kerja.</li>
+          </ul>
+        </div>
+
+        <h3>Tugas / Proyek Peserta Didik</h3>
+        <p>Buatlah dokumen lamaran kerja lengkap untuk posisi bidang Informatika sesuai minat kalian (misalnya Junior Web Developer, IT Support, Teknisi Jaringan, atau Junior Data Analyst), yang terdiri atas:</p>
+        <ol>
+          <li>Curriculum Vitae (CV) format ATS, ditulis dalam format .docx atau .pdf.</li>
+          <li>Surat lamaran kerja (cover letter) yang sesuai dengan posisi yang dipilih.</li>
+          <li>Daftar minimal 1 proyek/portofolio (boleh proyek sekolah) yang relevan dengan posisi tersebut.</li>
+        </ol>
+        <div class="callout">
+          <div class="callout-title">📤 Pengumpulan</div>
+          <p>Dikumpulkan melalui email dengan format subjek: <em>Lamaran_[NamaLengkap]_[Posisi]</em>, sebagai simulasi pengiriman lamaran kerja secara profesional secara daring.</p>
+        </div>
+
+        <div class="nav-btns">
+          <button class="btn" onclick="navigateTo('seleksi')">← Budaya Seleksi Kerja</button>
+          <button class="btn" onclick="navigateTo('rubrik')">Lanjut: Rubrik Penilaian →</button>
+        </div>
+      </section>
+
+      <!-- 08 RUBRIK -->
+      <section class="content-section" id="rubrik">
+        <div class="eyebrow">Bagian 08</div>
+        <h2 class="sec-title">Rubrik Penilaian</h2>
+        <table>
+          <tr><th>Aspek Penilaian</th><th>Sangat Baik (4)</th><th>Baik (3)</th><th>Cukup (2)</th><th>Perlu Bimbingan (1)</th></tr>
+          <tr><td><strong>Kesesuaian Format ATS</strong></td><td>Format sangat sesuai, struktur jelas, mudah dibaca sistem</td><td>Format sesuai dengan sedikit revisi</td><td>Format cukup sesuai, ada elemen yang tidak ramah ATS</td><td>Format belum sesuai standar ATS</td></tr>
+          <tr><td><strong>Kelengkapan Isi CV</strong></td><td>Semua komponen lengkap dan relevan</td><td>Komponen lengkap, sebagian kurang relevan</td><td>Ada komponen yang belum lengkap</td><td>Banyak komponen belum lengkap</td></tr>
+          <tr><td><strong>Kualitas Surat Lamaran</strong></td><td>Bahasa formal, runtut, dan meyakinkan</td><td>Bahasa formal, cukup runtut</td><td>Bahasa cukup formal, kurang runtut</td><td>Bahasa belum formal/tidak runtut</td></tr>
+          <tr><td><strong>Sikap Profesional (Simulasi Wawancara)</strong></td><td>Percaya diri, sopan, komunikatif</td><td>Cukup percaya diri dan sopan</td><td>Kurang percaya diri, cukup sopan</td><td>Belum menunjukkan sikap profesional</td></tr>
+        </table>
+        <p class="rubric-note">Skor akhir = total skor per aspek ÷ skor maksimal × 100.</p>
+
+        <div class="nav-btns">
+          <button class="btn" onclick="navigateTo('aktivitas')">← Aktivitas &amp; Tugas</button>
+          <button class="btn" onclick="navigateTo('kesalahan')">Lanjut: Kesalahan Umum →</button>
+        </div>
+      </section>
+
+      <!-- 09 KESALAHAN -->
+      <section class="content-section" id="kesalahan">
+        <div class="eyebrow">Bagian 09</div>
+        <h2 class="sec-title">Kesalahan Umum yang Perlu Dihindari</h2>
+        <p>Anggap ini sebagai "log error" yang sering muncul saat siswa pertama kali menyusun CV dan surat lamaran — kenali agar tidak terulang.</p>
+
+        <div class="console">
+          <div class="console-head"><span></span><span></span><span></span></div>
+          <div class="console-body">
+            <div class="console-line"><span class="lbl">[ERROR 01]</span> <b>Satu dokumen untuk semua lowongan</b> — menggunakan CV/surat lamaran yang sama persis untuk melamar semua posisi tanpa penyesuaian kata kunci.</div>
+            <div class="console-line"><span class="lbl">[ERROR 02]</span> <b>Data tidak jujur</b> — mencantumkan informasi palsu atau melebih-lebihkan kemampuan yang belum dikuasai.</div>
+            <div class="console-line"><span class="lbl">[ERROR 03]</span> <b>Salah sebut nama</b> — keliru menyebut nama perusahaan atau posisi, biasanya akibat "copy-paste" dari lamaran sebelumnya.</div>
+            <div class="console-line"><span class="lbl">[ERROR 04]</span> <b>Email tidak formal</b> — contoh: kesayangan_bagas@email.com.</div>
+            <div class="console-line"><span class="lbl">[ERROR 05]</span> <b>File hasil scan</b> — format CV berupa gambar hasil pindai yang tidak dapat dibaca sistem ATS.</div>
+            <div class="console-line"><span class="lbl">[ERROR 06]</span> <b>Surat tidak proporsional</b> — terlalu panjang dan bertele-tele, atau justru terlalu singkat tanpa penjelasan yang meyakinkan.</div>
+          </div>
+        </div>
+
+        <div class="nav-btns">
+          <button class="btn" onclick="navigateTo('rubrik')">← Rubrik Penilaian</button>
+          <button class="btn" onclick="navigateTo('glosarium')">Lanjut: Glosarium →</button>
+        </div>
+      </section>
+
+      <!-- 10 GLOSARIUM -->
+      <section class="content-section" id="glosarium">
+        <div class="eyebrow">Bagian 10</div>
+        <h2 class="sec-title">Glosarium</h2>
+        <p>Klik setiap kartu untuk membuka artinya.</p>
+        <div class="flash-grid" id="flashGrid">
+          <div class="flashcard"><div class="flashcard-inner">
+            <div class="flash-face flash-front"><div class="term">ATS</div><div class="hint">Applicant Tracking System — klik untuk lihat arti</div></div>
+            <div class="flash-face flash-back"><p>Perangkat lunak yang digunakan perusahaan untuk menyaring dan mengelola lamaran kerja secara otomatis.</p></div>
+          </div></div>
+          <div class="flashcard"><div class="flashcard-inner">
+            <div class="flash-face flash-front"><div class="term">CV</div><div class="hint">Curriculum Vitae — klik untuk lihat arti</div></div>
+            <div class="flash-face flash-back"><p>Dokumen berisi ringkasan data diri, pendidikan, pengalaman, dan keterampilan pelamar kerja.</p></div>
+          </div></div>
+          <div class="flashcard"><div class="flashcard-inner">
+            <div class="flash-face flash-front"><div class="term">Cover Letter</div><div class="hint">Surat Lamaran — klik untuk lihat arti</div></div>
+            <div class="flash-face flash-back"><p>Surat pengantar yang menjelaskan minat dan kelayakan pelamar terhadap suatu posisi.</p></div>
+          </div></div>
+          <div class="flashcard"><div class="flashcard-inner">
+            <div class="flash-face flash-front"><div class="term">Portofolio</div><div class="hint">Klik untuk lihat arti</div></div>
+            <div class="flash-face flash-back"><p>Kumpulan hasil karya atau proyek yang menunjukkan kemampuan seseorang.</p></div>
+          </div></div>
+          <div class="flashcard"><div class="flashcard-inner">
+            <div class="flash-face flash-front"><div class="term">Technical Interview</div><div class="hint">Klik untuk lihat arti</div></div>
+            <div class="flash-face flash-back"><p>Wawancara yang berfokus pada pengujian kemampuan teknis pelamar.</p></div>
+          </div></div>
+          <div class="flashcard"><div class="flashcard-inner">
+            <div class="flash-face flash-front"><div class="term">Culture Fit</div><div class="hint">Klik untuk lihat arti</div></div>
+            <div class="flash-face flash-back"><p>Kecocokan nilai dan sikap kerja pelamar dengan budaya organisasi perusahaan.</p></div>
+          </div></div>
+        </div>
+
+        <div class="nav-btns">
+          <button class="btn" onclick="navigateTo('kesalahan')">← Kesalahan Umum</button>
+          <button class="btn" onclick="navigateTo('beranda')">Kembali ke Beranda ↺</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  // ---------- Sidebar navigation ----------
+  const navButtons = document.querySelectorAll('.nav-item');
+  const sections = document.querySelectorAll('.content-section');
+  const totalSections = navButtons.length;
+  const visited = new Set(['beranda']);
+  const labels = {};
+  navButtons.forEach(b=>{ labels[b.dataset.target] = b.textContent.trim(); });
+
+  function updateProgress(){
+    document.getElementById('progressLabel').textContent = visited.size + '/' + totalSections;
+    document.getElementById('progressBar').style.width = (visited.size/totalSections*100) + '%';
+  }
+  function markVisited(id){
+    visited.add(id);
+    navButtons.forEach(b=>{ if(visited.has(b.dataset.target)) b.classList.add('visited'); });
+    updateProgress();
+  }
+  function navigateTo(id){
+    sections.forEach(s=>s.classList.remove('active'));
+    navButtons.forEach(b=>b.classList.remove('active'));
+    const target = document.getElementById(id);
+    if(!target) return;
+    target.classList.add('active');
+    const navBtn = document.querySelector('.nav-item[data-target="'+id+'"]');
+    if(navBtn) navBtn.classList.add('active');
+    document.getElementById('contentWrap').scrollTop = 0;
+    document.getElementById('bcCurrent').textContent = labels[id] || id;
+    markVisited(id);
+    closeSidebarMobile();
+  }
+  navButtons.forEach(btn=>{
+    btn.addEventListener('click', ()=> navigateTo(btn.dataset.target));
+  });
+  updateProgress();
+  navButtons[0].classList.add('active','visited');
+
+  // ---------- Subtabs (scoped groups) ----------
+  document.querySelectorAll('.subtabs').forEach(group=>{
+    const buttons = group.querySelectorAll('.subtab-btn');
+    const panelContainer = group.parentElement;
+    buttons.forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const panels = panelContainer.querySelectorAll(':scope > .subtab-panel');
+        buttons.forEach(b=>b.classList.remove('active'));
+        panels.forEach(p=>p.classList.remove('active'));
+        btn.classList.add('active');
+        const target = panelContainer.querySelector(':scope > .subtab-panel[data-panel="'+btn.dataset.tab+'"]');
+        if(target) target.classList.add('active');
+      });
+    });
+  });
+
+  // ---------- Checklists ----------
+  document.querySelectorAll('.checklist').forEach(list=>{
+    const boxes = list.querySelectorAll('input[type=checkbox]');
+    const counter = list.querySelector('.checklist-counter');
+    const bar = list.querySelector('.checklist-bar-fill');
+    function update(){
+      const checked = [...boxes].filter(b=>b.checked).length;
+      counter.textContent = checked + ' dari ' + boxes.length + ' selesai';
+      bar.style.width = (checked/boxes.length*100) + '%';
+      boxes.forEach(b=>{ b.closest('.check-item').classList.toggle('checked', b.checked); });
+    }
+    boxes.forEach(b=>b.addEventListener('change', update));
+    update();
+  });
+
+  // ---------- Flashcards ----------
+  document.querySelectorAll('.flashcard').forEach(card=>{
+    card.addEventListener('click', ()=> card.classList.toggle('flipped'));
+  });
+
+  // ---------- Mobile sidebar ----------
+  const sidebar = document.getElementById('sidebar');
+  const backdrop = document.getElementById('backdrop');
+  document.getElementById('sidebarToggle').addEventListener('click', ()=>{
+    sidebar.classList.add('open'); backdrop.style.display='block';
+  });
+  backdrop.addEventListener('click', closeSidebarMobile);
+  function closeSidebarMobile(){
+    sidebar.classList.remove('open'); backdrop.style.display='none';
+  }
+
+  // ---------- Hero terminal typing animation ----------
+  const heroLines = [
+    {t:'$ compile cv_ats.docx --check-format', c:'c'},
+    {t:'> Memindai struktur dokumen...', c:'c'},
+    {t:'✓ Format file: PDF/DOCX berbasis teks', c:'g'},
+    {t:'✓ Font terbaca sistem: Arial 11pt', c:'g'},
+    {t:'⚠ Kata kunci "MySQL" belum ditemukan pada bagian Skills', c:'w'},
+    {t:'✓ Struktur bagian lengkap: Kontak, Profil, Skills, Pengalaman, Pendidikan', c:'g'},
+    {t:'> Hasil: CV siap dikirim setelah 1 perbaikan kecil.', c:'c'},
+  ];
+  const el = document.getElementById('heroTyped');
+  let li=0, ci=0;
+  function typeNext(){
+    if(li>=heroLines.length) return;
+    const line = heroLines[li];
+    if(ci===0){ el.innerHTML += (li>0?'\n':'') ; }
+    const span = document.createElement('span');
+    span.className = line.c;
+    if(!el.querySelector('span.currentline')){
+      span.classList.add('currentline');
+      el.appendChild(span);
+    }
+    const current = el.querySelector('span.currentline');
+    current.textContent += line.t.charAt(ci);
+    ci++;
+    if(ci<line.t.length){
+      setTimeout(typeNext, 14);
+    } else {
+      current.classList.remove('currentline');
+      li++; ci=0;
+      setTimeout(typeNext, 260);
+    }
+  }
+  typeNext();
+</script>
+</body>
+</html>
