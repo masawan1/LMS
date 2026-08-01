@@ -233,6 +233,7 @@
 
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-head">
+      <a class="back-link" href="#" style="display:inline-flex; align-items:center; gap:6px; text-decoration:none; color:var(--text-muted); font-family:var(--mono); font-size:11.5px; margin-bottom:10px;">&larr; kembali ke daftar materi</a>
       <div class="tag">// modul_interaktif.informatika</div>
       <h1>CV ATS &amp; Surat Lamaran Kerja</h1>
     </div>
@@ -870,6 +871,7 @@
           <button class="btn" onclick="navigateTo('kesalahan')">← Kesalahan Umum</button>
           <button class="btn" onclick="navigateTo('beranda')">Kembali ke Beranda ↺</button>
         </div>
+        <div id="akhir-materi"></div>
       </section>
 
     </div>
@@ -995,5 +997,9 @@
   }
   typeNext();
 </script>
+
+<script src="../../assets/js/api.js"></script>
+<script src="../../assets/js/auth.js"></script>
+<script src="../../assets/js/materi-tracker.js"></script>
 </body>
 </html>
