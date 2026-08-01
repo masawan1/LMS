@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KKA · GitHub &amp; Anatomi Website Statis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1329;
+    --bg-alt: #0b0e20;
+    --surface: #1a2142;
+    --surface-2: #212a52;
+    --border: #313c6e;
+    --text: #edebf7;
+    --muted: #949cc7;
+    --accent: #e8b34c;
+    --accent-dim: #6b5624;
+    --accent-alt: #5fd9c7;
+    --accent-alt-dim: #1f4a45;
+    --danger: #ff6b81;
+    --success: #6ee7a3;
+    --font-display: 'JetBrains Mono', ui-monospace, monospace;
+    --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    * { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+  }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+  code, pre { font-family: var(--font-display); }
+  :focus-visible { outline: 2px solid var(--accent-alt); outline-offset: 3px; border-radius: 4px; }
+
+  .ambient {
+    position: fixed; inset: 0; z-index: -1;
+    background:
+      radial-gradient(circle at 12% 15%, rgba(232,179,76,.08), transparent 40%),
+      radial-gradient(circle at 88% 70%, rgba(95,217,199,.07), transparent 45%),
+      var(--bg);
+  }
+
+  header.topbar {
+    position: sticky; top: 0; z-index: 30;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 32px;
+    background: rgba(11,14,32,.85);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+  }
+  .brand { display: flex; align-items: center; gap: 8px; font-family: var(--font-display); font-weight: 700; color: var(--accent); font-size: .95rem; }
+  .brand svg { flex-shrink: 0; }
+  .topnav { display: flex; gap: 22px; font-size: .82rem; }
+  .topnav a { text-decoration: none; color: var(--muted); }
+  .topnav a:hover { color: var(--accent-alt); }
+  .nav-toggle { display: none; background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 8px 10px; cursor: pointer; }
+
+  .hero {
+    padding: 72px 32px 48px;
+    max-width: 900px; margin: 0 auto;
+    text-align: center;
+  }
+  .eyebrow { font-family: var(--font-display); font-size: .78rem; letter-spacing: .08em; color: var(--accent-alt); text-transform: uppercase; margin: 0 0 14px; }
+  .hero h1 { font-family: var(--font-display); font-size: clamp(1.9rem, 4.5vw, 3rem); font-weight: 800; line-height: 1.2; margin: 0 0 18px; }
+  .accent { color: var(--accent); }
+  .accent-alt { color: var(--accent-alt); }
+  .hero p.lead { color: var(--muted); font-size: 1.05rem; max-width: 62ch; margin: 0 auto; }
+
+  section { padding: 56px 32px; max-width: 900px; margin: 0 auto; border-top: 1px solid var(--border); }
+  section:first-of-type { border-top: none; }
+  .commit-hash { font-family: var(--font-display); font-size: .78rem; color: var(--accent); margin: 0 0 6px; }
+  h2 { font-family: var(--font-display); font-size: 1.5rem; margin: 0 0 20px; }
+  h3 { font-family: var(--font-display); font-size: 1.02rem; color: var(--accent-alt); margin: 0 0 8px; }
+
+  .callout { display: flex; gap: 12px; align-items: flex-start; background: var(--accent-alt-dim); border: 1px solid var(--accent-alt); border-radius: var(--radius); padding: 16px 18px; margin: 20px 0 0; }
+  .callout p { margin: 0; font-size: .92rem; }
+  .callout-icon { font-size: 1.1rem; }
+
+  /* Anatomi cards */
+  .anatomy-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .anatomy-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; display: flex; flex-direction: column; gap: 10px; }
+  .anatomy-tag { font-family: var(--font-display); font-size: .7rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+  .anatomy-card pre { margin: 6px 0 0; font-size: .78rem; }
+  .anatomy-card p { margin: 0; color: var(--muted); font-size: .9rem; }
+
+  pre {
+    background: var(--bg-alt); border: 1px solid var(--border); border-radius: 8px;
+    padding: 14px 16px; overflow-x: auto; font-size: .83rem; color: var(--accent-alt); margin: 10px 0;
+  }
+  code { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px; font-size: .87em; color: var(--accent); }
+  pre code { background: none; border: none; padding: 0; color: inherit; }
+
+  /* Live demo */
+  .demo-box {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 28px; text-align: center;
+  }
+  .demo-box.demo-dark { background: var(--bg-alt); }
+  .demo-title { font-family: var(--font-display); font-weight: 700; font-size: 1.1rem; margin: 0 0 6px; transition: color .25s ease; }
+  .demo-sub { color: var(--muted); margin: 0 0 18px; font-size: .88rem; }
+  .demo-btn {
+    font-family: var(--font-display); font-weight: 600; font-size: .85rem;
+    background: var(--accent); color: #251c05; border: none; padding: 12px 22px;
+    border-radius: 8px; cursor: pointer; transition: transform .15s ease, background .25s ease;
+  }
+  .demo-btn:hover { transform: translateY(-1px); }
+  .demo-counter { font-family: var(--font-display); font-size: .8rem; color: var(--accent-alt); margin-top: 14px; }
+  .demo-explain { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 22px; }
+  .demo-explain div { background: var(--bg-alt); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; font-size: .8rem; color: var(--muted); }
+  .demo-explain strong { color: var(--text); display: block; margin-bottom: 4px; font-family: var(--font-display); font-size: .78rem; }
+
+  /* Praktik steps */
+  .steps { padding-left: 0; list-style: none; counter-reset: step; }
+  .steps li { position: relative; padding: 4px 0 24px 44px; counter-increment: step; }
+  .steps li::before {
+    content: counter(step); position: absolute; left: 0; top: 2px;
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--surface-2); border: 1px solid var(--accent-alt); color: var(--accent-alt);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display); font-size: .82rem; font-weight: 700;
+  }
+  .steps li::after {
+    content: ''; position: absolute; left: 15px; top: 34px; bottom: 0; width: 1px; background: var(--border);
+  }
+  .steps li:last-child::after { display: none; }
+  .steps strong { display: block; margin-bottom: 6px; }
+
+  /* terminal */
+  .terminal { background: var(--bg-alt); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-top: 10px; }
+  .terminal-bar { display: flex; align-items: center; gap: 8px; padding: 8px 14px; background: var(--surface); border-bottom: 1px solid var(--border); }
+  .dot { width: 9px; height: 9px; border-radius: 50%; }
+  .dot.red { background: #ff5f57; } .dot.yellow { background: #febc2e; } .dot.green { background: #28c840; }
+  .terminal-body { padding: 12px 16px; margin: 0; border: none; border-radius: 0; }
+
+  /* Drive download */
+  .drive-card {
+    display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;
+    background: linear-gradient(135deg, var(--surface), var(--surface-2));
+    border: 1px solid var(--border); border-radius: var(--radius); padding: 26px 28px;
+  }
+  .drive-card-text h3 { margin-bottom: 4px; }
+  .drive-card-text p { margin: 0; color: var(--muted); font-size: .88rem; }
+  .drive-link {
+    display: flex; align-items: center; gap: 10px; text-decoration: none;
+    background: var(--accent); color: #251c05; font-weight: 700; font-family: var(--font-display);
+    padding: 12px 20px; border-radius: 8px; font-size: .85rem; white-space: nowrap;
+    transition: transform .15s ease;
+  }
+  .drive-link:hover { transform: translateY(-1px); }
+  .drive-note { font-size: .76rem; color: var(--muted); margin-top: 10px; }
+
+  footer { padding: 40px 32px 60px; max-width: 900px; margin: 0 auto; text-align: center; color: var(--muted); font-size: .85rem; }
+
+  @media (max-width: 800px) {
+    .anatomy-grid, .demo-explain { grid-template-columns: 1fr; }
+    .topnav { display: none; }
+    .nav-toggle { display: inline-flex; }
+  }
+</style>
+</head>
+<body>
+
+<div class="ambient" aria-hidden="true"></div>
+
+<header class="topbar">
+  <div style="display:flex; align-items:center; gap:16px;">
+    <a class="back-link" href="#" style="text-decoration:none; color:var(--muted); font-family:var(--font-display); font-size:.78rem; display:flex; align-items:center; gap:6px;">&larr; kembali</a>
+    <div class="brand">
+      <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      <span>kka · github-basics</span>
+    </div>
+  </div>
+  <nav class="topnav" aria-label="Navigasi materi">
+    <a href="#apa-itu-github">GitHub</a>
+    <a href="#anatomi">index/style/script</a>
+    <a href="#demo">Contoh Live</a>
+    <a href="#praktik">Praktik ke GitHub</a>
+    <a href="#unduh">Unduh Berkas</a>
+  </nav>
+</header>
+
+<main>
+
+  <section class="hero" id="top">
+    <p class="eyebrow">KKA · Kelas X SMK</p>
+    <h1>GitHub, <span class="accent">index.html</span>, <span class="accent-alt">style.css</span> &amp; script.js</h1>
+    <p class="lead">Empat istilah yang selalu berdampingan saat membangun website. Halaman ini menjelaskan masing-masing secara singkat, menunjukkan contohnya berjalan langsung di layar, lalu mempraktikkan cara menerbitkannya lewat GitHub.</p>
+  </section>
+
+  <section id="apa-itu-github">
+    <p class="commit-hash">a1f2c9e</p>
+    <h2>1. Apa itu GitHub?</h2>
+    <p><strong>GitHub</strong> adalah layanan online untuk menyimpan, mencatat riwayat perubahan, dan membagikan kode/proyek. GitHub dibangun di atas <strong>Git</strong>, alat version control yang mencatat setiap perubahan file sebagai sebuah "commit".</p>
+    <p>Di GitHub, proyekmu disimpan dalam sebuah <strong>repository</strong> (folder proyek online). Selain untuk menyimpan kode, repository ini juga bisa langsung dijadikan <strong>website hidup</strong> lewat fitur bernama <strong>GitHub Pages</strong> — inilah yang akan kita praktikkan nanti.</p>
+    <div class="callout">
+      <span class="callout-icon">💡</span>
+      <p><strong>Singkatnya:</strong> Git mencatat perubahan di komputermu, GitHub menyimpannya online, dan GitHub Pages mengubah repository itu menjadi alamat website yang bisa dibuka siapa saja.</p>
+    </div>
+  </section>
+
+  <section id="anatomi">
+    <p class="commit-hash">6b8d40f</p>
+    <h2>2. Tiga Berkas Dasar Sebuah Website</h2>
+    <p>Website statis paling sederhana selalu terdiri dari tiga jenis berkas berikut. Ketiganya bekerja sama seperti tubuh manusia: <em>kerangka, pakaian, dan gerakan</em>.</p>
+    <div class="anatomy-grid">
+      <div class="anatomy-card">
+        <span class="anatomy-tag">🦴 Kerangka</span>
+        <h3>index.html</h3>
+        <p>Berkas utama yang otomatis dibuka pertama kali. Berisi <strong>struktur</strong> halaman: judul, paragraf, tombol, gambar — semua elemen konten.</p>
+        <pre><code>&lt;h1&gt;Halo, Dunia&lt;/h1&gt;
+&lt;p&gt;Ini paragraf.&lt;/p&gt;
+&lt;button&gt;Klik&lt;/button&gt;</code></pre>
+      </div>
+      <div class="anatomy-card">
+        <span class="anatomy-tag">👕 Pakaian</span>
+        <h3>style.css</h3>
+        <p>Mengatur <strong>tampilan</strong>: warna, ukuran font, jarak antar elemen, tata letak. Tanpa CSS, halaman HTML hanya teks polos hitam-putih.</p>
+        <pre><code>h1 {
+  color: #e8b34c;
+  font-size: 2rem;
+}</code></pre>
+      </div>
+      <div class="anatomy-card">
+        <span class="anatomy-tag">⚡ Gerakan</span>
+        <h3>script.js</h3>
+        <p>Menambahkan <strong>interaktivitas</strong>: merespons klik, mengubah isi halaman, menghitung, memvalidasi form — tanpa perlu memuat ulang halaman.</p>
+        <pre><code>document.querySelector("button")
+  .addEventListener("click", () => {
+    alert("Tombol diklik!");
+  });</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <section id="demo">
+    <p class="commit-hash">f4a01d2</p>
+    <h2>3. Contoh Langsung — Ketiganya Bekerja Bersama</h2>
+    <p>Kotak di bawah ini <strong>bukan gambar atau tangkapan layar</strong> — ini adalah HTML asli di halaman ini, yang ditata oleh CSS, dan digerakkan oleh JavaScript. Klik tombolnya:</p>
+
+    <div class="demo-box" id="demoBox">
+      <p class="demo-title" id="demoTitle">Struktur ini datang dari index.html</p>
+      <p class="demo-sub" id="demoSub">Warnanya diatur oleh style.css. Klik tombol untuk melihat script.js bekerja.</p>
+      <button class="demo-btn" id="demoBtn" type="button">Klik saya</button>
+      <p class="demo-counter" id="demoCounter">Sudah diklik 0 kali</p>
+    </div>
+
+    <div class="demo-explain">
+      <div><strong>index.html</strong>Menyediakan &lt;button&gt; dan &lt;p&gt; di atas — elemen yang kamu lihat dan klik.</div>
+      <div><strong>style.css</strong>Memberi warna latar, sudut membulat, dan efek saat tombol ditekan.</div>
+      <div><strong>script.js</strong>Menghitung jumlah klik dan mengganti warna judul setiap kali tombol ditekan.</div>
+    </div>
+  </section>
+
+  <section id="praktik">
+    <p class="commit-hash">c72e918</p>
+    <h2>4. Praktik: Menerbitkan Website ke GitHub</h2>
+    <p>Berikut langkah menerapkan tiga berkas di atas menjadi website yang benar-benar hidup di internet lewat <strong>GitHub Pages</strong>.</p>
+    <ol class="steps">
+      <li>
+        <strong>Buat repository baru</strong>
+        Masuk ke akun GitHub-mu → klik <code>New repository</code> → beri nama (misalnya <code>tugas-web-kka</code>) → set ke <code>Public</code> → klik <code>Create repository</code>.
+      </li>
+      <li>
+        <strong>Unggah tiga berkasmu</strong>
+        Bisa lewat tombol <code>Add file → Upload files</code> di GitHub, atau lewat terminal jika sudah instal Git:
+        <div class="terminal">
+          <div class="terminal-bar"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div>
+          <pre class="terminal-body"><code>git init
+git add index.html style.css script.js
+git commit -m "upload website pertama"
+git remote add origin https://github.com/username/tugas-web-kka.git
+git push -u origin main</code></pre>
+        </div>
+      </li>
+      <li>
+        <strong>Aktifkan GitHub Pages</strong>
+        Di repository, buka tab <code>Settings → Pages</code>. Pada bagian <code>Branch</code>, pilih <code>main</code> dan folder <code>/root</code>, lalu klik <code>Save</code>.
+      </li>
+      <li>
+        <strong>Buka website-mu</strong>
+        Setelah beberapa menit, GitHub akan menampilkan alamat seperti:
+        <pre><code>https://username.github.io/tugas-web-kka/</code></pre>
+        Buka alamat itu — website yang tadi hanya berupa tiga berkas di komputermu kini bisa diakses siapa saja.
+      </li>
+    </ol>
+  </section>
+
+  <section id="unduh">
+    <p class="commit-hash">9d3f7a0</p>
+    <h2>5. Unduh Berkas Latihan</h2>
+    <div class="drive-card">
+      <div class="drive-card-text">
+        <h3>Berkas praktik (index.html, style.css, script.js)</h3>
+        <p>Unduh salinan berkas untuk dipraktikkan sendiri, lalu ikuti langkah di bagian 4 untuk menerbitkannya ke GitHub.</p>
+      </div>
+      <a class="drive-link" href="https://drive.google.com/drive/folders/1XrKIpF6-Smk_lignYH5dny8lTjbiQSQ_?usp=sharing" target="_blank" rel="noopener">
+        <svg width="16" height="16" viewBox="0 0 87.3 78" aria-hidden="true"><path fill="#0066da" d="M6.6 66.85l3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z"/><path fill="#00ac47" d="M43.65 25L29.9 1.2c-1.35.8-2.5 1.9-3.3 3.3L1.2 47.5c-.8 1.4-1.2 2.95-1.2 4.5h27.5z"/><path fill="#ea4335" d="M73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5h-27.502l5.852 11.5z"/><path fill="#00832d" d="M43.65 25L57.4 1.2c-1.35-.8-2.9-1.2-4.5-1.2h-18.5c-1.6 0-3.15.45-4.5 1.2z"/><path fill="#2684fc" d="M59.7 52.5h-32.1l-13.75 23.8c1.35.8 2.9 1.2 4.5 1.2h50.6c1.6 0 3.15-.45 4.5-1.2z"/><path fill="#ffba00" d="M73.4 26.5L60.4 4.5c-.8-1.4-1.95-2.5-3.3-3.3L43.65 25 59.7 52.5h27.48c0-1.55-.4-3.1-1.2-4.5z"/></svg>
+        <span>Unduh di Google Drive</span>
+      </a>
+    </div>
+    <p class="drive-note">Catatan: tautan di atas masih contoh (mengarah ke Drive umum). Ganti <code>href</code> pada tombol ini dengan tautan folder Drive tempat kamu menaruh berkas latihannya.</p>
+  </section>
+
+  <footer>
+    Materi KKA · GitHub &amp; Anatomi Website Statis — Kelas X SMK
+  </footer>
+  <div id="akhir-materi"></div>
+
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('demoBtn');
+  const title = document.getElementById('demoTitle');
+  const sub = document.getElementById('demoSub');
+  const counter = document.getElementById('demoCounter');
+  const box = document.getElementById('demoBox');
+
+  const colors = ['#e8b34c', '#5fd9c7', '#ff6b81', '#6ee7a3', '#edebf7'];
+  const messages = [
+    'Bagus! Ini script.js yang bekerja.',
+    'Setiap klik dihitung oleh JavaScript.',
+    'Warna judul ini diganti lewat kode, bukan manual.',
+    'index.html menyediakan tombolnya, script.js menggerakkannya.',
+    'Coba klik terus dan lihat warnanya berputar.'
+  ];
+
+  let count = 0;
+  btn.addEventListener('click', () => {
+    count++;
+    counter.textContent = `Sudah diklik ${count} kali`;
+    title.style.color = colors[count % colors.length];
+    sub.textContent = messages[count % messages.length];
+    box.classList.toggle('demo-dark');
+  });
+});
+</script>
+
+<script src="../../assets/js/api.js"></script>
+<script src="../../assets/js/auth.js"></script>
+<script src="../../assets/js/materi-tracker.js"></script>
+</body>
+</html>
